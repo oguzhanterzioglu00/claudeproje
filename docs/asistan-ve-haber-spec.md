@@ -41,18 +41,19 @@ Bu belge, Flutter uygulamasındaki üç modülün (Hakkım ne?, İlanlar ve iler
 
 **Bildirim:** kaydedilen ilanların son başvuru gününe 3 gün kala ve profile yüksek uyumlu yeni ilanlarda push (kullanıcı kapatabilir).
 
-## 3. Haberler (sonraki modül)
+## 3. Haberler (Gündem)
 
 Aynı ilkeler: resmî kaynak (Resmî Gazete, kurum duyuruları, Hazine ve Maliye Bakanlığı genelgeleri) öncelikli; üçüncü taraf haberde yalnızca başlık ve bağlantı; her haber kaynak ve zaman damgası taşır. Otomatik özet kullanılırsa "otomatik özet" etiketi ve kaynağa bağlantı zorunludur. Maaş katsayısı gibi sayısal duyurular (bkz. `docs/maas-spec.md` §4) haber akışından **değil**, doğrulanmış parametre güncellemesiyle uygulamaya girer.
 
+**Uygulama:** `lib/features/haberler/` — `Haber` (başlık, tür, kaynak adı, yayın tarihi, kısa özet, `resmiKaynak`, `otomatikOzet`, bağlantı), `HaberKaynagi` arayüzü (`getir()`, en yeni başta) ve şimdilik `OrnekHaberKaynagi`. Ana sayfada `GundemBolumu` (en yeni 3 haber; kaynak yüklenemezse sessizce gizlenir), `Tümü` ile `HaberlerSayfasi` (tür süzgeci, hata/boş durum). Ayrıntı alt sayfasında kaynak, tarih, "Resmî kaynak" rozeti ve — özet yapay zekâ ürettiyse — "Otomatik özet" etiketi + uyarı görünür. Haber metni saklanmaz; yalnızca başlık, kısa özet ve bağlantı.
+
 ## 4. Profil ve statü
 
-Modüllerin çoğu kullanıcının statüsüne (`Statu`: 657 memuru, 4/B sözleşmeli, işçi, akademik, diğer) göre değişir: Becayiş yalnızca 657 memurlarına açıktır, maaş hesabı şu an yalnızca memurlar içindir, ilan süzgeçleri ve uyum skoru statüye bağlıdır. Profil ekranı (statü, kurum, hizmet sınıfı, unvan, il, derece/kademe, hizmet yılı, ek gösterge vb.) henüz yoktur; uygulama örnek bir profille çalışır. Profil verisi KVKK kapsamındadır: açık rıza, minimum veri, silme hakkı.
+Modüllerin çoğu kullanıcının statüsüne (`Statu`: 657 memuru, 4/B sözleşmeli, işçi, akademik, diğer) göre değişir: Becayiş yalnızca 657 memurlarına açıktır, maaş hesabı şu an yalnızca memurlar içindir, ilan süzgeçleri ve uyum skoru statüye bağlıdır. Profil ekranı (`lib/features/profil/`) ilk açılışta gösterilir; ad, statü, kurum, hizmet sınıfı, unvan, il, sicil no, kurumsal e-posta, aday memur bilgisi ve maaş girdileri cihazda (`shared_preferences`) saklanır, ekrandan silinebilir. Ana sayfa, maaş ve becayiş bu profilden beslenir. Profil verisi KVKK kapsamındadır: açık rıza, minimum veri, silme hakkı.
 
 ## 5. Açık işler
 
-1. Profil ekranı ve kalıcı depolama; statüye göre sekme/özellik açma-kapama.
-2. Gerçek `MevzuatAsistani` ve `IlanKaynagi` uygulamaları (HTTP istemcisi) ve arka uç.
-3. Ana sayfa özetinin (net maaş, yol haritası) profil ve maaş motoruna bağlanması.
-4. Haber modülü tasarımı ve ekranı.
-5. Uygulama içi "Kaynağı aç" için `url_launcher` bağlantısı.
+1. Gerçek `MevzuatAsistani`, `IlanKaynagi` ve `HaberKaynagi` uygulamaları (HTTP istemcisi) ve arka uç.
+2. Uygulama içi "Kaynağı aç" için `url_launcher` bağlantısı (ilan ve haber ayrıntılarında düğme şimdilik pasif).
+3. Profilin bulutla eşitlenmesi (açık rıza + KVKK aydınlatması), statüye göre ilan uyum skoru.
+4. 657 dışı statüler (4/B, işçi, akademik) için maaş hesabı.

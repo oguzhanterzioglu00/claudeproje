@@ -114,6 +114,7 @@ class GeriBaslik extends StatelessWidget {
             button: true,
             label: 'Geri',
             excludeSemantics: true,
+            onTap: () => Navigator.maybePop(context),
             child: Material(
               color: PusulaRenk.beyaz,
               shape: RoundedRectangleBorder(

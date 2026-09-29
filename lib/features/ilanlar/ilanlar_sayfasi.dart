@@ -302,6 +302,7 @@ class _IlanKarti extends StatelessWidget {
                 button: true,
                 label: kayitli ? 'Kaydı kaldır' : 'Kaydet',
                 excludeSemantics: true,
+                onTap: onKaydet,
                 child: Material(
                   color: kayitli ? PusulaRenk.amber : PusulaRenk.zemin,
                   shape: RoundedRectangleBorder(

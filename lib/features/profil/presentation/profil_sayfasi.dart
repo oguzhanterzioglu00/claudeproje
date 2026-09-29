@@ -385,6 +385,7 @@ class _SecimAlani extends StatelessWidget {
             button: true,
             label: '$etiket: ${deger.isEmpty ? 'seçilmedi' : deger}',
             excludeSemantics: true,
+            onTap: onTap,
             child: Material(
               color: PusulaRenk.beyaz,
               shape: RoundedRectangleBorder(

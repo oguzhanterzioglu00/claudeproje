@@ -175,6 +175,7 @@ class _AsistanSayfasiState extends State<AsistanSayfasi> {
                     button: true,
                     label: 'Gönder',
                     excludeSemantics: true,
+                    onTap: _bekliyor ? null : () => _gonder(_soru.text),
                     child: Material(
                       color: _bekliyor ? PusulaRenk.cizgi : PusulaRenk.amber,
                       borderRadius: BorderRadius.circular(18),

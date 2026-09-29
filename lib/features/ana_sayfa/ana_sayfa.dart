@@ -19,6 +19,7 @@ class AnaSayfa extends StatelessWidget {
     this.maasaGit,
     this.bildirimAc,
     this.profilAc,
+    this.gundem,
   });
 
   final AnaSayfaVerisi veri;
@@ -30,6 +31,9 @@ class AnaSayfa extends StatelessWidget {
   final VoidCallback? maasaGit;
   final VoidCallback? bildirimAc;
   final VoidCallback? profilAc;
+
+  /// Kısayolların altında gösterilen haber bölümü (isteğe bağlı).
+  final Widget? gundem;
 
   @override
   Widget build(BuildContext context) => SafeArea(
@@ -95,6 +99,7 @@ class AnaSayfa extends StatelessWidget {
                 ],
               ),
             ),
+            if (gundem != null) gundem!,
           ],
         ),
       );
@@ -141,6 +146,7 @@ class _Ust extends StatelessWidget {
             button: true,
             label: 'Profilim',
             excludeSemantics: true,
+            onTap: onProfil,
             child: Material(
               color: PusulaRenk.beyaz,
               shape: RoundedRectangleBorder(
@@ -162,6 +168,7 @@ class _Ust extends StatelessWidget {
             button: true,
             label: bildirimVar ? 'Bildirimler, yeni var' : 'Bildirimler',
             excludeSemantics: true,
+            onTap: onBildirim,
             child: Material(
               color: PusulaRenk.beyaz,
               shape: RoundedRectangleBorder(

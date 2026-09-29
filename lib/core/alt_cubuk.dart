@@ -66,6 +66,7 @@ class _Oge extends StatelessWidget {
         selected: secili,
         label: sekme.etiket,
         excludeSemantics: true,
+        onTap: onTap,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: onTap,

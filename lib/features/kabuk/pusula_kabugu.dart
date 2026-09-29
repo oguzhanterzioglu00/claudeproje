@@ -10,6 +10,8 @@ import '../becayis/data/becayis_deposu.dart';
 import '../becayis/data/ornek_veri.dart';
 import '../becayis/domain/eslesme.dart';
 import '../becayis/presentation/becayis_sekmesi.dart';
+import '../haberler/gundem_bolumu.dart';
+import '../haberler/haber_kaynagi.dart';
 import '../ilanlar/ilan_kaynagi.dart';
 import '../ilanlar/ilanlar_sayfasi.dart';
 import '../maas/domain/memur_maas_hesaplayici.dart';
@@ -27,6 +29,7 @@ class PusulaKabugu extends StatefulWidget {
     this.becayisDeposuUret = BecayisOrnekVeri.depoProfilden,
     this.asistan = const SahteAsistan(),
     this.ilanKaynagi = const OrnekIlanKaynagi(),
+    this.haberKaynagi = const OrnekHaberKaynagi(),
     this.bugun,
     this.baslangicSekmesi = 0,
   });
@@ -37,6 +40,7 @@ class PusulaKabugu extends StatefulWidget {
   final BecayisDeposu Function(Profil) becayisDeposuUret;
   final MevzuatAsistani asistan;
   final IlanKaynagi ilanKaynagi;
+  final HaberKaynagi haberKaynagi;
   final DateTime? bugun;
   final int baslangicSekmesi;
 
@@ -138,6 +142,7 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
                   asistanaGit: () => _git(PusulaKabugu.asistanSekmesi),
                   becayisiAc: () => _git(PusulaKabugu.becayis),
                   profilAc: _profilAc,
+                  gundem: GundemBolumu(kaynak: widget.haberKaynagi, bugun: widget.bugun),
                 );
               },
             ),

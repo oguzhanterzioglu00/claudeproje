@@ -17,9 +17,13 @@ Tasarım: "Memur Uygulaması İlk Tasarım" (Claude Artifact). Renkler Ayas Soft
 ## Klasörler
 
 - `lib/core/` — tema ve ortak parçalar
+- `lib/features/profil/` — ilk kurulum, profil ve statü (cihazda saklanır)
+- `lib/features/ana_sayfa/` — profil odaklı ana sayfa ve Gündem bölümü
+- `lib/features/maas/` — memur maaş motoru ve ekranı
 - `lib/features/becayis/` — Becayiş modülü (`domain/` eşleştirme motoru)
+- `lib/features/asistan/`, `ilanlar/`, `haberler/` — Hakkım ne?, kamu ilanları, Gündem (şimdilik örnek servislerle)
 - `test/` — birim ve widget testleri
-- `docs/becayis-spec.md` — Becayiş ürün ve arka uç şartnamesi (hukuki dayanak dahil)
+- `docs/becayis-spec.md`, `docs/maas-spec.md`, `docs/asistan-ve-haber-spec.md` — ürün ve arka uç şartnameleri (hukuki dayanak dahil)
 
 ## Çalıştırma
 
@@ -34,3 +38,6 @@ flutter run
 
 - Paket kimliği (`tr.com.ayasyazilim.pusula`) onaylanmalı; mağazada kalıcıdır.
 - Becayiş mevzuat teyidi ve hukuk/KVKK görüşü: `docs/becayis-spec.md` §1.1 ve §8.
+- Maaş motorundaki vergi/SGK/asgari ücret parametreleri ikincil kaynaklıdır; resmî kaynakla doğrulanmalı (`docs/maas-spec.md`).
+- Ödeme, doğrulama, asistan, ilan ve haber servisleri şimdilik örnektir; arka uç bağlanmadan yayınlanmamalı.
+- Web/iOS/Android platform klasörleri (`flutter create`) henüz repoda yok; çalışma zamanı hedefi seçilince eklenmeli. Web derlemesi ayrı bir kopyada denendi ve başarılı.

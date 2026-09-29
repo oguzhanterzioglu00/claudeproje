@@ -419,6 +419,7 @@ class _KademeDugmesi extends StatelessWidget {
         selected: secili,
         label: 'Kademe $n',
         excludeSemantics: true,
+        onTap: onTap,
         child: Material(
           color: secili ? PusulaRenk.amber : PusulaRenk.beyaz,
           shape: RoundedRectangleBorder(
@@ -494,6 +495,7 @@ class _Yuvarlak extends StatelessWidget {
         enabled: onTap != null,
         label: etiket,
         excludeSemantics: true,
+        onTap: onTap,
         child: Material(
           color: onTap == null ? PusulaRenk.cizgi : PusulaRenk.amber,
           borderRadius: BorderRadius.circular(16),
