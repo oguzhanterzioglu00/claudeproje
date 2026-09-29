@@ -9,8 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  google_fonts: ^6.2.1
   in_app_purchase: ^3.2.0
+  lucide_icons_flutter: ^3.1.20
 
 dev_dependencies:
   flutter_test:
@@ -19,3 +19,27 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  # Yazı tipleri uygulamaya gömülüdür (çevrimdışı çalışır, ağdan yazı tipi çekilmez).
+  # Sora ve Figtree: SIL Open Font License 1.1. Her ikisinde de ₺ işareti yok;
+  # ₺ sistem yazı tipinden gelir.
+  fonts:
+    - family: Sora
+      fonts:
+        - asset: assets/fonts/Sora-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Sora-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Sora-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Sora-ExtraBold.ttf
+          weight: 800
+    - family: Figtree
+      fonts:
+        - asset: assets/fonts/Figtree-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Figtree-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Figtree-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Figtree-Bold.ttf
+          weight: 700

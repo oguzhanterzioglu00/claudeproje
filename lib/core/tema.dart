@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// Kadro renkleri (Ayas Software logosundan). Tasarımdaki değerlerle aynıdır.
 abstract final class KadroRenk {
@@ -18,7 +17,40 @@ abstract final class KadroRenk {
   static const beyaz = Color(0xFFFFFFFF);
 }
 
-/// Başlıklar Sora, gövde metni Figtree.
+/// Sık kullanılan yazı stilleri. Başlıklar Sora, gövde metni Figtree
+/// (ikisi de uygulamaya gömülü; bkz. pubspec.yaml).
+abstract final class KadroYazi {
+  static const baslikAilesi = 'Sora';
+  static const metinAilesi = 'Figtree';
+
+  static TextStyle baslik(
+    double boyut, {
+    Color renk = KadroRenk.lacivert,
+    double aralik = -0.5,
+    FontWeight agirlik = FontWeight.w800,
+  }) =>
+      TextStyle(
+        fontFamily: baslikAilesi,
+        fontSize: boyut,
+        fontWeight: agirlik,
+        letterSpacing: aralik,
+        color: renk,
+        height: 1.15,
+      );
+
+  static TextStyle metin(
+    double boyut, {
+    Color renk = KadroRenk.lacivert,
+    FontWeight agirlik = FontWeight.w600,
+  }) =>
+      TextStyle(
+        fontFamily: metinAilesi,
+        fontSize: boyut,
+        fontWeight: agirlik,
+        color: renk,
+      );
+}
+
 ThemeData kadroTema() {
   final taban = ThemeData(
     useMaterial3: true,
@@ -31,25 +63,16 @@ ThemeData kadroTema() {
     ),
   );
 
-  final govde = GoogleFonts.figtreeTextTheme(taban.textTheme).apply(
+  final govde = taban.textTheme.apply(
+    fontFamily: KadroYazi.metinAilesi,
     bodyColor: KadroRenk.lacivert,
     displayColor: KadroRenk.lacivert,
   );
 
   return taban.copyWith(
     textTheme: govde.copyWith(
-      headlineSmall: GoogleFonts.sora(
-        fontSize: 24,
-        fontWeight: FontWeight.w800,
-        letterSpacing: -1,
-        color: KadroRenk.lacivert,
-      ),
-      titleLarge: GoogleFonts.sora(
-        fontSize: 18,
-        fontWeight: FontWeight.w700,
-        letterSpacing: -0.4,
-        color: KadroRenk.lacivert,
-      ),
+      headlineSmall: KadroYazi.baslik(24, aralik: -1),
+      titleLarge: KadroYazi.baslik(18, agirlik: FontWeight.w700, aralik: -0.4),
     ),
   );
 }

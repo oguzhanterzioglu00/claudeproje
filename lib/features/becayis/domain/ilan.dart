@@ -21,6 +21,8 @@ class Ilan {
     required this.hedefIller,
     this.zincirIzni = true,
     this.maviTik = false,
+    this.kurumAdi = '',
+    this.gorunenAd = '',
   });
 
   final String id;
@@ -36,6 +38,12 @@ class Ilan {
   final List<String> hedefIller;
   final bool zincirIzni;
   final bool maviTik;
+
+  /// Ekranda gösterilecek kurum adı (ör. "Sağlık Bakanlığı"). Eşleşmeyi etkilemez.
+  final String kurumAdi;
+
+  /// Gizlilik gereği yalnızca baş harf + soyad (ör. "M. Demir"). Eşleşmeyi etkilemez.
+  final String gorunenAd;
 
   /// Yasal olarak karşılaştırılabilir grup: aynı kurum + aynı sınıf.
   String get grup => '${normalize(kurumId)}|${normalize(sinif)}';
