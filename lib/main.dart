@@ -5,11 +5,11 @@ import 'core/ucgenler.dart';
 import 'features/kabuk/pusula_kabugu.dart';
 import 'features/profil/data/profil_deposu.dart';
 import 'features/profil/data/profil_kaydi.dart';
-import 'features/profil/presentation/profil_sayfasi.dart';
+import 'features/profil/presentation/ilk_kurulum_sayfasi.dart';
 
 void main() => runApp(const PusulaUygulamasi());
 
-/// Uygulama kökü: profil yüklenir; profil yoksa ilk kurulum, varsa ana kabuk açılır.
+/// Uygulama kökü: profil yüklenir; profil yoksa karşılama ve ilk kurulum, varsa ana kabuk açılır.
 class PusulaUygulamasi extends StatefulWidget {
   const PusulaUygulamasi({super.key, this.profilKaydi = const YerelProfilKaydi()});
 
@@ -45,7 +45,7 @@ class _PusulaUygulamasiState extends State<PusulaUygulamasi> {
             if (!_profil.yuklendi) return const _Acilis();
             if (_profil.profil == null) {
               // Kayıt tamamlanınca depo değişir ve kabuk kendiliğinden açılır.
-              return ProfilSayfasi(depo: _profil, ilkKurulum: true, onBitti: () {});
+              return IlkKurulumSayfasi(depo: _profil);
             }
             return PusulaKabugu(profilDeposu: _profil);
           },
