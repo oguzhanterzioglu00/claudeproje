@@ -35,6 +35,13 @@ flutter test
 flutter run
 ```
 
+## Telefona kurmak (APK)
+
+Her push'ta GitHub Actions (`.github/workflows/apk.yml`) analiz ve testleri çalıştırıp deneme APK'sı üretir:
+GitHub'da **Actions** sekmesi → son çalışma → **Artifacts** → `kamu-pusulasi-apk` indir → zip'i aç →
+`app-release.apk`'yı Android telefonda aç (ilk seferde "bilinmeyen kaynaklardan yüklemeye izin ver" gerekir).
+Bu APK debug anahtarıyla imzalıdır; yalnızca deneme içindir.
+
 ## Yayın öncesi yapılacaklar
 
 - Paket kimliği (`tr.com.ayasyazilim.pusula`) onaylanmalı; mağazada kalıcıdır.
