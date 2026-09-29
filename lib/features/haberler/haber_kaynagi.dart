@@ -34,6 +34,7 @@ class OrnekHaberKaynagi implements HaberKaynagi {
         ozet: 'Örnek içerik. Gerçek sürümde katsayı duyuruları kaynaktan derlenir; '
             'maaş hesabı bu akıştan değil, doğrulanmış parametre güncellemesinden beslenir.',
         resmiKaynak: true,
+        baglanti: Uri.parse('https://www.hmb.gov.tr'),
       ),
       Haber(
         id: 'h2',
@@ -44,6 +45,7 @@ class OrnekHaberKaynagi implements HaberKaynagi {
         ozet: 'Örnek içerik. Mevzuat değişiklikleri kaynak maddesiyle birlikte gösterilir.',
         resmiKaynak: true,
         otomatikOzet: true,
+        baglanti: Uri.parse('https://www.resmigazete.gov.tr'),
       ),
       Haber(
         id: 'h3',

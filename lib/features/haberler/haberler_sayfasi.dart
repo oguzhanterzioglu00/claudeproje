@@ -1,30 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../core/baglanti.dart';
 import '../../core/bilesenler.dart';
 import '../../core/tema.dart';
 import '../../core/yukselen.dart';
+import 'haber_kapagi.dart';
 import 'haber_kaynagi.dart';
 import 'haber_modeli.dart';
-
-IconData _ikon(HaberTuru t) => switch (t) {
-      HaberTuru.mevzuat => LucideIcons.scale,
-      HaberTuru.maas => LucideIcons.banknote,
-      HaberTuru.duyuru => LucideIcons.megaphone,
-      HaberTuru.atama => LucideIcons.userCheck,
-    };
-
-Color _renk(HaberTuru t) => switch (t) {
-      HaberTuru.mevzuat => PusulaRenk.mor,
-      HaberTuru.maas => PusulaRenk.amber,
-      HaberTuru.duyuru => PusulaRenk.mavi,
-      HaberTuru.atama => PusulaRenk.turkuaz,
-    };
-
-Color _ikonRengi(HaberTuru t) => switch (t) {
-      HaberTuru.mevzuat || HaberTuru.duyuru => PusulaRenk.beyaz,
-      HaberTuru.maas || HaberTuru.atama => PusulaRenk.lacivert,
-    };
 
 /// Haber ayrıntısını alt sayfada açar; ana sayfadaki bölüm ve tam liste ortak kullanır.
 Future<void> haberAyrintisiAc(
@@ -204,8 +187,8 @@ class HaberKarti extends StatelessWidget {
             Container(
               width: 44,
               height: 44,
-              decoration: BoxDecoration(color: _renk(haber.tur), borderRadius: BorderRadius.circular(14)),
-              child: Icon(_ikon(haber.tur), size: 22, color: _ikonRengi(haber.tur)),
+              decoration: BoxDecoration(color: HaberGorunumu.renk(haber.tur), borderRadius: BorderRadius.circular(14)),
+              child: Icon(HaberGorunumu.ikon(haber.tur), size: 22, color: HaberGorunumu.ikonRengi(haber.tur)),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -288,7 +271,7 @@ class _Ayrinti extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(children: [
-            Hap(haber.tur.etiket, zemin: _renk(haber.tur), yazi: _ikonRengi(haber.tur), ikon: _ikon(haber.tur)),
+            Hap(haber.tur.etiket, zemin: HaberGorunumu.renk(haber.tur), yazi: HaberGorunumu.ikonRengi(haber.tur), ikon: HaberGorunumu.ikon(haber.tur)),
             const SizedBox(width: 8),
             if (haber.resmiKaynak)
               const Hap('Resmî kaynak',
@@ -342,7 +325,10 @@ class _Ayrinti extends StatelessWidget {
             yukseklik: 56,
             metin: 'Kaynağı aç',
             ikon: LucideIcons.externalLink,
-            onPressed: kaynagiAc == null ? null : () => kaynagiAc!(haber),
+            // Bağlantısı olmayan haberde düğme pasif; olanda tarayıcıda açılır (testte [kaynagiAc]).
+            onPressed: haber.baglanti == null
+                ? null
+                : () => kaynagiAc != null ? kaynagiAc!(haber) : baglantiAc(context, haber.baglanti),
           ),
         ],
       );

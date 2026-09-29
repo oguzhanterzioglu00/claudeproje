@@ -25,6 +25,7 @@ class KamuIlani {
     required this.kaynakGuncelleme,
     this.ozet = '',
     this.uyum,
+    this.baglanti,
   });
 
   final String id;
@@ -42,6 +43,9 @@ class KamuIlani {
 
   /// Kullanıcının profiline uyum (0-100); profil yoksa null.
   final int? uyum;
+
+  /// İlanın kaynağındaki adres; yoksa "Kaynağı aç" düğmesi pasif kalır.
+  final Uri? baglanti;
 
   /// [bugun] itibarıyla kalan tam gün; süresi dolduysa negatif.
   int kalanGun(DateTime bugun) {

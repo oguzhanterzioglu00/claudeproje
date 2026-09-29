@@ -35,6 +35,7 @@ class OrnekIlanKaynagi implements IlanKaynagi {
         kaynakGuncelleme: gun(-1),
         ozet: 'Örnek ilan metni. Gerçek ilanlarda başvuru şartları ve tarihler kaynaktan derlenir.',
         uyum: 92,
+        baglanti: Uri.parse('https://www.saglik.gov.tr'),
       ),
       KamuIlani(
         id: 'o2',
@@ -59,6 +60,7 @@ class OrnekIlanKaynagi implements IlanKaynagi {
         kaynakAdi: 'İŞKUR (örnek)',
         kaynakGuncelleme: gun(-1),
         uyum: 64,
+        baglanti: Uri.parse('https://www.iskur.gov.tr'),
       ),
       KamuIlani(
         id: 'o4',
@@ -82,6 +84,7 @@ class OrnekIlanKaynagi implements IlanKaynagi {
         kaynakAdi: 'Kurumun resmî duyurusu (örnek)',
         kaynakGuncelleme: gun(-4),
         uyum: 55,
+        baglanti: Uri.parse('https://www.meb.gov.tr'),
       ),
       // Süresi dolmuş: listede görünmemeli.
       KamuIlani(

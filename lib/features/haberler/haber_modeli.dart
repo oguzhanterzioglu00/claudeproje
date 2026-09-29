@@ -26,6 +26,7 @@ class Haber {
     this.resmiKaynak = false,
     this.otomatikOzet = false,
     this.baglanti,
+    this.gorsel,
   });
 
   final String id;
@@ -45,6 +46,10 @@ class Haber {
 
   /// Kaynağın adresi. Yoksa "Kaynağı aç" düğmesi pasif kalır.
   final Uri? baglanti;
+
+  /// Haber görselinin adresi. Yalnızca yayın hakkı olan (ör. kurumun kendi duyurusundaki
+  /// ya da lisanslı) görseller kullanılmalıdır; yoksa ya da yüklenemezse türe göre çizilmiş kapak gösterilir.
+  final Uri? gorsel;
 
   /// "Bugün", "Dün", "3 gün önce", "2 hafta önce", "4 ay önce"; ileri tarih "Bugün" sayılır.
   String zamanEtiketi(DateTime bugun) {

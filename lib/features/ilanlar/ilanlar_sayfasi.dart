@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../core/baglanti.dart';
 import '../../core/bilesenler.dart';
 import '../../core/metin.dart';
 import '../../core/tema.dart';
@@ -458,7 +459,10 @@ class _Ayrinti extends StatelessWidget {
             yukseklik: 56,
             metin: 'Kaynağı aç',
             ikon: LucideIcons.externalLink,
-            onPressed: kaynagiAc == null ? null : () => kaynagiAc!(ilan),
+            // Bağlantısı olmayan ilanda düğme pasif; olanda tarayıcıda açılır (testte [kaynagiAc]).
+            onPressed: ilan.baglanti == null
+                ? null
+                : () => kaynagiAc != null ? kaynagiAc!(ilan) : baglantiAc(context, ilan.baglanti),
           ),
         ],
       );

@@ -12,6 +12,7 @@ import '../becayis/domain/eslesme.dart';
 import '../becayis/presentation/becayis_sekmesi.dart';
 import '../haberler/gundem_bolumu.dart';
 import '../haberler/haber_kaynagi.dart';
+import '../haberler/haber_modeli.dart';
 import '../ilanlar/ilan_kaynagi.dart';
 import '../ilanlar/ilanlar_sayfasi.dart';
 import '../maas/domain/memur_maas_hesaplayici.dart';
@@ -32,6 +33,7 @@ class PusulaKabugu extends StatefulWidget {
     this.asistan = const SahteAsistan(),
     this.ilanKaynagi = const OrnekIlanKaynagi(),
     this.haberKaynagi = const OrnekHaberKaynagi(),
+    this.haberOtomatik = true,
     this.bugun,
     this.baslangicSekmesi = 0,
     this.fotograf,
@@ -46,6 +48,9 @@ class PusulaKabugu extends StatefulWidget {
   final MevzuatAsistani asistan;
   final IlanKaynagi ilanKaynagi;
   final HaberKaynagi haberKaynagi;
+
+  /// Haber slaytlarının kendiliğinden ilerlemesi (testlerde kapatılır).
+  final bool haberOtomatik;
   final DateTime? bugun;
   final int baslangicSekmesi;
 
@@ -162,7 +167,7 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
                   profilAc: _profilAc,
                   avatarFoto: widget.fotograf?.foto,
                   avatarAd: p.ad,
-                  gundem: GundemBolumu(kaynak: widget.haberKaynagi, bugun: widget.bugun),
+                  gundem: GundemBolumu(kaynak: widget.haberKaynagi, bugun: widget.bugun, otomatik: widget.haberOtomatik),
                 );
               },
             ),
@@ -174,6 +179,13 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
                   ay: widget.bugun?.month,
                   baslangic: p.maas ?? const MaasGirdisi(derece: 8, kademe: 3, hizmetYili: 10),
                   kayitliGirdi: p.maas,
+                  haberler: GundemBolumu(
+                    kaynak: widget.haberKaynagi,
+                    bugun: widget.bugun,
+                    baslik: 'Maaş ve mevzuat haberleri',
+                    turler: const {HaberTuru.maas, HaberTuru.mevzuat},
+                    otomatik: widget.haberOtomatik,
+                  ),
                   kaydet: p.statu == Statu.memur657 ? (g) => widget.profilDeposu.kaydet(p.kopya(maas: g)) : null,
                 );
               },

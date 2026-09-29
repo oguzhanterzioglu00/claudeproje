@@ -20,6 +20,7 @@ class MaasSayfasi extends StatefulWidget {
     this.baslangic = const MaasGirdisi(derece: 8, kademe: 3, hizmetYili: 10),
     this.kayitliGirdi,
     this.kaydet,
+    this.haberler,
   });
 
   final MemurMaasHesaplayici hesaplayici;
@@ -33,6 +34,9 @@ class MaasSayfasi extends StatefulWidget {
 
   /// "Profilime kaydet" düğmesi; boşsa düğme gösterilmez.
   final ValueChanged<MaasGirdisi>? kaydet;
+
+  /// Sayfanın altında gösterilen haber bölümü (isteğe bağlı).
+  final Widget? haberler;
 
   @override
   State<MaasSayfasi> createState() => _MaasSayfasiState();
@@ -235,6 +239,7 @@ class _MaasSayfasiState extends State<MaasSayfasi> {
               ],
             ),
           ],
+          if (widget.haberler != null) widget.haberler!,
         ],
       ),
     );
