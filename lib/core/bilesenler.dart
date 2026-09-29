@@ -250,6 +250,36 @@ abstract final class AltSayfa {
       );
 }
 
+/// Üstten başlayıp saat yönünde dolan yuvarlak uçlu halka. Flutter'ın hazır
+/// [CircularProgressIndicator] bileşeni kalın çizgide taşıp kesildiği için
+/// halka elle çizilir.
+class _HalkaRessami extends CustomPainter {
+  _HalkaRessami({required this.deger, required this.kalinlik, required this.iz, required this.renk});
+
+  final double deger;
+  final double kalinlik;
+  final Color iz;
+  final Color renk;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final alan = (Offset.zero & size).deflate(kalinlik / 2);
+    final boya = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = kalinlik
+      ..strokeCap = StrokeCap.round;
+    canvas.drawArc(alan, 0, 2 * 3.141592653589793, false, boya..color = iz);
+    if (deger > 0) {
+      canvas.drawArc(alan, -3.141592653589793 / 2, 2 * 3.141592653589793 * deger.clamp(0.0, 1.0), false,
+          boya..color = renk);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_HalkaRessami eski) =>
+      eski.deger != deger || eski.kalinlik != kalinlik || eski.iz != iz || eski.renk != renk;
+}
+
 /// Yüzde skoru gösteren halka. Değer değişince eski değerden yenisine akar.
 class SkorHalkasi extends StatelessWidget {
   const SkorHalkasi({
@@ -287,12 +317,8 @@ class SkorHalkasi extends StatelessWidget {
             alignment: Alignment.center,
             children: [
               SizedBox.expand(
-                child: CircularProgressIndicator(
-                  value: v,
-                  strokeWidth: kalinlik,
-                  strokeCap: StrokeCap.round,
-                  backgroundColor: iz,
-                  color: PusulaRenk.amber,
+                child: CustomPaint(
+                  painter: _HalkaRessami(deger: v, kalinlik: kalinlik, iz: iz, renk: PusulaRenk.amber),
                 ),
               ),
               Text.rich(

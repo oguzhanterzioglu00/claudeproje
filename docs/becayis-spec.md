@@ -41,6 +41,7 @@ Buradan çıkan ürün kuralları:
 
 **Doğrulanamayan veya belirsiz noktalar** (hukuk teyidi gerekir):
 - Aday memurlar ve sözleşmeli personel (4/B): ikincil kaynaklar (ör. Av. Same Öztorun'un md. 73 rehberi) aday memurların (asaleti onaylanmamış) ve 4/B'lilerin becayiş yapamadığını belirtiyor; yer değiştirme yönetmeliği de aday memurları kapsam dışı bırakıyor. Birincil metinde açık bir hüküm doğrulanamadı. Ürün ikisini de şimdilik ilan vermekten dışlar; yalnızca asaleti onaylanmış 657 memurlarına açıktır.
+- **3'lü zincir:** Md. 73 iki memurun "karşılıklı" yer değiştirmesini tanımlar. Üç kişilik çevrimin (A→B→C→A) yasal dayanağı doğrulanamadı; kurumlar kabul etmeyebilir. Uygulama zincir eşleşmelerinde bu uyarıyı gösterir. Hukuk görüşü olumsuz gelirse zincir tek bir bayrakla (`zincir_izni` varsayılanı false ve zincir modu gizli) kapatılabilir; motor zaten `zincirIzni` alanını dikkate alır.
 - Dilekçe içeriği (aynı kaynak): sicil bilgileri, mevcut görev yerleri ve karşılıklı irade beyanı yer almalıdır; talep silsile yoluyla atamaya yetkili amire iletilir. Dilekçe şablonu bunları içerir.
 - Asgari hizmet süresi, disiplin kaydı gibi koşullar kurumdan kuruma değişiyor; kanun metninde yok.
 - İkincil kaynaklardan birinde "derece kaldırıldı" tablosu, diğerlerinde "sınıf ve derece" ifadesi geçiyor. Kanun metninin kendisi teyit edilene kadar derece şart sayılmaz.
