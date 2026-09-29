@@ -20,7 +20,9 @@ void main() {
         }
         expect(k.kaynaklar, isNotEmpty, reason: k.id);
         for (final kaynak in k.kaynaklar) {
-          expect(kaynak.baslik, startsWith('657 sayılı Devlet Memurları Kanunu, md. '), reason: k.id);
+          expect(kaynak.baslik,
+              anyOf(startsWith('657 sayılı Devlet Memurları Kanunu, md. '), startsWith('5510 sayılı Kanun, ')),
+              reason: k.id);
           expect(kaynak.alinti, isNotNull, reason: '${k.id}: ${kaynak.baslik}');
           expect(kaynak.alinti!.length, greaterThan(60), reason: '${k.id}: ${kaynak.baslik}');
         }
@@ -36,14 +38,19 @@ void main() {
     });
 
     test('cevaplardaki rakamlar kanun alıntılarıyla tutarlı (bilinen kritik değerler)', () {
-      String alinti(String id) => BilgiBankasi.konular.firstWhere((k) => k.id == id).kaynaklar.map((e) => e.alinti).join(' ');
+      String alinti(String id) =>
+          BilgiBankasi.konular.firstWhere((k) => k.id == id).kaynaklar.map((e) => e.alinti).join(' ');
       String cevap(String id) => BilgiBankasi.konular.firstWhere((k) => k.id == id).cevap;
 
       expect(alinti('yillik_izin'), allOf(contains('yirmi gün'), contains('30 gündür')));
       expect(cevap('yillik_izin'), allOf(contains('20 gün'), contains('30 gün')));
 
-      expect(alinti('mazeret_izni'), allOf(contains('onaltı hafta'), contains('yirmidört hafta'), contains('on gün babalık'), contains('yedi gün')));
-      expect(cevap('mazeret_izni'), allOf(contains('16 hafta'), contains('24 hafta'), contains('10 gün'), contains('7 gün')));
+      expect(
+          alinti('mazeret_izni'),
+          allOf(
+              contains('onaltı hafta'), contains('yirmidört hafta'), contains('on gün babalık'), contains('yedi gün')));
+      expect(cevap('mazeret_izni'),
+          allOf(contains('16 hafta'), contains('24 hafta'), contains('10 gün'), contains('7 gün')));
 
       expect(alinti('hastalik_izni'), allOf(contains('onsekiz aya'), contains('oniki aya'), contains('üç aya')));
       expect(cevap('hastalik_izni'), allOf(contains('18 aya'), contains('12 aya'), contains('3 aya')));
@@ -51,7 +58,8 @@ void main() {
       expect(alinti('ayliksiz_izin'), allOf(contains('onsekiz aya'), contains('yirmidört aya'), contains('bir yıla')));
       expect(cevap('ayliksiz_izin'), allOf(contains('18 aya'), contains('24 aya'), contains('1 yıla')));
 
-      expect(alinti('kademe_derece'), allOf(contains('en az bir yıl'), contains('en az 3 yıl'), contains('3 üncü kademesinde 1 yıl')));
+      expect(alinti('kademe_derece'),
+          allOf(contains('en az bir yıl'), contains('en az 3 yıl'), contains('3 üncü kademesinde 1 yıl')));
     });
   });
 
@@ -100,7 +108,8 @@ void main() {
     test('yalnızca "izin" yazılırsa birden çok aday döner (tahmin edilmez)', () {
       final e = BilgiArama.esles('izin');
       expect(e.konu, isNull);
-      expect(e.adaylar.map((k) => k.id), containsAll(['yillik_izin', 'mazeret_izni', 'hastalik_izni', 'ayliksiz_izin']));
+      expect(
+          e.adaylar.map((k) => k.id), containsAll(['yillik_izin', 'mazeret_izni', 'hastalik_izni', 'ayliksiz_izin']));
     });
 
     test('her konunun kendi örnek sorusu kendi konusuna gider', () {
@@ -126,14 +135,15 @@ void main() {
       expect(c.kaynaklar, isEmpty);
       expect(c.surum, isNull);
       expect(c.oneriler, hasLength(YerelMevzuatAsistani.desteklenenKonular.length));
-      expect(c.oneriler, isNot(contains('Emeklilik için ne kadar süre gerekir?')), reason: 'kapsam dışı konu önerilmez');
     });
 
-    test('emeklilik kapsam dışıdır: kaynak ve sürüm bilgisi yok', () async {
+    test('emeklilik 5510 sayılı Kanun alıntısıyla, 2008 öncesi uyarısıyla ve kendi sürüm notuyla yanıtlanır', () async {
       final c = await asistan.sor('emeklilik yaşı kaç');
-      expect(c.metin, contains('5510'));
-      expect(c.kaynaklar, isEmpty);
-      expect(c.surum, isNull);
+      expect(c.metin, allOf(contains('58'), contains('60'), contains('9000 gün'), contains('emekliye sevk onayı')));
+      expect(c.kaynaklar.first.baslik, startsWith('5510 sayılı Kanun, md. 28'));
+      expect(c.kaynaklar.first.alinti, allOf(contains('58, erkek ise 60'), contains('en az 9000 gün')));
+      expect(c.uyari, contains('2008 öncesinde'));
+      expect(c.surum, BilgiBankasi.surum5510);
     });
 
     test('Becayiş kaynağı sabiti bilgi bankasıyla aynı maddeyi gösterir', () {

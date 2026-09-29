@@ -41,8 +41,8 @@ class _AsistanSayfasiState extends State<AsistanSayfasi> {
       metin: 'Merhaba! Sorunu ilgili kanun maddesini bularak, alıntısıyla birlikte yanıtlarım. '
           'Şu an 657 sayılı Devlet Memurları Kanunu\'na dayanarak becayiş, yıllık izin, mazeret izni, '
           'rapor/hastalık izni, aylıksız izin, kademe ve derece yükselmesi, tayin, disiplin cezaları, '
-          'adaylık ve çalışma saatleri sorularını yanıtlıyorum. '
-          'Emeklilik ve diğer kanunlar henüz yok; bilmediğim konuda tahmin yürütmem.',
+          'adaylık, çalışma saatleri ve emeklilik (5510 sayılı Kanun) sorularını yanıtlıyorum. '
+          'Diğer kanunlar henüz yok; bilmediğim konuda tahmin yürütmem.',
     ),
   ];
   bool _bekliyor = false;
@@ -214,8 +214,7 @@ class _Ust extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Hakkım ne?', style: PusulaYazi.baslik(22, aralik: -0.9)),
-                Text('Mevzuat asistanı',
-                    style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500)),
+                Text('Mevzuat asistanı', style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500)),
               ],
             ),
           ),
@@ -366,8 +365,8 @@ class _CevapIcerigi extends StatelessWidget {
                       const Icon(LucideIcons.bookOpen, size: 16, color: PusulaRenk.mor),
                       const SizedBox(width: 6),
                       Expanded(
-                        child: Text(k.baslik,
-                            style: PusulaYazi.metin(12, renk: PusulaRenk.mor, agirlik: FontWeight.w700)),
+                        child:
+                            Text(k.baslik, style: PusulaYazi.metin(12, renk: PusulaRenk.mor, agirlik: FontWeight.w700)),
                       ),
                     ],
                   ),
@@ -390,7 +389,8 @@ class _CevapIcerigi extends StatelessWidget {
               const SizedBox(width: 6),
               Expanded(
                 child: Text(c.uyari!,
-                    style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500).copyWith(height: 1.4)),
+                    style:
+                        PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500).copyWith(height: 1.4)),
               ),
             ],
           ),

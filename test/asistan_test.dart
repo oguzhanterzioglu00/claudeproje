@@ -73,15 +73,15 @@ void main() {
     }
   });
 
-  testWidgets('emeklilik: dürüstçe kapsam dışı, kaynak uydurmaz', (tester) async {
+  testWidgets('emeklilik: 5510 sayılı Kanun maddesiyle ve 2008 öncesi uyarısıyla yanıtlanır', (tester) async {
     await ac(tester, const YerelMevzuatAsistani(sure: Duration(milliseconds: 10)));
     await tester.enterText(find.byType(TextField), 'Emeklilik için ne kadar süre gerekir?');
     await tester.tap(find.bySemanticsLabel('Gönder'));
     await tester.pump(const Duration(milliseconds: 30));
     await tester.pumpAndSettle();
-    expect(find.textContaining('5510 sayılı'), findsOneWidget);
-    expect(find.textContaining('cevap veremiyorum'), findsOneWidget);
-    expect(find.textContaining('Kaynak: mevzuat.gov.tr'), findsNothing);
+    expect(find.textContaining('5510 sayılı Kanun, md. 28'), findsWidgets);
+    expect(find.textContaining('2008 öncesinde'), findsOneWidget);
+    expect(find.textContaining('5510 sayılı Kanun birleştirilmiş metni'), findsOneWidget);
   });
 
   testWidgets('bilinmeyen soruda tahmin yok; önerilen sorulara dokunarak devam edilir', (tester) async {

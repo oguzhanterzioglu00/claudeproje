@@ -78,7 +78,10 @@ abstract final class BilgiArama {
     final puanlar = [for (final k in konular) (k, puan(k, s))];
     final en = puanlar.fold<double>(0, (m, e) => e.$2 > m ? e.$2 : m);
     if (en <= 0) return const BilgiEslesmesi();
-    final ust = [for (final e in puanlar) if (e.$2 == en) e.$1];
+    final ust = [
+      for (final e in puanlar)
+        if (e.$2 == en) e.$1
+    ];
     return ust.length == 1 ? BilgiEslesmesi(konu: ust.first) : BilgiEslesmesi(adaylar: ust);
   }
 }
@@ -94,8 +97,7 @@ class YerelMevzuatAsistani implements MevzuatAsistani {
 
   static const becayisKaynagi = MevzuatKaynagi(
     baslik: '657 sayılı Devlet Memurları Kanunu, md. 73 (Karşılıklı yer değiştirme)',
-    alinti:
-        'Aynı Kurumun başka başka yerlerde bulunan aynı sınıftaki memurları, karşılıklı olarak '
+    alinti: 'Aynı Kurumun başka başka yerlerde bulunan aynı sınıftaki memurları, karşılıklı olarak '
         'yer değiştirme suretiyle atanmalarını isteyebilirler. Bu isteğin yerine getirilmesi '
         'atamaya yetkili amirlerince uygun bulunmasına bağlıdır.',
   );
@@ -114,7 +116,7 @@ class YerelMevzuatAsistani implements MevzuatAsistani {
         metin: k.cevap,
         kaynaklar: k.kaynaklar,
         uyari: k.uyari,
-        surum: k.kapsamDisi ? null : BilgiBankasi.surum,
+        surum: k.kapsamDisi ? null : (k.surum ?? BilgiBankasi.surum),
       );
     }
 

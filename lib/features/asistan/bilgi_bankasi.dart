@@ -15,6 +15,7 @@ class BilgiKonusu {
     required this.cevap,
     required this.kaynaklar,
     this.uyari,
+    this.surum,
     this.kapsamDisi = false,
   });
 
@@ -35,6 +36,9 @@ class BilgiKonusu {
   /// Cevabın altında gösterilen dikkat notu (kanunun dışında kalan konular).
   final String? uyari;
 
+  /// Konunun kaynağı 657 sayılı Kanun değilse cevabın altında gösterilen kaynak/sürüm notu.
+  final String? surum;
+
   /// Asistanın henüz cevaplayamadığı ama bilinen bir konu: dürüstçe "kapsam dışı" der.
   final bool kapsamDisi;
 }
@@ -44,6 +48,10 @@ abstract final class BilgiBankasi {
   /// Metnin alındığı sürüm; ekranda cevabın altında gösterilir.
   static const surum =
       'Kaynak: mevzuat.gov.tr birleştirilmiş metin (31/7/2026 tarihinde yürürlüğe giren 7590 sayılı Kanun değişikliğine kadar işlenmiş)';
+
+  /// 5510 sayılı Kanun konuları için sürüm notu.
+  static const surum5510 =
+      'Kaynak: mevzuat.gov.tr 5510 sayılı Kanun birleştirilmiş metni (24/7/2026 tarihli 7590 sayılı Kanun değişikliğine kadar işlenmiş)';
 
   static const konular = <BilgiKonusu>[
     BilgiKonusu(
@@ -432,14 +440,32 @@ abstract final class BilgiBankasi {
     ),
     BilgiKonusu(
       id: 'emeklilik',
-      baslik: 'Emeklilik',
+      baslik: 'Emeklilik (yaşlılık aylığı)',
       etiket: 'Emeklilik',
       ornekSoru: 'Emeklilik için ne kadar süre gerekir?',
-      anahtarlar: ['emekli', 'emeklilik', 'emekli aylig', 'prim gun', 'yas sarti', 'sgk'],
+      anahtarlar: ['emekli', 'emeklilik', 'emekli aylig', 'yaslilik aylig', 'prim gun', 'yas sarti', 'sgk'],
       cevap:
-          'Emeklilik (yaş, prim günü, hizmet süresi) 657 sayılı Kanunda değil, 5510 sayılı Sosyal Sigortalar ve Genel Sağlık Sigortası Kanunu\'nda düzenlenir. Bu kanunun metni asistana henüz eklenmedi; bu yüzden emeklilik sorularına bu sürümde cevap veremiyorum. Kesin bilgi için SGK\'nın kendi hizmetlerini (ör. e-Devlet\'teki hizmet dökümünü) kullanabilirsin.',
-      kaynaklar: [],
-      kapsamDisi: true,
+          '5510 sayılı Kanuna göre, 2008\'de yürürlüğe giren düzenlemeden sonra ilk kez sigortalı olanlara kadın 58, erkek 60 yaşını doldurmak ve en az 9000 gün prim bildirilmiş olmak şartıyla yaşlılık aylığı bağlanır (yaş şartı 2036\'dan itibaren kademeli olarak artar). 4/1-(c) kapsamındaki sigortalılar (memurlar gibi) için ayrıca istek üzerine yetkili makamdan emekliye sevk onayı alınması ve ilişiğin kesilmesi gerekir.',
+      kaynaklar: [
+        MevzuatKaynagi(
+          baslik: '5510 sayılı Kanun, md. 28 (Yaşlılık sigortasından sağlanan haklar ve yararlanma şartları)',
+          alinti:
+              'İlk defa bu Kanuna göre sigortalı sayılanlara; a) Kadın ise 58, erkek ise 60 yaşını doldurmuş olmaları ve en az 9000 gün malûllük, yaşlılık ve ölüm sigortaları primi bildirilmiş olması şartıyla yaşlılık aylığı bağlanır. Ancak, 4 üncü maddenin birinci fıkrasının (a) bendi kapsamında sigortalı sayılanlar için prim gün sayısı şartı 7200 gün olarak uygulanır. b) (a) bendinde belirtilen yaş şartı; 1) 1/1/2036 ilâ 31/12/2037 tarihleri arasında kadın için 59, erkek için 61, 2) 1/1/2038 ilâ 31/12/2039 tarihleri arasında kadın için 60, erkek için 62, 3) 1/1/2040 ilâ 31/12/2041 tarihleri arasında kadın için 61, erkek için 63, 4) 1/1/2042 ilâ 31/12/2043 tarihleri arasında kadın için 62, erkek için 64, 5) 1/1/2044 ilâ 31/12/2045 tarihleri arasında kadın için 63, erkek için 65, 6) 1/1/2046 ilâ 31/12/2047 tarihleri arasında kadın için 64, erkek için 65, 7) 1/1/2048 tarihinden itibaren ise kadın ve erkek için 65, olarak uygulanır.',
+        ),
+        MevzuatKaynagi(
+          baslik: '5510 sayılı Kanun, md. 28 (emekliye sevk onayı)',
+          alinti:
+              '4 üncü maddenin birinci fıkrasının (c) bendinde belirtilen sigortalıların ise istekleri üzerine yetkili makamdan emekliye sevk onayı alındıktan sonra ilişiklerinin kesilmesi şarttır.',
+        ),
+        MevzuatKaynagi(
+          baslik: '5510 sayılı Kanun, geçici md. 4 (eski 5434 sayılı Kanun kapsamındakiler)',
+          alinti:
+              'Bu madde kapsamına girenlerin aylıklarının bağlanması, artırılması, azaltılması, kesilmesi, yeniden bağlanması, toptan ödemeleri, ilgi devamı, ihya ve borçlanmaları, diğer ödemeler ve yardımlar ile emeklilik ikramiyeleri hakkında bu Kanunla yürürlükten kaldırılan hükümleri de dahil 5434 sayılı Kanun hükümlerine göre işlem yapılır',
+        ),
+      ],
+      uyari:
+          '2008 öncesinde memuriyete başlayanlar (eski 5434 sayılı Kanuna tabi olanlar) için şartlar farklıdır ve geçici madde 4 uyarınca mülga 5434 sayılı Kanun hükümlerine göre belirlenir. Bu kanunun metni asistanda yok; kendi durumun için SGK\'dan veya e-Devlet\'teki hizmet dökümünden bilgi al.',
+      surum: BilgiBankasi.surum5510,
     ),
   ];
 }
