@@ -40,8 +40,8 @@ Buradan çıkan ürün kuralları:
 **Başvuru usulü.** Memurlar taleplerini disiplin amirleri kanalıyla atamaya yetkili amire iletir; iki taraf da dilekçe verir. Dilekçe ekranı bu yüzden "aynı gün, disiplin amiri kanalıyla, iki taraf da" uyarısını gösterir.
 
 **Doğrulanamayan veya belirsiz noktalar** (hukuk teyidi gerekir):
-- Aday memurların becayişi: yönetmelik kapsamı aday memurları dışarıda bırakıyor; becayiş için ayrı ve açık bir düzenleme bulunamadı. Ürün, aday memurları ilan vermekten şimdilik dışlar.
-- Sözleşmeli personel (4/B): ayrı mevzuata tabi olduğu belirtiliyor. Ürün yalnızca 657 kapsamındaki memurlara açık.
+- Aday memurlar ve sözleşmeli personel (4/B): ikincil kaynaklar (ör. Av. Same Öztorun'un md. 73 rehberi) aday memurların (asaleti onaylanmamış) ve 4/B'lilerin becayiş yapamadığını belirtiyor; yer değiştirme yönetmeliği de aday memurları kapsam dışı bırakıyor. Birincil metinde açık bir hüküm doğrulanamadı. Ürün ikisini de şimdilik ilan vermekten dışlar; yalnızca asaleti onaylanmış 657 memurlarına açıktır.
+- Dilekçe içeriği (aynı kaynak): sicil bilgileri, mevcut görev yerleri ve karşılıklı irade beyanı yer almalıdır; talep silsile yoluyla atamaya yetkili amire iletilir. Dilekçe şablonu bunları içerir.
 - Asgari hizmet süresi, disiplin kaydı gibi koşullar kurumdan kuruma değişiyor; kanun metninde yok.
 - İkincil kaynaklardan birinde "derece kaldırıldı" tablosu, diğerlerinde "sınıf ve derece" ifadesi geçiyor. Kanun metninin kendisi teyit edilene kadar derece şart sayılmaz.
 - Kişisel iletişim bilgisinin ücret karşılığı açılması ve KVKK açısından işlenmesi mevzuat dışı bir konudur; ayrıca hukuk ve KVKK görüşü alınmalıdır.
