@@ -1,9 +1,6 @@
-/// Türkçe harfleri de doğru küçülten, karşılaştırma için normalleştirilmiş anahtar.
-String normalize(String s) => s
-    .trim()
-    .replaceAll('İ', 'i')
-    .replaceAll('I', 'ı')
-    .toLowerCase();
+import '../../../core/metin.dart';
+
+export '../../../core/metin.dart' show normalize;
 
 /// Bir memurun becayiş ilanı.
 ///

@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/alt_cubuk.dart';
-import '../../core/tema.dart';
 import '../ana_sayfa/ana_sayfa.dart';
 import '../ana_sayfa/ana_sayfa_verisi.dart';
+import '../asistan/asistan_sayfasi.dart';
 import '../becayis/data/becayis_deposu.dart';
+import '../ilanlar/ilanlar_sayfasi.dart';
 import '../becayis/domain/statu.dart';
 import '../becayis/presentation/becayis_sekmesi.dart';
 import '../maas/presentation/maas_sayfasi.dart';
@@ -65,32 +66,13 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
               becayisiAc: () => _git(PusulaKabugu.becayis),
             ),
             MaasSayfasi(ay: widget.bugun?.month),
-            const _Yakinda('Hakkım ne?'),
+            const AsistanSayfasi(),
             BecayisSekmesi(profil: widget.profil, depo: widget.becayisDeposu),
-            const _Yakinda('İlanlar'),
+            IlanlarSayfasi(bugun: widget.bugun),
           ],
         ),
-        bottomNavigationBar: PusulaAltCubuk(sekmeler: _sekmeler, secili: _secili, onSec: _git),
-      );
-}
-
-/// Henüz yazılmamış sekmeler için geçici sayfa.
-class _Yakinda extends StatelessWidget {
-  const _Yakinda(this.baslik);
-
-  final String baslik;
-
-  @override
-  Widget build(BuildContext context) => SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(baslik, style: PusulaYazi.baslik(24, aralik: -1)),
-              const SizedBox(height: 8),
-              Text('Yakında', style: PusulaYazi.metin(14, renk: PusulaRenk.soluk)),
-            ],
-          ),
-        ),
+        bottomNavigationBar: MediaQuery.viewInsetsOf(context).bottom > 0
+            ? null
+            : PusulaAltCubuk(sekmeler: _sekmeler, secili: _secili, onSec: _git),
       );
 }

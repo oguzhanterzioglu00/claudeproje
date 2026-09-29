@@ -28,3 +28,7 @@ const _aylar = [
 
 /// "Salı, 29 Eylül" (intl paketi gerektirmeden).
 String kisaTarih(DateTime t) => '${_gunler[t.weekday - 1]}, ${t.day} ${_aylar[t.month - 1]}';
+
+/// Karşılaştırma/arama için Türkçe harfleri doğru küçülten normalleştirme
+/// (İ → i, I → ı; sonra küçük harf).
+String normalize(String s) => s.trim().replaceAll('İ', 'i').replaceAll('I', 'ı').toLowerCase();
