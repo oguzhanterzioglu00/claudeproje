@@ -99,7 +99,7 @@ void main() {
     expect(find.text('Döküm'), findsNothing);
     expect(find.text('Tahmini net maaş'), findsNothing);
 
-    await tester.tap(find.text('Memur 4/A'));
+    await tester.tap(find.text('Memur (657)'));
     await tester.pumpAndSettle(const Duration(seconds: 2));
     expect(find.text('Döküm'), findsOneWidget);
   });

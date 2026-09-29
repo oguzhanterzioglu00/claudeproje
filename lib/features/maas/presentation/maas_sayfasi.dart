@@ -39,7 +39,7 @@ class MaasSayfasi extends StatefulWidget {
 }
 
 class _MaasSayfasiState extends State<MaasSayfasi> {
-  static const _gruplar = ['Memur 4/A', 'Sözleşmeli', 'İşçi'];
+  static const _gruplar = ['Memur (657)', 'Sözleşmeli', 'İşçi'];
 
   late MaasGirdisi _g = widget.baslangic;
   late MaasGirdisi? _kayitli = widget.kayitliGirdi;
