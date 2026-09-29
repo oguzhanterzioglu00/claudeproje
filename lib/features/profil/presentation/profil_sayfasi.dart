@@ -7,6 +7,7 @@ import '../../../core/tema.dart';
 import '../../../core/yukselen.dart';
 import '../../ayarlar/ayarlar_sayfasi.dart';
 import '../../hatirlatici/hatirlatici_deposu.dart';
+import '../../ilanlar/kayitli_ilanlar.dart';
 import '../../ilanlar/yeni_ilan_takibi.dart';
 import '../../hesap/data/oturum_deposu.dart';
 import '../../hesap/presentation/hesap_bolumu.dart';
@@ -28,7 +29,8 @@ class ProfilSayfasi extends StatefulWidget {
     this.fotografKaynagi = const ImagePickerFotografKaynagi(),
     this.oturum,
     this.hatirlatici,
-    this.ilanTakibi,
+        this.ilanTakibi,
+    this.kayitliIlanlar,
     this.tarihSec = _varsayilanTarihSec,
   });
 
@@ -45,7 +47,11 @@ class ProfilSayfasi extends StatefulWidget {
   final HatirlaticiDeposu? hatirlatici;
 
   /// Verilirse Ayarlar'da yeni ilan bildirimi tercihleri görünür.
-  final YeniIlanTakibi? ilanTakibi;
+    final YeniIlanTakibi? ilanTakibi;
+
+  /// Verilirse hesap silinirken kaydedilen ilanlar da silinir.
+  final KayitliIlanlar? kayitliIlanlar;
+
 
   /// Tarih seçici; testlerde değiştirilir. Vazgeçilirse null döner.
   final Future<DateTime?> Function(BuildContext context, DateTime baslangic, DateTime ilk, DateTime son) tarihSec;
@@ -320,6 +326,7 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                         veriSil: () async {
                           await widget.hatirlatici?.tercihiSil();
                           await widget.ilanTakibi?.tercihiSil();
+                          await widget.kayitliIlanlar?.temizle();
                           await widget.depo.sil();
                           await widget.fotograf?.kaldir();
                         },

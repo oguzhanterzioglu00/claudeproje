@@ -110,6 +110,8 @@ void main() {
       expect(find.text('Sürekli işçi alımı'), findsNothing); // uyum 64
       expect(find.text('Öğretmen ataması duyurusu'), findsNothing); // uyum 55
 
+            await tester.drag(find.text('Tümü'), const Offset(-400, 0)); // süzgeç şeridini kaydır
+      await tester.pumpAndSettle();
       await tester.tap(find.text('İşçi alımı'));
       await tester.pumpAndSettle();
       expect(find.text('Sürekli işçi alımı'), findsOneWidget);

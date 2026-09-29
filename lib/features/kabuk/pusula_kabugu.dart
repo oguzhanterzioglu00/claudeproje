@@ -23,7 +23,9 @@ import '../haberler/gundem_bolumu.dart';
 import '../haberler/haber_kaynagi.dart';
 import '../haberler/haber_modeli.dart';
 import '../ilanlar/ilan_kaynagi.dart';
+import '../ilanlar/ilanlar_bolumu.dart';
 import '../ilanlar/ilanlar_sayfasi.dart';
+import '../ilanlar/kayitli_ilanlar.dart';
 import '../ilanlar/yeni_ilan_takibi.dart';
 import '../maas/domain/memur_maas_hesaplayici.dart';
 import '../maas/presentation/maas_sayfasi.dart';
@@ -52,6 +54,7 @@ class PusulaKabugu extends StatefulWidget {
     this.oturum,
     this.hatirlatici,
     this.ilanTakibi,
+    this.kayitliIlanlar,
   });
 
   final ProfilDeposu profilDeposu;
@@ -78,6 +81,9 @@ class PusulaKabugu extends StatefulWidget {
   /// Verilirse yeni ilan bildirimi (ayarlarda açılır) çalışır: uygulama açılınca, ön plana gelince ve
   /// açıkken 15 dakikada bir ilan akışı kontrol edilir.
   final YeniIlanTakibi? ilanTakibi;
+
+  /// Kaydedilen ilanlar (cihazda kalıcı); verilmezse İlanlar sekmesi bellekte tutar.
+  final KayitliIlanlar? kayitliIlanlar;
 
   /// Sekme sırası; kısayollar bu sabitlerle yönlendirir.
   static const anaSayfa = 0;
@@ -173,6 +179,7 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
         oturum: widget.oturum,
         hatirlatici: widget.hatirlatici,
         ilanTakibi: widget.ilanTakibi,
+        kayitliIlanlar: widget.kayitliIlanlar,
       ),
     ),
   );
@@ -252,6 +259,14 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
               araclar: p.statu == Statu.memur657
                   ? AraclarBolumu(izinAc: _izinAc, zamAc: _zamAc, tabloAc: _tabloAc)
                   : null,
+              ilanlar: widget.ilanKaynagi is OrnekIlanKaynagi
+                  ? null
+                  : IlanlarBolumu(
+                      kaynak: widget.ilanKaynagi,
+                      turler: IlanBildirimTercihi.varsayilan(p.statu),
+                      tumunuAc: () => _git(PusulaKabugu.ilanlar),
+                      bugun: widget.bugun,
+                    ),
               gundem: GundemBolumu(kaynak: widget.haberKaynagi, bugun: widget.bugun, otomatik: widget.haberOtomatik),
             );
           },
@@ -290,7 +305,7 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
           listenable: widget.profilDeposu,
           builder: (context, _) => BecayisSekmesi(profil: _profil, depo: _becayis, profilAc: _profilAc),
         ),
-        IlanlarSayfasi(kaynak: widget.ilanKaynagi, bugun: widget.bugun),
+        IlanlarSayfasi(kaynak: widget.ilanKaynagi, bugun: widget.bugun, kayitlar: widget.kayitliIlanlar),
       ],
     ),
     bottomNavigationBar: MediaQuery.viewInsetsOf(context).bottom > 0

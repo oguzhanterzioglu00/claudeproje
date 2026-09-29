@@ -53,6 +53,48 @@ class KamuIlani {
   /// İlanın kaynağındaki adres; yoksa "Kaynağı aç" düğmesi pasif kalır.
   final Uri? baglanti;
 
+  /// Kaydedilen ilanları cihazda saklamak için (uyum puanı saklanmaz; profile göre yeniden hesaplanır).
+  Map<String, Object?> toJson() => {
+    'id': id,
+    'baslik': baslik,
+    'kurum': kurum,
+    'konum': konum,
+    'tur': tur.name,
+    'yayin': yayinTarihi.toIso8601String(),
+    'sonBasvuru': sonBasvuru?.toIso8601String(),
+    'kaynakAdi': kaynakAdi,
+    'kaynakGuncelleme': kaynakGuncelleme.toIso8601String(),
+    'ozet': ozet,
+    'baglanti': baglanti?.toString(),
+    'kategori': kategori,
+  };
+
+  /// Bozuk kayıtta null döner (kayıtlı listeden atlanır).
+  static KamuIlani? fromJson(Object? j) {
+    if (j is! Map<String, Object?>) return null;
+    String metin(String k) => j[k] is String ? j[k]! as String : '';
+    DateTime? tarih(String k) => j[k] is String ? DateTime.tryParse(j[k]! as String) : null;
+    final id = metin('id');
+    final baslik = metin('baslik');
+    final yayin = tarih('yayin');
+    if (id.isEmpty || baslik.isEmpty || yayin == null) return null;
+    final u = Uri.tryParse(metin('baglanti'));
+    return KamuIlani(
+      id: id,
+      baslik: baslik,
+      kurum: metin('kurum'),
+      konum: metin('konum'),
+      tur: IlanTuru.values.firstWhere((t) => t.name == metin('tur'), orElse: () => IlanTuru.diger),
+      yayinTarihi: yayin,
+      sonBasvuru: tarih('sonBasvuru'),
+      kaynakAdi: metin('kaynakAdi'),
+      kaynakGuncelleme: tarih('kaynakGuncelleme') ?? yayin,
+      ozet: metin('ozet'),
+      baglanti: u != null && (u.scheme == 'https' || u.scheme == 'http') && u.host.isNotEmpty ? u : null,
+      kategori: metin('kategori'),
+    );
+  }
+
   /// [bugun] itibarıyla kalan tam gün; süresi dolduysa negatif, son başvuru günü bilinmiyorsa null.
   int? kalanGun(DateTime bugun) {
     final son = sonBasvuru;

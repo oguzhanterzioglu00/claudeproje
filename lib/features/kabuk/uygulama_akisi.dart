@@ -6,6 +6,7 @@ import '../../core/tema.dart';
 import '../haberler/haber_kaynagi.dart';
 import '../hatirlatici/hatirlatici_deposu.dart';
 import '../ilanlar/arka_plan.dart';
+import '../ilanlar/kayitli_ilanlar.dart';
 import '../ilanlar/ilan_kaynagi.dart';
 import '../ilanlar/yeni_ilan_takibi.dart';
 import '../hatirlatici/hatirlatici_servisi.dart';
@@ -23,13 +24,14 @@ import 'pusula_kabugu.dart';
 
 /// Bir hesaba ait cihaz içi kullanıcı verisi (profil ve fotoğraf).
 class _KullaniciVerisi {
-  _KullaniciVerisi(this.hesapId, this.profil, this.fotograf, this.hatirlatici, this.ilanTakibi);
+  _KullaniciVerisi(this.hesapId, this.profil, this.fotograf, this.hatirlatici, this.ilanTakibi, this.kayitliIlanlar);
 
   final String hesapId;
   final ProfilDeposu profil;
   final FotografDeposu fotograf;
   final HatirlaticiDeposu? hatirlatici;
   final YeniIlanTakibi? ilanTakibi;
+  final KayitliIlanlar kayitliIlanlar;
 
   bool get yuklendi => profil.yuklendi && fotograf.yuklendi;
 
@@ -38,6 +40,7 @@ class _KullaniciVerisi {
     fotograf.dispose();
     hatirlatici?.dispose();
     ilanTakibi?.dispose();
+    kayitliIlanlar.dispose();
   }
 }
 
@@ -145,8 +148,10 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
                 hesapId: hesap.id,
                 arkaPlan: widget.arkaPlan,
               ),
+        KayitliIlanlar(widget.depolama, hesapId: hesap.id),
       );
       _veri = v;
+      v.kayitliIlanlar.yukle();
       v.profil.yukle();
       v.fotograf.yukle();
       v.profil.addListener(_veriDegisti);
@@ -204,6 +209,8 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
               oturum: widget.oturum,
               hatirlatici: veri.hatirlatici,
               ilanTakibi: veri.ilanTakibi,
+              kayitliIlanlar: veri.kayitliIlanlar,
+
               ilanKaynagi: widget.ilanKaynagi ?? const OrnekIlanKaynagi(),
               haberKaynagi: widget.haberKaynagi ?? const OrnekHaberKaynagi(),
             );

@@ -3,17 +3,22 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/baglanti.dart';
 import '../../core/bilesenler.dart';
+import '../../core/depolama.dart';
 import '../../core/metin.dart';
 import '../../core/tema.dart';
 import '../../core/yukselen.dart';
 import 'ilan_kaynagi.dart';
 import 'ilan_modeli.dart';
+import 'kayitli_ilanlar.dart';
 
 /// Otomatik derlenen kamu ilanları: arama, tür süzgeci, kaydetme ve kaynak bilgisi.
 class IlanlarSayfasi extends StatefulWidget {
-  const IlanlarSayfasi({super.key, this.kaynak = const OrnekIlanKaynagi(), this.bugun, this.kaynagiAc});
+  const IlanlarSayfasi({super.key, this.kaynak = const OrnekIlanKaynagi(), this.bugun, this.kaynagiAc, this.kayitlar});
 
   final IlanKaynagi kaynak;
+
+  /// Kaydedilen ilanlar (cihazda kalıcı). Verilmezse ekran ömrü boyunca bellekte tutulur.
+  final KayitliIlanlar? kayitlar;
 
   /// Testlerde sabit tarih vermek için; boşsa bugün.
   final DateTime? bugun;
@@ -27,6 +32,7 @@ class IlanlarSayfasi extends StatefulWidget {
 
 enum _Suzgec {
   tumu('Tümü'),
+  kayitli('Kaydedilenler'),
   sanaUygun('Sana uygun'),
   memur('KPSS'),
   isci('İşçi alımı'),
@@ -42,6 +48,7 @@ enum _Suzgec {
     _Suzgec.memur => i.tur == IlanTuru.memur,
     _Suzgec.isci => i.tur == IlanTuru.isci,
     _Suzgec.sozlesmeli => i.tur == IlanTuru.sozlesmeli,
+    _Suzgec.kayitli => true,
   };
 }
 
@@ -49,7 +56,17 @@ class _IlanlarSayfasiState extends State<IlanlarSayfasi> {
   late Future<List<KamuIlani>> _ilanlar = widget.kaynak.getir();
   final _ara = TextEditingController();
   _Suzgec _suzgec = _Suzgec.tumu;
-  final Set<String> _kayitli = {};
+  late final KayitliIlanlar _kayitlar = widget.kayitlar ?? KayitliIlanlar(BellekDepolama(), hesapId: 'yerel');
+
+  @override
+  void initState() {
+    super.initState();
+    _kayitlar.addListener(_kayitDegisti);
+  }
+
+  void _kayitDegisti() {
+    if (mounted) setState(() {});
+  }
 
   DateTime get _bugun => widget.bugun ?? DateTime.now();
 
@@ -58,6 +75,7 @@ class _IlanlarSayfasiState extends State<IlanlarSayfasi> {
 
   @override
   void dispose() {
+    _kayitlar.removeListener(_kayitDegisti);
     _ara.dispose();
     super.dispose();
   }
@@ -76,10 +94,13 @@ class _IlanlarSayfasiState extends State<IlanlarSayfasi> {
     } catch (_) {}
   }
 
+  bool get _kayitliSuzgeci => _suzgec == _Suzgec.kayitli;
+
   List<KamuIlani> _liste(List<KamuIlani> hepsi) {
     final q = normalize(_ara.text);
     return hepsi.where((i) {
-      if (!i.acikMi(_bugun) || !_suzgec.uyar(i)) return false;
+      // Kaydedilenler süresi dolmuş olsa da görünür (kullanıcı kendisi kaydetmiştir).
+      if (!_kayitliSuzgeci && (!i.acikMi(_bugun) || !_suzgec.uyar(i))) return false;
       if (q.isEmpty) return true;
       return normalize('${i.baslik} ${i.kurum} ${i.konum}').contains(q);
     }).toList();
@@ -95,9 +116,13 @@ class _IlanlarSayfasiState extends State<IlanlarSayfasi> {
     child: FutureBuilder<List<KamuIlani>>(
       future: _ilanlar,
       builder: (context, snap) {
-        final yukleniyor = snap.connectionState != ConnectionState.done;
-        final hata = snap.hasError;
-        final liste = snap.hasData ? _liste(snap.data!) : const <KamuIlani>[];
+        final yukleniyor = !_kayitliSuzgeci && snap.connectionState != ConnectionState.done;
+        final hata = !_kayitliSuzgeci && snap.hasError;
+        final liste = _kayitliSuzgeci
+            ? _liste(_kayitlar.liste)
+            : snap.hasData
+            ? _liste(snap.data!)
+            : const <KamuIlani>[];
         // "Sana uygun" süzgeci yalnızca kaynak uyum puanı veriyorsa anlamlıdır (örnek veride var, gerçek akışta yok).
         final suzgecler = [
           for (final s in _Suzgec.values)
@@ -120,7 +145,11 @@ class _IlanlarSayfasiState extends State<IlanlarSayfasi> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            snap.hasData ? '${liste.length} açık ilan' : 'İlanlar yükleniyor',
+                            _kayitliSuzgeci
+                                ? '${liste.length} kayıtlı ilan'
+                                : snap.hasData
+                                ? '${liste.length} açık ilan'
+                                : 'İlanlar yükleniyor',
                             style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w700),
                           ),
                           Text('İlanlar', style: PusulaYazi.baslik(28, aralik: -1.2)),
@@ -217,10 +246,12 @@ class _IlanlarSayfasiState extends State<IlanlarSayfasi> {
                   onDugme: _yenile,
                 )
               else if (liste.isEmpty)
-                const _Mesaj(
-                  ikon: LucideIcons.search,
-                  baslik: 'Uygun ilan bulunamadı',
-                  alt: 'Aramayı veya süzgeci değiştirmeyi dene.',
+                _Mesaj(
+                  ikon: _kayitliSuzgeci ? LucideIcons.bookmark : LucideIcons.search,
+                  baslik: _kayitliSuzgeci && _ara.text.trim().isEmpty ? 'Kayıtlı ilanın yok' : 'Uygun ilan bulunamadı',
+                  alt: _kayitliSuzgeci && _ara.text.trim().isEmpty
+                      ? 'Bir ilanın yanındaki işarete dokunarak kaydedebilirsin.'
+                      : 'Aramayı veya süzgeci değiştirmeyi dene.',
                 )
               else
                 for (var k = 0; k < liste.length; k++) ...[
@@ -229,10 +260,8 @@ class _IlanlarSayfasiState extends State<IlanlarSayfasi> {
                     child: _IlanKarti(
                       ilan: liste[k],
                       bugun: _bugun,
-                      kayitli: _kayitli.contains(liste[k].id),
-                      onKaydet: () => setState(() {
-                        if (!_kayitli.remove(liste[k].id)) _kayitli.add(liste[k].id);
-                      }),
+                      kayitli: _kayitlar.icerir(liste[k].id),
+                      onKaydet: () => _kayitlar.degistir(liste[k]),
                       onAc: () => _ayrinti(liste[k]),
                     ),
                   ),

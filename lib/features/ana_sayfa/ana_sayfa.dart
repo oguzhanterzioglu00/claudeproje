@@ -23,8 +23,9 @@ class AnaSayfa extends StatelessWidget {
     this.maasaGit,
     this.bildirimAc,
     this.profilAc,
-    this.gundem,
+        this.gundem,
     this.araclar,
+    this.ilanlar,
     this.avatarFoto,
     this.avatarAd = '',
   });
@@ -43,7 +44,10 @@ class AnaSayfa extends StatelessWidget {
   final Widget? gundem;
 
   /// Kısayolların altında gösterilen araçlar bölümü (isteğe bağlı).
-  final Widget? araclar;
+    final Widget? araclar;
+
+  /// "Yeni ilanlar" bölümü (gerçek ilan akışı varsa).
+  final Widget? ilanlar;
 
   /// Profil düğmesinde gösterilen fotoğraf ve ad (baş harfler için).
   final Uint8List? avatarFoto;
@@ -135,7 +139,8 @@ class AnaSayfa extends StatelessWidget {
                 ],
               ),
             ),
-            if (araclar != null) araclar!,
+                        if (araclar != null) araclar!,
+            if (ilanlar != null) ilanlar!,
             if (gundem != null) gundem!,
           ],
         ),
