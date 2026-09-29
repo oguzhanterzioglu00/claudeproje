@@ -11,22 +11,31 @@ import '../../../core/yukselen.dart';
 /// Kurulum bittikten sonra kısa, animasyonlu "hazırlanıyor" akışı: pusula ibresi
 /// yerine oturur, adımlar sırayla işaretlenir; sonra [onBitti] çağrılır.
 class HazirlaniyorSayfasi extends StatefulWidget {
-  const HazirlaniyorSayfasi({super.key, required this.onBitti, this.ad = ''});
+  const HazirlaniyorSayfasi({super.key, required this.onBitti, this.ad = '', this.memur = false});
 
   final VoidCallback onBitti;
   final String ad;
+
+  /// 657 memuru ise maaş ve becayiş adımları gösterilir; değilse yalnızca geçerli olanlar.
+  final bool memur;
 
   @override
   State<HazirlaniyorSayfasi> createState() => _HazirlaniyorSayfasiState();
 }
 
 class _HazirlaniyorSayfasiState extends State<HazirlaniyorSayfasi> {
-  static const _adimlar = [
-    (LucideIcons.userRoundCheck, 'Profilin kaydedildi'),
-    (LucideIcons.calculator, 'Maaş hesabın hazır'),
-    (LucideIcons.arrowRightLeft, 'Becayiş ve ilanlar ayarlandı'),
-    (LucideIcons.newspaper, 'Gündem yükleniyor'),
-  ];
+  List<(IconData, String)> get _adimlar => [
+        (LucideIcons.userRoundCheck, 'Profilin kaydedildi'),
+        if (widget.memur)
+          (LucideIcons.calculator, 'Maaş hesabın hazır')
+        else
+          (LucideIcons.sparkles, 'Hakkım ne? asistanı hazır'),
+        if (widget.memur)
+          (LucideIcons.arrowRightLeft, 'Becayiş ve ilanlar ayarlandı')
+        else
+          (LucideIcons.briefcase, 'İlanlar ayarlandı'),
+        (LucideIcons.newspaper, 'Gündem yükleniyor'),
+      ];
 
   Timer? _sayac;
   bool _basladi = false;
@@ -49,6 +58,7 @@ class _HazirlaniyorSayfasiState extends State<HazirlaniyorSayfasi> {
   @override
   Widget build(BuildContext context) {
     final ad = widget.ad.trim().split(RegExp(r'\s+')).first;
+    final adimlar = _adimlar;
     return Scaffold(
       backgroundColor: PusulaRenk.lacivert,
       body: Stack(
@@ -75,12 +85,12 @@ class _HazirlaniyorSayfasiState extends State<HazirlaniyorSayfasi> {
                     ),
                   ),
                   const SizedBox(height: 28),
-                  for (var i = 0; i < _adimlar.length; i++) ...[
+                  for (var i = 0; i < adimlar.length; i++) ...[
                     Yukselen(
                       gecikme: Duration(milliseconds: 500 + i * 550),
-                      child: _AdimSatiri(ikon: _adimlar[i].$1, metin: _adimlar[i].$2),
+                      child: _AdimSatiri(ikon: adimlar[i].$1, metin: adimlar[i].$2),
                     ),
-                    if (i < _adimlar.length - 1) const SizedBox(height: 14),
+                    if (i < adimlar.length - 1) const SizedBox(height: 14),
                   ],
                 ],
               ),

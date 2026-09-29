@@ -9,6 +9,7 @@ import '../hesap/presentation/giris_sayfasi.dart';
 import '../profil/data/fotograf_deposu.dart';
 import '../profil/data/profil_deposu.dart';
 import '../profil/data/profil_kaydi.dart';
+import '../profil/domain/profil.dart';
 import '../profil/presentation/hazirlaniyor_sayfasi.dart';
 import '../profil/presentation/ilk_kurulum_sayfasi.dart';
 import '../profil/presentation/karsilama_sayfasi.dart';
@@ -150,6 +151,7 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
           if (_kurulumGoruldu && !_hazirlandi) {
             return HazirlaniyorSayfasi(
               ad: veri.profil.profil!.ad,
+              memur: veri.profil.profil!.statu == Statu.memur657,
               onBitti: () {
                 if (mounted) setState(() => _hazirlandi = true);
               },
