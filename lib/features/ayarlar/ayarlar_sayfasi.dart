@@ -311,6 +311,42 @@ class _YeniIlanBildirimi extends StatelessWidget {
     );
   }
 
+  void _mesaj(BuildContext context, String metin) => ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        content: Text(
+          metin,
+          style: PusulaYazi.metin(14, renk: PusulaRenk.beyaz, agirlik: FontWeight.w600),
+        ),
+        backgroundColor: PusulaRenk.lacivert,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+
+  Future<void> _testEt(BuildContext context) async {
+    final gonderildi = await takip.testBildirimiGonder();
+    if (!context.mounted) return;
+    _mesaj(
+      context,
+      gonderildi
+          ? 'Test bildirimi gönderildi. Görmediysen bildirim panelini ve telefonun bildirim ayarlarını kontrol et.'
+          : 'Bildirimler telefon ayarlarında kapalı. Ayarlar → Uygulamalar → Kamu Pusulası → Bildirimler bölümünden aç.',
+    );
+  }
+
+  Future<void> _simdiKontrolEt(BuildContext context) async {
+    final s = await takip.kontrolSonucu();
+    if (!context.mounted) return;
+    _mesaj(context, switch (s.durum) {
+      KontrolDurumu.kapali => 'Yeni ilan bildirimi kapalı.',
+      KontrolDurumu.mesgul => 'Kontrol zaten sürüyor, birazdan tekrar dene.',
+      KontrolDurumu.alinamadi => 'İlan akışı alınamadı. İnternet bağlantını kontrol et.',
+      KontrolDurumu.yeniYok => 'Akışta ${s.bakilan} ilan var; seçtiğin türlerde yeni ilan yok.',
+      KontrolDurumu.bildirildi => '${s.bildirim} bildirim gönderildi.',
+    });
+  }
+
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: takip,
@@ -368,6 +404,27 @@ class _YeniIlanBildirimi extends StatelessWidget {
                     backgroundColor: PusulaRenk.beyaz,
                     side: const BorderSide(color: PusulaRenk.lacivert, width: 1.5),
                   ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _testEt(context),
+                    icon: const Icon(LucideIcons.bell, size: 16),
+                    label: const Text('Test bildirimi'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _simdiKontrolEt(context),
+                    icon: const Icon(LucideIcons.refreshCw, size: 16),
+                    label: const Text('Şimdi kontrol et'),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 8),

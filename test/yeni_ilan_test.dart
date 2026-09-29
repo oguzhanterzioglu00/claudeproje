@@ -181,6 +181,81 @@ void main() {
     });
   });
 
+  group('Tanı: test bildirimi ve şimdi kontrol et', () {
+    test('test bildirimi gösterilir; telefon ayarlarında kapalıysa gösterilmez ve false döner', () async {
+      final k = kur();
+      await k.takip.yukle();
+      expect(await k.takip.testBildirimiGonder(), isTrue);
+      expect(k.servis.gosterilenler.single.baslik, contains('test bildirimi'));
+      k.servis.bildirimlerAcik = false;
+      expect(await k.takip.testBildirimiGonder(), isFalse);
+      expect(k.servis.gosterilenler, hasLength(1));
+    });
+
+    test('kontrolSonucu: kapalı, akış alınamadı, yeni yok, bildirildi durumlarını ayırır', () async {
+      final k = kur();
+      await k.takip.yukle();
+      expect((await k.takip.kontrolSonucu()).durum, KontrolDurumu.kapali);
+      await k.takip.ayarla(true, statu: Statu.memur657);
+      k.kaynak.hata = true;
+      expect((await k.takip.kontrolSonucu()).durum, KontrolDurumu.alinamadi);
+      k.kaynak.hata = false;
+      final yokSonucu = await k.takip.kontrolSonucu();
+      expect(yokSonucu.durum, KontrolDurumu.yeniYok);
+      expect(yokSonucu.bakilan, 2);
+      k.kaynak.liste = [..._sirasiz(k), _ilan('yeni')];
+      final s = await k.takip.kontrolSonucu();
+      expect((s.durum, s.bildirim), (KontrolDurumu.bildirildi, 1));
+    });
+
+    testWidgets('Ayarlar: düğmeler test bildirimi gönderir ve kontrol sonucunu söyler', (tester) async {
+      tester.view.physicalSize = const Size(390, 1600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final kaynak = _Kaynak()..liste = [_ilan('a')];
+      final servis = SahteHatirlaticiServisi();
+      final takip = YeniIlanTakibi(
+        kaynak: kaynak,
+        servis: servis,
+        depolama: BellekDepolama(),
+        hesapId: 'h1',
+        simdi: () => simdi,
+      );
+      await takip.yukle();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: pusulaTema(),
+          home: AyarlarSayfasi(
+            profil: const Profil(ad: 'A', statu: Statu.memur657),
+            ilanTakibi: takip,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Test bildirimi'), findsNothing, reason: 'bildirim kapalıyken düğmeler yok');
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Test bildirimi'));
+      await tester.pumpAndSettle();
+      expect(servis.gosterilenler, hasLength(1));
+      expect(find.textContaining('Test bildirimi gönderildi'), findsOneWidget);
+
+      servis.bildirimlerAcik = false;
+      await tester.tap(find.text('Test bildirimi'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Bildirimler telefon ayarlarında kapalı'), findsOneWidget);
+
+      await tester.tap(find.text('Şimdi kontrol et'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Akışta 1 ilan var; seçtiğin türlerde yeni ilan yok'), findsOneWidget);
+      kaynak.hata = true;
+      await tester.tap(find.text('Şimdi kontrol et'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('İlan akışı alınamadı'), findsOneWidget);
+    });
+  });
+
   group('Arka plan', () {
     YeniIlanTakibi takipKur(
       BellekDepolama depo,

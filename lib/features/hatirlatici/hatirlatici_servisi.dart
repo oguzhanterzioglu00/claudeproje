@@ -8,6 +8,9 @@ abstract interface class HatirlaticiServisi {
   /// Bu platformda zamanlanmış bildirim desteklenir mi (web'de desteklenmez).
   bool get destekleniyor;
 
+  /// Bildirimler şu an telefon ayarlarında açık mı (izin sorulmayan eski Android sürümlerinde de doğru sonuç verir).
+  Future<bool> bildirimlerAcikMi();
+
   /// Bildirim iznini ister; verildiyse true.
   Future<bool> izinIste();
 
@@ -64,6 +67,19 @@ class YerelHatirlaticiServisi implements HatirlaticiServisi {
       return yedek;
     }
   }
+
+  @override
+  Future<bool> bildirimlerAcikMi() => _guvenli(() async {
+    if (!destekleniyor) return false;
+    await _hazirla();
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return await _eklenti
+              .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+              ?.areNotificationsEnabled() ??
+          false;
+    }
+    return true;
+  }, false);
 
   @override
   Future<bool> izinIste() => _guvenli(() async {
@@ -127,8 +143,12 @@ class SahteHatirlaticiServisi implements HatirlaticiServisi {
   @override
   final bool destekleniyor;
   int izinIstegi = 0;
+  bool bildirimlerAcik = true;
   final Map<int, ({String baslik, String govde, DateTime zaman})> planlananlar = {};
   final List<({int id, String baslik, String govde})> gosterilenler = [];
+
+  @override
+  Future<bool> bildirimlerAcikMi() async => bildirimlerAcik;
 
   @override
   Future<bool> izinIste() async {

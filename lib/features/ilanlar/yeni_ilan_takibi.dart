@@ -9,6 +9,9 @@ import 'arka_plan.dart';
 import 'ilan_kaynagi.dart';
 import 'ilan_modeli.dart';
 
+/// [YeniIlanTakibi.kontrolSonucu] durumu.
+enum KontrolDurumu { kapali, mesgul, alinamadi, yeniYok, bildirildi }
+
 /// Yeni ilan bildirimi tercihi: açık/kapalı ve hangi ilan türleri için.
 class IlanBildirimTercihi {
   const IlanBildirimTercihi({this.acik = false, this.turler = const {}});
@@ -201,15 +204,19 @@ class YeniIlanTakibi extends ChangeNotifier {
   }
 
   /// Akışa bakar; yeni ve seçili türdeki ilanlar için bildirim gösterir. Gösterilen bildirim sayısını döner.
-  Future<int> kontrolEt() async {
-    if (!_tercih.acik || _kontrolde) return 0;
+  Future<int> kontrolEt() async => (await kontrolSonucu()).bildirim;
+
+  /// [kontrolEt] ile aynı işi yapar ve ne olduğunu da bildirir (ayarlardaki "Şimdi kontrol et" için).
+  Future<({KontrolDurumu durum, int bildirim, int bakilan})> kontrolSonucu() async {
+    if (!_tercih.acik) return (durum: KontrolDurumu.kapali, bildirim: 0, bakilan: 0);
+    if (_kontrolde) return (durum: KontrolDurumu.mesgul, bildirim: 0, bakilan: 0);
     _kontrolde = true;
     try {
       final List<KamuIlani> ilanlar;
       try {
         ilanlar = await _kaynak.getir();
       } catch (_) {
-        return 0;
+        return (durum: KontrolDurumu.alinamadi, bildirim: 0, bakilan: 0);
       }
       final gorulen = await _gorulenler();
       final bugun = _simdi();
@@ -218,7 +225,7 @@ class YeniIlanTakibi extends ChangeNotifier {
           if (!gorulen.contains(i.id) && _tercih.turler.contains(i.tur) && i.acikMi(bugun)) i,
       ];
       await _gorulenleriYaz({...gorulen, for (final i in ilanlar) i.id});
-      if (yeniler.isEmpty) return 0;
+      if (yeniler.isEmpty) return (durum: KontrolDurumu.yeniYok, bildirim: 0, bakilan: ilanlar.length);
       if (yeniler.length <= enFazlaBireysel) {
         var sira = 0;
         for (final i in yeniler) {
@@ -228,17 +235,29 @@ class YeniIlanTakibi extends ChangeNotifier {
             govde: i.baslik,
           );
         }
-        return yeniler.length;
+        return (durum: KontrolDurumu.bildirildi, bildirim: yeniler.length, bakilan: ilanlar.length);
       }
       await _servis.hemenGoster(
         id: bildirimKimligi,
         baslik: '${yeniler.length} yeni kamu ilanı',
         govde: '${[for (final i in yeniler.take(2)) i.kurum.isEmpty ? i.baslik : i.kurum].join(', ')} ve diğerleri',
       );
-      return 1;
+      return (durum: KontrolDurumu.bildirildi, bildirim: 1, bakilan: ilanlar.length);
     } finally {
       _kontrolde = false;
     }
+  }
+
+  /// Bildirimin çalıştığını denemek için hemen bir test bildirimi gösterir. Bildirimler telefon
+  /// ayarlarında kapalıysa false döner (bildirim gösterilmez).
+  Future<bool> testBildirimiGonder() async {
+    if (!await _servis.bildirimlerAcikMi()) return false;
+    await _servis.hemenGoster(
+      id: bildirimKimligi + 9,
+      baslik: 'Kamu Pusulası test bildirimi',
+      govde: 'Bildirimler çalışıyor. Yeni ilan çıktığında böyle haber vereceğim.',
+    );
+    return true;
   }
 
   /// Hesap silinirken tercih ve görülen ilan kayıtları da silinir.
