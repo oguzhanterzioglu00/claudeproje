@@ -1,14 +1,14 @@
-# Kadro · Becayiş modülü: ürün ve arka uç şartnamesi
+# Pusula · Becayiş modülü: ürün ve arka uç şartnamesi
 
-Bu belge, "Memur Uygulaması İlk Tasarım" tasarımındaki Becayiş ekranlarının (Tayin sekmesi, İlanlar, İlan ver, Eşleşme, Dilekçe) Flutter uygulamasına ve arka uca nasıl çevrileceğini tanımlar. Modül Kadro'nun kendi özelliğidir; harici bir siteye veya servise bağlı çalışmaz.
+Bu belge, "Memur Uygulaması İlk Tasarım" tasarımındaki Becayiş ekranlarının (Tayin sekmesi, İlanlar, İlan ver, Eşleşme, Dilekçe) Flutter uygulamasına ve arka uca nasıl çevrileceğini tanımlar. Modül Pusula'nın kendi özelliğidir; harici bir siteye veya servise bağlı çalışmaz.
 
 ## 1. Ürün mantığı
 
-Becayiş, 657 sayılı Kanun'un 73. maddesi kapsamında iki (veya üç) memurun görev yerlerini karşılıklı değiştirmesidir. Kadro yalnızca doğru kişileri buluşturur ve dilekçeyi hazırlar; yer değişikliği kurumun onayına bağlıdır. Uygulama içinde bu açıkça belirtilir.
+Becayiş, 657 sayılı Kanun'un 73. maddesi kapsamında iki (veya üç) memurun görev yerlerini karşılıklı değiştirmesidir. Pusula yalnızca doğru kişileri buluşturur ve dilekçeyi hazırlar; yer değişikliği kurumun onayına bağlıdır. Uygulama içinde bu açıkça belirtilir.
 
 Kullanıcı akışı:
 
-1. **İlan ver:** Kurum, hizmet sınıfı, unvan ve mevcut il Kadro profilinden gelir. Kullanıcı hedef illeri seçer ve 3'lü zincir tercihini belirler. İlan ücretsizdir.
+1. **İlan ver:** Kurum, hizmet sınıfı, unvan ve mevcut il Pusula profilinden gelir. Kullanıcı hedef illeri seçer ve 3'lü zincir tercihini belirler. İlan ücretsizdir.
 2. **Mavi tik (isteğe bağlı):** Kurumsal e-postaya 6 haneli kod gider. Doğrulanan ilan öne çıkar.
 3. **Eşleşme:** Sistem ikili ve 3'lü zincir eşleşmeleri arar, bulunca bildirim gönderir.
 4. **İlgileniyorum:** Taraflar sırayla onay verir. Ödeme yalnızca **tüm taraflar onayladıktan sonra** istenir.
@@ -98,7 +98,7 @@ Kişi iletişimini açmak dijital bir hizmettir. iOS ve Android mağaza politika
 | `GET /eslesmeler/{id}/dilekce.pdf` | Taraf bilgileriyle doldurulmuş dilekçe |
 | `POST /dogrulama/eposta`, `POST /dogrulama/kod` | Mavi tik akışı |
 
-Kimlik doğrulama Kadro hesabı ile yapılır. Tüm uçlar oturum ister; iletişim ve dilekçe uçları ayrıca yetki kontrolü yapar.
+Kimlik doğrulama Pusula hesabı ile yapılır. Tüm uçlar oturum ister; iletişim ve dilekçe uçları ayrıca yetki kontrolü yapar.
 
 ## 7. Bildirim, gizlilik, kalite
 
@@ -113,7 +113,7 @@ Kimlik doğrulama Kadro hesabı ile yapılır. Tüm uçlar oturum ister; iletiş
 1. Mevzuat teyidi: md. 73 metni mevzuat.gov.tr'den, aday memur ve sözleşmeli durumu ile kurum ek şartları bir idare hukuku uzmanından (bkz. §1.1).
 2. Fiyat ve mağaza fiyat basamağı.
 3. Aynı ilana ikinci eşleşme geldiğinde ek ödeme istenmeyeceği (bu şartnamede: istenmez) ürün olarak onaylanacak.
-4. Bildirimler için Kadro'nun mevcut push altyapısı mı, ayrı servis mi.
+4. Bildirimler için Pusula'nın mevcut push altyapısı mı, ayrı servis mi.
 5. Eşleşme sıralama ağırlıklarının gerçek veriyle ayarlanması.
 
 ## 9. Flutter iskeleti (öneri)

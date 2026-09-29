@@ -47,8 +47,8 @@ class BecayisPanelSayfasi extends StatelessWidget {
               children: [
                 Expanded(
                   child: _Sayi(
-                    renk: KadroRenk.mor,
-                    on: KadroRenk.beyaz,
+                    renk: PusulaRenk.mor,
+                    on: PusulaRenk.beyaz,
                     ikon: LucideIcons.users,
                     sayi: ikili.length,
                     etiket: 'Eşleşme',
@@ -57,8 +57,8 @@ class BecayisPanelSayfasi extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: _Sayi(
-                    renk: KadroRenk.turkuaz,
-                    on: KadroRenk.lacivert,
+                    renk: PusulaRenk.turkuaz,
+                    on: PusulaRenk.lacivert,
                     ikon: LucideIcons.arrowRightLeft,
                     sayi: zincir,
                     etiket: "3'lü zincir",
@@ -67,8 +67,8 @@ class BecayisPanelSayfasi extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: _Sayi(
-                    renk: KadroRenk.amber,
-                    on: KadroRenk.lacivert,
+                    renk: PusulaRenk.amber,
+                    on: PusulaRenk.lacivert,
                     ikon: LucideIcons.mapPin,
                     sayi: benim.hedefIller.length,
                     etiket: 'Hedef il',
@@ -84,14 +84,14 @@ class BecayisPanelSayfasi extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Yeni eşleşme', style: KadroYazi.baslik(18, agirlik: FontWeight.w700, aralik: -0.4)),
+                  Text('Yeni eşleşme', style: PusulaYazi.baslik(18, agirlik: FontWeight.w700, aralik: -0.4)),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: KadroRenk.kirmizi,
+                      color: PusulaRenk.kirmizi,
                       borderRadius: BorderRadius.circular(999),
                     ),
-                    child: Text('Az önce', style: KadroYazi.metin(12, renk: KadroRenk.beyaz, agirlik: FontWeight.w700)),
+                    child: Text('Az önce', style: PusulaYazi.metin(12, renk: PusulaRenk.beyaz, agirlik: FontWeight.w700)),
                   ),
                 ],
               ),
@@ -113,8 +113,8 @@ class BecayisPanelSayfasi extends StatelessWidget {
               children: [
                 Expanded(
                   child: _EylemKarti(
-                    renk: KadroRenk.mavi,
-                    on: KadroRenk.beyaz,
+                    renk: PusulaRenk.mavi,
+                    on: PusulaRenk.beyaz,
                     ikon: LucideIcons.search,
                     baslik: 'İlanları gör',
                     alt: 'Tüm illerden ilanlar',
@@ -124,8 +124,8 @@ class BecayisPanelSayfasi extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _EylemKarti(
-                    renk: KadroRenk.amber,
-                    on: KadroRenk.lacivert,
+                    renk: PusulaRenk.amber,
+                    on: PusulaRenk.lacivert,
                     ikon: LucideIcons.pencil,
                     baslik: 'İlanı düzenle',
                     alt: 'Hedef illeri değiştir',
@@ -152,17 +152,17 @@ class _Baslik extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Karşılıklı yer değiştirme', style: KadroYazi.metin(12, renk: KadroRenk.soluk, agirlik: FontWeight.w700)),
-              Text('Becayiş', style: KadroYazi.baslik(26, aralik: -1.2)),
+              Text('Karşılıklı yer değiştirme', style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w700)),
+              Text('Becayiş', style: PusulaYazi.baslik(26, aralik: -1.2)),
             ],
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: KadroRenk.lacivert,
+              color: PusulaRenk.lacivert,
               borderRadius: BorderRadius.circular(999),
             ),
-            child: Text('ÖRNEK', style: KadroYazi.metin(11, renk: KadroRenk.amber, agirlik: FontWeight.w700)),
+            child: Text('ÖRNEK', style: PusulaYazi.metin(11, renk: PusulaRenk.amber, agirlik: FontWeight.w700)),
           ),
         ],
       );
@@ -177,7 +177,7 @@ class _IlanKarti extends StatelessWidget {
   Widget build(BuildContext context) => ClipRRect(
         borderRadius: BorderRadius.circular(30),
         child: Container(
-          color: KadroRenk.lacivert,
+          color: PusulaRenk.lacivert,
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
           child: Stack(
             children: [
@@ -186,7 +186,7 @@ class _IlanKarti extends StatelessWidget {
                 top: -90,
                 child: Opacity(
                   opacity: 0.45,
-                  child: KadroUcgenler(boyut: 210, orta: KadroRenk.mavi),
+                  child: PusulaUcgenler(boyut: 210, orta: PusulaRenk.mavi),
                 ),
               ),
               Column(
@@ -195,11 +195,11 @@ class _IlanKarti extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('İLANIM', style: KadroYazi.metin(12, renk: const Color(0xFFC9D0E0), agirlik: FontWeight.w700)),
+                      Text('İLANIM', style: PusulaYazi.metin(12, renk: const Color(0xFFC9D0E0), agirlik: FontWeight.w700)),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
                         decoration: BoxDecoration(
-                          color: KadroRenk.beyaz.withValues(alpha: 0.12),
+                          color: PusulaRenk.beyaz.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Row(
@@ -211,24 +211,24 @@ class _IlanKarti extends StatelessWidget {
                               decoration: const BoxDecoration(color: Color(0xFFB7E88A), shape: BoxShape.circle),
                             ),
                             const SizedBox(width: 8),
-                            Text('Yayında', style: KadroYazi.metin(12, renk: KadroRenk.beyaz, agirlik: FontWeight.w700)),
+                            Text('Yayında', style: PusulaYazi.metin(12, renk: PusulaRenk.beyaz, agirlik: FontWeight.w700)),
                           ],
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Text(ilan.unvan, style: KadroYazi.baslik(32, renk: KadroRenk.beyaz, aralik: -1.4)),
+                  Text(ilan.unvan, style: PusulaYazi.baslik(32, renk: PusulaRenk.beyaz, aralik: -1.4)),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       const Icon(LucideIcons.mapPin, size: 15, color: Color(0xFFC9D0E0)),
                       const SizedBox(width: 6),
-                      Text('${ilan.kurumAdi} · ${ilan.mevcutIl}', style: KadroYazi.metin(14, renk: const Color(0xFFC9D0E0))),
+                      Text('${ilan.kurumAdi} · ${ilan.mevcutIl}', style: PusulaYazi.metin(14, renk: const Color(0xFFC9D0E0))),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Text('Gitmek istediğin iller', style: KadroYazi.metin(12, renk: const Color(0xFFC9D0E0))),
+                  Text('Gitmek istediğin iller', style: PusulaYazi.metin(12, renk: const Color(0xFFC9D0E0))),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -238,10 +238,10 @@ class _IlanKarti extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
                           decoration: BoxDecoration(
-                            color: KadroRenk.beyaz.withValues(alpha: 0.15),
+                            color: PusulaRenk.beyaz.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(999),
                           ),
-                          child: Text(il, style: KadroYazi.metin(12, renk: KadroRenk.beyaz, agirlik: FontWeight.w700)),
+                          child: Text(il, style: PusulaYazi.metin(12, renk: PusulaRenk.beyaz, agirlik: FontWeight.w700)),
                         ),
                     ],
                   ),
@@ -249,10 +249,10 @@ class _IlanKarti extends StatelessWidget {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        const Icon(LucideIcons.badgeCheck, size: 18, color: KadroRenk.amber),
+                        const Icon(LucideIcons.badgeCheck, size: 18, color: PusulaRenk.amber),
                         const SizedBox(width: 8),
                         Text('Mavi tik · kurumsal e-posta doğrulandı',
-                            style: KadroYazi.metin(13, renk: KadroRenk.amber, agirlik: FontWeight.w700)),
+                            style: PusulaYazi.metin(13, renk: PusulaRenk.amber, agirlik: FontWeight.w700)),
                       ],
                     ),
                   ],
@@ -286,8 +286,8 @@ class _Sayi extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: KadroRenk.beyaz,
-            border: Border.all(color: KadroRenk.lacivert, width: 1.5),
+            color: PusulaRenk.beyaz,
+            border: Border.all(color: PusulaRenk.lacivert, width: 1.5),
             borderRadius: BorderRadius.circular(22),
           ),
           child: Column(
@@ -300,8 +300,8 @@ class _Sayi extends StatelessWidget {
                 child: Icon(ikon, size: 18, color: on),
               ),
               const SizedBox(height: 8),
-              Text('$sayi', style: KadroYazi.baslik(24, aralik: -1)),
-              Text(etiket, style: KadroYazi.metin(12, renk: KadroRenk.soluk)),
+              Text('$sayi', style: PusulaYazi.baslik(24, aralik: -1)),
+              Text(etiket, style: PusulaYazi.metin(12, renk: PusulaRenk.soluk)),
             ],
           ),
         ),
@@ -321,10 +321,10 @@ class _EslesmeKarti extends StatelessWidget {
     final uyari = eslesme.uyarilar.isEmpty ? null : eslesme.uyarilar.first;
 
     return Material(
-      color: KadroRenk.beyaz,
+      color: PusulaRenk.beyaz,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(26),
-        side: const BorderSide(color: KadroRenk.lacivert, width: 1.5),
+        side: const BorderSide(color: PusulaRenk.lacivert, width: 1.5),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(26),
@@ -339,21 +339,21 @@ class _EslesmeKarti extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('${diger.gorunenAd} · ${diger.unvan}', style: KadroYazi.metin(15, agirlik: FontWeight.w700)),
+                    Text('${diger.gorunenAd} · ${diger.unvan}', style: PusulaYazi.metin(15, agirlik: FontWeight.w700)),
                     const SizedBox(height: 3),
                     Text('${diger.mevcutIl} → ${benim.mevcutIl} · ${diger.kurumAdi}',
-                        style: KadroYazi.metin(13, renk: KadroRenk.soluk, agirlik: FontWeight.w500)),
+                        style: PusulaYazi.metin(13, renk: PusulaRenk.soluk, agirlik: FontWeight.w500)),
                     const SizedBox(height: 3),
                     Row(
                       children: [
                         Icon(uyari == null ? LucideIcons.check : LucideIcons.info,
-                            size: 14, color: uyari == null ? KadroRenk.yesilYazi : KadroRenk.soluk),
+                            size: 14, color: uyari == null ? PusulaRenk.yesilYazi : PusulaRenk.soluk),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             uyari ?? 'Kurum, sınıf ve unvan eşleşti',
-                            style: KadroYazi.metin(12,
-                                renk: uyari == null ? KadroRenk.yesilYazi : KadroRenk.soluk,
+                            style: PusulaYazi.metin(12,
+                                renk: uyari == null ? PusulaRenk.yesilYazi : PusulaRenk.soluk,
                                 agirlik: FontWeight.w700),
                           ),
                         ),
@@ -366,8 +366,8 @@ class _EslesmeKarti extends StatelessWidget {
               Container(
                 width: 40,
                 height: 40,
-                decoration: BoxDecoration(color: KadroRenk.amber, borderRadius: BorderRadius.circular(14)),
-                child: const Icon(LucideIcons.chevronRight, size: 20, color: KadroRenk.lacivert),
+                decoration: BoxDecoration(color: PusulaRenk.amber, borderRadius: BorderRadius.circular(14)),
+                child: const Icon(LucideIcons.chevronRight, size: 20, color: PusulaRenk.lacivert),
               ),
             ],
           ),
@@ -402,11 +402,11 @@ class _SkorHalkasi extends StatelessWidget {
                   value: v,
                   strokeWidth: 5,
                   strokeCap: StrokeCap.round,
-                  backgroundColor: KadroRenk.cizgi,
-                  color: KadroRenk.amber,
+                  backgroundColor: PusulaRenk.cizgi,
+                  color: PusulaRenk.amber,
                 ),
               ),
-              Text('${(v * 100).round()}', style: KadroYazi.baslik(15, aralik: -0.5)),
+              Text('${(v * 100).round()}', style: PusulaYazi.baslik(15, aralik: -0.5)),
             ],
           ),
         ),
@@ -459,8 +459,8 @@ class _EylemKarti extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(baslik, style: KadroYazi.baslik(16, renk: on, aralik: -0.5)),
-                      Text(alt, style: KadroYazi.metin(12, renk: on)),
+                      Text(baslik, style: PusulaYazi.baslik(16, renk: on, aralik: -0.5)),
+                      Text(alt, style: PusulaYazi.metin(12, renk: on)),
                     ],
                   ),
                 ],

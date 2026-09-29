@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kadro/core/tema.dart';
-import 'package:kadro/features/becayis/data/ornek_veri.dart';
-import 'package:kadro/features/becayis/domain/eslesme.dart';
-import 'package:kadro/features/becayis/presentation/becayis_panel_sayfasi.dart';
+import 'package:pusula/core/tema.dart';
+import 'package:pusula/features/becayis/data/ornek_veri.dart';
+import 'package:pusula/features/becayis/domain/eslesme.dart';
+import 'package:pusula/features/becayis/presentation/becayis_panel_sayfasi.dart';
 
 import 'yardimci/yazilar.dart';
 
 void main() {
-  setUpAll(kadroYazilariniYukle);
+  setUpAll(pusulaYazilariniYukle);
 
   test('örnek veri: farklı kurumdaki ilan eşleşmez, 2 ikili + 1 zincir çıkar', () {
     final e = BecayisOrnekVeri.eslesmeler();
@@ -24,7 +24,7 @@ void main() {
 
     Eslesme? acilan;
     await tester.pumpWidget(MaterialApp(
-      theme: kadroTema(),
+      theme: pusulaTema(),
       home: Scaffold(
         body: BecayisPanelSayfasi(
           benim: BecayisOrnekVeri.benimIlanim,

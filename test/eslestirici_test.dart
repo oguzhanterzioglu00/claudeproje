@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kadro/features/becayis/domain/eslesme.dart';
-import 'package:kadro/features/becayis/domain/eslestirici.dart';
-import 'package:kadro/features/becayis/domain/ilan.dart';
+import 'package:pusula/features/becayis/domain/eslesme.dart';
+import 'package:pusula/features/becayis/domain/eslestirici.dart';
+import 'package:pusula/features/becayis/domain/ilan.dart';
 
 Ilan ilan(
   String id,

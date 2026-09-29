@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Kadro renkleri (Ayas Software logosundan). Tasarımdaki değerlerle aynıdır.
-abstract final class KadroRenk {
+/// Pusula renkleri (Ayas Software logosundan). Tasarımdaki değerlerle aynıdır.
+abstract final class PusulaRenk {
   static const lacivert = Color(0xFF182350);
   static const mavi = Color(0xFF2F63B5);
   static const turkuaz = Color(0xFF12B5D6);
@@ -19,13 +19,13 @@ abstract final class KadroRenk {
 
 /// Sık kullanılan yazı stilleri. Başlıklar Sora, gövde metni Figtree
 /// (ikisi de uygulamaya gömülü; bkz. pubspec.yaml).
-abstract final class KadroYazi {
+abstract final class PusulaYazi {
   static const baslikAilesi = 'Sora';
   static const metinAilesi = 'Figtree';
 
   static TextStyle baslik(
     double boyut, {
-    Color renk = KadroRenk.lacivert,
+    Color renk = PusulaRenk.lacivert,
     double aralik = -0.5,
     FontWeight agirlik = FontWeight.w800,
   }) =>
@@ -40,7 +40,7 @@ abstract final class KadroYazi {
 
   static TextStyle metin(
     double boyut, {
-    Color renk = KadroRenk.lacivert,
+    Color renk = PusulaRenk.lacivert,
     FontWeight agirlik = FontWeight.w600,
   }) =>
       TextStyle(
@@ -51,28 +51,28 @@ abstract final class KadroYazi {
       );
 }
 
-ThemeData kadroTema() {
+ThemeData pusulaTema() {
   final taban = ThemeData(
     useMaterial3: true,
-    scaffoldBackgroundColor: KadroRenk.zemin,
+    scaffoldBackgroundColor: PusulaRenk.zemin,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: KadroRenk.lacivert,
-      primary: KadroRenk.lacivert,
-      secondary: KadroRenk.amber,
-      surface: KadroRenk.beyaz,
+      seedColor: PusulaRenk.lacivert,
+      primary: PusulaRenk.lacivert,
+      secondary: PusulaRenk.amber,
+      surface: PusulaRenk.beyaz,
     ),
   );
 
   final govde = taban.textTheme.apply(
-    fontFamily: KadroYazi.metinAilesi,
-    bodyColor: KadroRenk.lacivert,
-    displayColor: KadroRenk.lacivert,
+    fontFamily: PusulaYazi.metinAilesi,
+    bodyColor: PusulaRenk.lacivert,
+    displayColor: PusulaRenk.lacivert,
   );
 
   return taban.copyWith(
     textTheme: govde.copyWith(
-      headlineSmall: KadroYazi.baslik(24, aralik: -1),
-      titleLarge: KadroYazi.baslik(18, agirlik: FontWeight.w700, aralik: -0.4),
+      headlineSmall: PusulaYazi.baslik(24, aralik: -1),
+      titleLarge: PusulaYazi.baslik(18, agirlik: FontWeight.w700, aralik: -0.4),
     ),
   );
 }

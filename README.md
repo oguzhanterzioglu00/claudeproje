@@ -1,6 +1,8 @@
-# Kadro
+# Pusula
 
-Memurun cebindeki maaş, ilan, becayiş ve haber asistanı. Flutter ile yazılıyor.
+Kamu çalışanının cebindeki maaş, hak, becayiş, ilan ve haber rehberi. Flutter ile yazılıyor.
+
+Uygulama adı çalışma adıdır; mağaza, TÜRKPATENT ve alan adı kontrolü yapılmadan kesinleşmiş sayılmaz. Yedek ad: Basamak. Paket kimliği: `tr.com.ayasyazilim.pusula` (mağazaya ilk yüklemeden önce değiştirilebilir).
 
 Tasarım: "Memur Uygulaması İlk Tasarım" (Claude Artifact). Renkler Ayas Software logosundan, ikonlar Lucide, yazı tipleri Sora ve Figtree.
 
@@ -22,5 +24,5 @@ flutter run
 
 ## Yayın öncesi yapılacaklar
 
-- `com.example` paket adı (`android/app/build.gradle`, iOS bundle id) gerçek kimlikle değiştirilmeli.
+- Paket kimliği (`tr.com.ayasyazilim.pusula`) onaylanmalı; mağazada kalıcıdır.
 - Becayiş mevzuat teyidi ve hukuk/KVKK görüşü: `docs/becayis-spec.md` §1.1 ve §8.

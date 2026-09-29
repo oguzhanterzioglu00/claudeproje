@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kadro/main.dart';
+import 'package:pusula/main.dart';
 
 import 'yardimci/yazilar.dart';
 
 void main() {
-  setUpAll(kadroYazilariniYukle);
+  setUpAll(pusulaYazilariniYukle);
 
   testWidgets('uygulama açılır', (tester) async {
-    await tester.pumpWidget(const KadroUygulamasi());
-    expect(find.text('Kadro'), findsOneWidget);
+    await tester.pumpWidget(const PusulaUygulamasi());
+    expect(find.text('Pusula'), findsOneWidget);
   });
 }

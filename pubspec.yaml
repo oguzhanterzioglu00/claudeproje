@@ -1,5 +1,5 @@
-name: kadro
-description: Kadro - memurun cebindeki maaş, ilan, becayiş ve haber asistanı.
+name: pusula
+description: Pusula - kamu çalışanının cebindeki maaş, hak, becayiş, ilan ve haber rehberi.
 publish_to: 'none'
 version: 0.1.0+1
 

@@ -4,8 +4,8 @@ import 'tema.dart';
 
 /// Ayas Software logosundaki beş üçgen (100x100 birimlik alanda).
 /// [orta] logonun ortadaki (mavi) üçgeninin rengi; koyu zeminde lacivert verilir.
-class KadroUcgenler extends StatelessWidget {
-  const KadroUcgenler({super.key, required this.boyut, this.orta = KadroRenk.mavi});
+class PusulaUcgenler extends StatelessWidget {
+  const PusulaUcgenler({super.key, required this.boyut, this.orta = PusulaRenk.mavi});
 
   final double boyut;
   final Color orta;
@@ -33,11 +33,11 @@ class _UcgenRessami extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final renkler = [
-      KadroRenk.turkuaz,
-      KadroRenk.amber,
+      PusulaRenk.turkuaz,
+      PusulaRenk.amber,
       orta,
-      KadroRenk.eflatun,
-      KadroRenk.mor,
+      PusulaRenk.eflatun,
+      PusulaRenk.mor,
     ];
     final olcek = size.width / 100;
     for (var i = 0; i < _sekiller.length; i++) {

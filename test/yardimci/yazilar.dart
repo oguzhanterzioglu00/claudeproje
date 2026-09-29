@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 /// Testlerde gerçek Sora ve Figtree ölçüleriyle çizim yapmak için gömülü
 /// yazı tiplerini yükler. Yüklenmezse test varsayılan "Ahem" yazısını kullanır
 /// (her harf kare) ve yerleşim hataları gerçek dışı çıkar.
-Future<void> kadroYazilariniYukle() async {
+Future<void> pusulaYazilariniYukle() async {
   Future<void> yukle(String aile, List<String> dosyalar) async {
     final yukleyici = FontLoader(aile);
     for (final d in dosyalar) {
