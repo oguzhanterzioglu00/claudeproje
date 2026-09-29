@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pusula/core/depolama.dart';
 import 'package:pusula/core/tema.dart';
 import 'package:pusula/features/hesap/data/oturum_deposu.dart';
@@ -176,5 +177,20 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.scrollUntilVisible(find.text('Google ile devam et'), 200, scrollable: find.byType(Scrollable).first);
     expect(find.text('Apple ile devam et'), findsOneWidget);
+  });
+
+  testWidgets('Kullanım Koşulları ve Aydınlatma Metni bağlantıları taslak metni açar', (tester) async {
+    await ac(tester);
+    await tester.scrollUntilVisible(find.text('Kullanım Koşulları'), 200, scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('Kullanım Koşulları'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('TASLAK'), findsOneWidget);
+    expect(find.textContaining('1. Hizmetin tanımı'), findsOneWidget);
+    await tester.tap(find.byIcon(LucideIcons.arrowLeft));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Aydınlatma Metni'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('1. Veri sorumlusu'), findsOneWidget);
   });
 }

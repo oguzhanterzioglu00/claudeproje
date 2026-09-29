@@ -5,6 +5,7 @@ import '../../../core/avatar.dart';
 import '../../../core/bilesenler.dart';
 import '../../../core/tema.dart';
 import '../../../core/yukselen.dart';
+import '../../ayarlar/ayarlar_sayfasi.dart';
 import '../../hesap/data/oturum_deposu.dart';
 import '../../hesap/presentation/hesap_bolumu.dart';
 import '../data/fotograf_deposu.dart';
@@ -287,6 +288,18 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                         hata: _epostaGecerli ? null : 'Geçerli bir e-posta adresi gir',
                       ),
                     ],
+                    const SizedBox(height: 26),
+                    _AyarlarSatiri(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => AyarlarSayfasi(
+                            hesap: widget.oturum?.hesap,
+                            profil: widget.depo.profil,
+                            fotografVar: widget.fotograf?.foto != null,
+                          ),
+                        ),
+                      ),
+                    ),
                     if (widget.oturum != null) ...[
                       const SizedBox(height: 26),
                       HesapBolumu(
@@ -366,6 +379,50 @@ class _FotografSatiri extends StatelessWidget {
                   ),
                   const Icon(LucideIcons.chevronRight, size: 20, color: PusulaRenk.soluk),
                 ],
+              ),
+            ),
+          ),
+        ),
+      );
+}
+
+/// Profil sayfasında "Ayarlar ve yasal" satırı.
+class _AyarlarSatiri extends StatelessWidget {
+  const _AyarlarSatiri({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+        container: true,
+        button: true,
+        label: 'Ayarlar ve yasal',
+        excludeSemantics: true,
+        onTap: onTap,
+        child: Material(
+          color: PusulaRenk.beyaz,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: const BorderSide(color: PusulaRenk.lacivert, width: 1.5),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(18),
+            onTap: onTap,
+            child: SizedBox(
+              height: 52,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    const Icon(LucideIcons.settings, size: 20, color: PusulaRenk.lacivert),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text('Ayarlar ve yasal',
+                          style: PusulaYazi.metin(15, agirlik: FontWeight.w700)),
+                    ),
+                    const Icon(LucideIcons.chevronRight, size: 18, color: PusulaRenk.soluk),
+                  ],
+                ),
               ),
             ),
           ),

@@ -210,4 +210,13 @@ void main() {
     expect(find.text('Fotoğrafı değiştir'), findsOneWidget);
     expect(find.text('AY'), findsNothing);
   });
+
+  testWidgets('Ayarlar ve yasal satırı ayarlar sayfasını açar (hesap ve profil aktarılır)', (tester) async {
+    await ac(tester);
+    await tester.ensureVisible(find.bySemanticsLabel('Ayarlar ve yasal'));
+    await tester.tap(find.text('Ayarlar ve yasal'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ayarlar'), findsOneWidget);
+    expect(find.text('Verilerimi kopyala'), findsOneWidget);
+  });
 }

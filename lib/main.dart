@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show LicenseEntryWithLineBreaks, LicenseRegistry;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -11,7 +12,23 @@ import 'features/kabuk/uygulama_akisi.dart';
 import 'features/profil/data/fotograf_deposu.dart';
 import 'features/profil/data/profil_kaydi.dart';
 
-void main() => runApp(const PusulaUygulamasi());
+void main() {
+  _yaziTipiLisanslariniKaydet();
+  runApp(const PusulaUygulamasi());
+}
+
+/// Uygulamaya gömülü yazı tiplerinin (SIL Open Font License 1.1) lisans sayfasında görünmesi için.
+void _yaziTipiLisanslariniKaydet() {
+  LicenseRegistry.addLicense(() async* {
+    yield const LicenseEntryWithLineBreaks(
+      ['Sora', 'Figtree', 'Noto Sans (yalnızca ₺ işareti)'],
+      'Bu yazı tipleri SIL Open Font License, Version 1.1 kapsamında lisanslanmıştır.\n'
+      'Tam metin: https://openfontlicense.org\n\n'
+      'Sora © The Sora Project Authors; Figtree © The Figtree Project Authors; '
+      'Noto Sans © The Noto Project Authors.',
+    );
+  });
+}
 
 /// Uygulama kökü. Bağımlılıklar (kimlik servisi, depolama, fotoğraf kaynağı)
 /// testlerde ve ileride gerçek arka uçla değiştirilebilir.

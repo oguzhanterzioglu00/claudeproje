@@ -7,6 +7,8 @@ import '../../../core/marka_ikonlari.dart';
 import '../../../core/tema.dart';
 import '../../../core/yukselen.dart';
 import '../../profil/presentation/profil_alanlari.dart';
+import '../../ayarlar/yasal_metinler.dart';
+import '../../ayarlar/yasal_sayfasi.dart';
 import '../data/kimlik_servisi.dart';
 import '../data/oturum_deposu.dart';
 import '../domain/hesap.dart';
@@ -80,6 +82,10 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
       if (mounted) setState(() => _hata = h.mesaj);
     }
   }
+
+  void _yasalAc(YasalMetin metin) => Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => YasalSayfasi(metin: metin)),
+      );
 
   Future<void> _sifremiUnuttum() => AltSayfa.goster<void>(
         context,
@@ -235,11 +241,27 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
                       ],
                       const SizedBox(height: 22),
                       Text(
-                        'Devam ederek Kullanım Koşulları\'nı ve Aydınlatma Metni\'ni kabul etmiş olursun. '
+                        'Devam ederek aşağıdaki metinleri kabul etmiş olursun. '
                         'Bu sürümde hesabın yalnızca bu cihazda tutulur.',
                         textAlign: TextAlign.center,
                         style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500)
                             .copyWith(height: 1.45),
+                      ),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        children: [
+                          TextButton(
+                            onPressed: () => _yasalAc(YasalMetinler.kosullar),
+                            child: Text('Kullanım Koşulları',
+                                style: PusulaYazi.metin(13, renk: PusulaRenk.mavi, agirlik: FontWeight.w700)),
+                          ),
+                          TextButton(
+                            onPressed: () => _yasalAc(YasalMetinler.aydinlatma),
+                            child: Text('Aydınlatma Metni',
+                                style: PusulaYazi.metin(13, renk: PusulaRenk.mavi, agirlik: FontWeight.w700)),
+                          ),
+                        ],
                       ),
                     ],
                   ),
