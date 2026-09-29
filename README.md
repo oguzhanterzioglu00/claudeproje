@@ -17,7 +17,8 @@ Tasarım: "Memur Uygulaması İlk Tasarım" (Claude Artifact). Renkler Ayas Soft
 ## Klasörler
 
 - `lib/core/` — tema, logo (`logo.dart`) ve ortak parçalar
-- `tool/simge_uret_test.dart` — uygulama simgelerini logodan üretir: `flutter test tool/simge_uret_test.dart`
+- `tool/simge_uret_test.dart` — uygulama simgelerini (yazısız pusula) çizer: `flutter test tool/simge_uret_test.dart`
+- `tool/marka_uret.py` — kullanıcının hazırladığı tam logodan (`tool/kaynak/`) uygulama içi görseli (`assets/marka/logo_tam.png`) üretir
 - `lib/features/hesap/` — giriş/kayıt, Google ve Apple ile giriş (örnek), şifre değiştirme, hesap silme
 - `lib/features/profil/` — tanıtım, 4 adımlı ilk kurulum, profil fotoğrafı, statü (cihazda saklanır)
 - `lib/features/ana_sayfa/` — profil odaklı ana sayfa ve Gündem bölümü

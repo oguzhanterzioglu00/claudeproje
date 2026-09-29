@@ -8,7 +8,7 @@
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="Kamu Pusulası: kamu çalışanlarının maaş, hak, becayiş, ilan ve haber rehberi.">
-  <meta name="theme-color" content="#182350">
+  <meta name="theme-color" content="#0F2266">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -22,12 +22,12 @@
   <link rel="manifest" href="manifest.json">
 
   <style>
-    html, body { margin: 0; height: 100%; background: #182350; }
+    html, body { margin: 0; height: 100%; background: #0F2266; }
     /* Flutter ilk kareyi çizene kadar görünen açılış ekranı. */
     #acilis {
       position: fixed; inset: 0; display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 18px;
-      background: #182350; color: #fff; font-family: system-ui, sans-serif;
+      background: #0F2266; color: #fff; font-family: system-ui, sans-serif;
       transition: opacity .35s ease;
     }
     #acilis.bitti { opacity: 0; pointer-events: none; }
@@ -41,15 +41,18 @@
 <body>
   <div id="acilis" role="status" aria-label="Kamu Pusulası yükleniyor">
     <svg viewBox="0 0 100 100" aria-hidden="true">
-      <circle cx="50" cy="50" r="32" fill="none" stroke="#ececf2" stroke-width="4.2"/>
-      <g stroke="#ececf2" stroke-width="4.2" stroke-linecap="round">
-        <line x1="50" y1="11.5" x2="50" y2="5"/><line x1="50" y1="88.5" x2="50" y2="95"/>
-        <line x1="11.5" y1="50" x2="5" y2="50"/><line x1="88.5" y1="50" x2="95" y2="50"/>
-      </g>
+      <path d="M16.06 47.92 A34 34 0 0 1 49.70 16.00" fill="none" stroke="#F7941D" stroke-width="7.6"/>
+      <path d="M53.85 16.22 A34 34 0 0 1 83.84 53.26" fill="none" stroke="#19C1EA" stroke-width="7.6"/>
+      <path d="M83.19 57.36 A34 34 0 0 1 49.11 83.99" fill="none" stroke="#6A3BD8" stroke-width="7.6"/>
+      <path d="M44.97 83.63 A34 34 0 0 1 16.03 51.48" fill="none" stroke="#C060E6" stroke-width="7.6"/>
+      <g transform="rotate(0 50 50)"><polygon points="50,23 44.7,44.7 50,50" fill="#fff"/><polygon points="50,23 55.3,44.7 50,50" fill="#C3CCEE"/></g>
+      <g transform="rotate(90 50 50)"><polygon points="50,23 44.7,44.7 50,50" fill="#fff"/><polygon points="50,23 55.3,44.7 50,50" fill="#C3CCEE"/></g>
+      <g transform="rotate(180 50 50)"><polygon points="50,23 44.7,44.7 50,50" fill="#fff"/><polygon points="50,23 55.3,44.7 50,50" fill="#C3CCEE"/></g>
+      <g transform="rotate(270 50 50)"><polygon points="50,23 44.7,44.7 50,50" fill="#fff"/><polygon points="50,23 55.3,44.7 50,50" fill="#C3CCEE"/></g>
       <g class="ibre">
-        <polygon points="50,23 59.6,50 40.4,50" fill="#FBB040"/>
-        <polygon points="50,77 59.6,50 40.4,50" fill="#12B5D6"/>
-        <circle cx="50" cy="50" r="4.2" fill="#182350" stroke="#ececf2" stroke-width="1.8"/>
+        <polygon points="50,18.5 42,50 50,50" fill="#FFD25C"/><polygon points="50,18.5 58,50 50,50" fill="#F7941D"/>
+        <polygon points="50,81.5 42,50 50,50" fill="#fff"/><polygon points="50,81.5 58,50 50,50" fill="#C3CCEE"/>
+        <circle cx="50" cy="50" r="5.2" fill="#2450B0"/><circle cx="50" cy="50" r="3.5" fill="#0C1E5F"/>
       </g>
     </svg>
     <p>Kamu Pusulası yükleniyor…</p>

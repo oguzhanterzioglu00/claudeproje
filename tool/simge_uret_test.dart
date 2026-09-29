@@ -47,7 +47,7 @@ void main() {
 
     // Android eski simge (yuvarlatılmış kare) ve uyarlanabilir ön plan (108dp tuval, 66dp güvenli alan).
     const eski = PusulaLogoRessami(koseOrani: 0.22);
-    const onPlan = PusulaLogoRessami(arkaplan: false, icerikOlcegi: 0.62);
+    const onPlan = PusulaLogoRessami(arkaplan: false, icerikOlcegi: 0.78);
     const yogunluk = {'mdpi': 1.0, 'hdpi': 1.5, 'xhdpi': 2.0, 'xxhdpi': 3.0, 'xxxhdpi': 4.0};
     for (final e in yogunluk.entries) {
       await _yaz('android/app/src/main/res/mipmap-${e.key}/ic_launcher.png', (48 * e.value).round(), eski);
@@ -56,7 +56,7 @@ void main() {
 
     // Web: sekme simgesi, PWA simgeleri ve (tam kare, güvenli alanlı) maskelenebilir simgeler.
     const webSimge = PusulaLogoRessami(koseOrani: 0.22);
-    const webMaske = PusulaLogoRessami(koseOrani: 0, icerikOlcegi: 0.72);
+    const webMaske = PusulaLogoRessami(koseOrani: 0, icerikOlcegi: 0.9);
     await _yaz('web/favicon.png', 32, webSimge);
     await _yaz('web/icons/Icon-192.png', 192, webSimge);
     await _yaz('web/icons/Icon-512.png', 512, webSimge);

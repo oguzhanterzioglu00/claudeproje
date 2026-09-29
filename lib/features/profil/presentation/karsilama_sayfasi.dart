@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/bilesenler.dart';
-import '../../../core/logo.dart';
 import '../../../core/tema.dart';
 import '../../../core/ucgenler.dart';
 import '../../../core/yukselen.dart';
@@ -23,7 +22,7 @@ class KarsilamaSayfasi extends StatefulWidget {
 class _KarsilamaSayfasiState extends State<KarsilamaSayfasi> {
   static const _slaytlar = <_Slayt>[
     _Slayt(
-      baslik: 'Kamu Pusulası',
+      baslik: 'Hoş geldin',
       aciklama:
           'Memur, sözleşmeli ve işçi — tüm kamu çalışanlarının cebindeki rehber.',
       gorsel: _MarkaGorseli(),
@@ -296,18 +295,21 @@ class _MarkaGorseli extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Container(
-          width: 230,
-          height: 230,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: RadialGradient(
-              colors: [PusulaRenk.mavi.withValues(alpha: 0.40), PusulaRenk.mavi.withValues(alpha: 0)],
-            ),
-          ),
-          child: const Center(child: PusulaLogo(boyut: 156, arkaplan: false)),
+    child: Semantics(
+      label: 'Kamu Pusulası logosu',
+      image: true,
+      excludeSemantics: true,
+      child: Container(
+        width: 250,
+        height: 250,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(56),
+          boxShadow: [BoxShadow(color: PusulaRenk.mavi.withValues(alpha: 0.45), blurRadius: 60, spreadRadius: 4)],
         ),
-      );
+        child: Image.asset('assets/marka/logo_tam.png', fit: BoxFit.contain, filterQuality: FilterQuality.medium),
+      ),
+    ),
+  );
 }
 
 class _MaasGorseli extends StatelessWidget {

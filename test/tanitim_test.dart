@@ -20,7 +20,7 @@ void main() {
 
   testWidgets('tanıtım 5 sayfadır; Devam ile ilerler, son sayfada Başlayalım tanıtımı bitirir', (tester) async {
     final bittiMi = await ac(tester);
-    expect(find.text('Kamu Pusulası'), findsOneWidget);
+    expect(find.text('Hoş geldin'), findsOneWidget);
     expect(find.text('Atla'), findsOneWidget);
     expect(find.text('Bilgilerin yalnızca bu cihazda saklanır'), findsOneWidget);
 
