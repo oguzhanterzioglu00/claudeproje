@@ -1,6 +1,7 @@
 import '../domain/eslesme.dart';
 import '../domain/eslestirici.dart';
 import '../domain/ilan.dart';
+import '../../profil/domain/profil.dart';
 import '../domain/kisi_bilgisi.dart';
 import 'becayis_deposu.dart';
 
@@ -108,6 +109,34 @@ class BecayisOrnekVeri {
 
   static List<Eslesme> eslesmeler() =>
       const Eslestirici().bul(tumIlanlar, ilanId: benimIlanim.id);
+
+  /// Kullanıcının profilinden becayiş deposu kurar. Diğer ilanlar arka uç
+  /// bağlanana kadar örnektir; kullanıcının ilanı henüz yayınlanmamıştır.
+  static BecayisDeposu depoProfilden(Profil p) => BecayisDeposu(
+        benim: Ilan(
+          id: 'ben',
+          kullaniciId: 'u-ben',
+          kurumId: p.kurumKimligi,
+          kurumAdi: p.kurumAdi,
+          sinif: p.sinif,
+          unvan: p.unvan,
+          mevcutIl: p.il,
+          hedefIller: const [],
+          gorunenAd: 'Sen',
+        ),
+        digerleri: digerIlanlar,
+        kisiler: {
+          ...kisiler,
+          'ben': KisiBilgisi(
+            tamAd: p.ad,
+            sicilNo: p.sicilNo.isEmpty ? '—' : p.sicilNo,
+            telefon: '',
+            eposta: p.kurumsalEposta,
+          ),
+        },
+        epostam: p.kurumsalEposta,
+        yayinda: false,
+      );
 
   static BecayisDeposu depo() => BecayisDeposu(
         benim: benimIlanim,

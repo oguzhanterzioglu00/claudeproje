@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pusula/features/profil/data/profil_kaydi.dart';
+import 'package:pusula/features/profil/domain/profil.dart';
 import 'package:pusula/main.dart';
 
 import 'yardimci/yazilar.dart';
@@ -6,10 +8,19 @@ import 'yardimci/yazilar.dart';
 void main() {
   setUpAll(pusulaYazilariniYukle);
 
-  testWidgets('uygulama ana sayfada açılır', (tester) async {
-    await tester.pumpWidget(const PusulaUygulamasi());
+  testWidgets('profil yoksa ilk kurulum açılır', (tester) async {
+    await tester.pumpWidget(PusulaUygulamasi(profilKaydi: BellekProfilKaydi()));
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+    expect(find.text('Hoş geldin'), findsOneWidget);
+    expect(find.text('Başla'), findsOneWidget);
+  });
+
+  testWidgets('profil varsa ana sayfa açılır', (tester) async {
+    await tester.pumpWidget(PusulaUygulamasi(
+      profilKaydi: BellekProfilKaydi(const Profil(ad: 'Ayşe', statu: Statu.memur657)),
+    ));
     await tester.pumpAndSettle(const Duration(seconds: 3));
     expect(find.text('Kamu Pusulası'), findsOneWidget);
-    expect(find.text('Yol haritan'), findsOneWidget);
+    expect(find.text('Hoş geldin'), findsNothing);
   });
 }

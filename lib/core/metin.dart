@@ -32,3 +32,19 @@ String kisaTarih(DateTime t) => '${_gunler[t.weekday - 1]}, ${t.day} ${_aylar[t.
 /// Karşılaştırma/arama için Türkçe harfleri doğru küçülten normalleştirme
 /// (İ → i, I → ı; sonra küçük harf).
 String normalize(String s) => s.trim().replaceAll('İ', 'i').replaceAll('I', 'ı').toLowerCase();
+
+/// Arama için: [normalize] ve ek olarak Türkçe harfler sadeleştirilir
+/// ("SAGLIK" ile "Sağlık" eşleşir). Eşleştirme kimliği için değil, yalnızca
+/// kullanıcının yazdığı arama metni için kullanılır.
+String aramaAnahtari(String s) {
+  const kaynak = 'çğıöşü';
+  const hedef = 'cgiosu';
+  final k = normalize(s);
+  final b = StringBuffer();
+  for (final r in k.runes) {
+    final c = String.fromCharCode(r);
+    final i = kaynak.indexOf(c);
+    b.write(i < 0 ? c : hedef[i]);
+  }
+  return b.toString();
+}

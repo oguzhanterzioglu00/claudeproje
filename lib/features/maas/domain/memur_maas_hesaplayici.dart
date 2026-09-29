@@ -50,6 +50,49 @@ class MaasGirdisi {
         ozelHizmetTazminatiOrani: ozelHizmetTazminatiOrani ?? this.ozelHizmetTazminatiOrani,
         digerBrut: digerBrut ?? this.digerBrut,
       );
+
+  Map<String, Object?> toJson() => {
+        'derece': derece,
+        'kademe': kademe,
+        'hizmetYili': hizmetYili,
+        'ekGosterge': ekGosterge,
+        'yanOdemePuani': yanOdemePuani,
+        'ozelHizmetTazminatiOrani': ozelHizmetTazminatiOrani,
+        'digerBrut': digerBrut,
+      };
+
+  /// Bozuk kayıtta (yanlış tipler, aşırı değerler) geçersiz derece/kademe motoru
+  /// düşürmesin diye değerler güvenli aralığa çekilir; asla hata fırlatmaz.
+  factory MaasGirdisi.fromJson(Map<String, Object?> j) {
+    int tam(String k, int varsayilan) => j[k] is num ? (j[k]! as num).toInt() : varsayilan;
+    double ondalik(String k) => j[k] is num ? (j[k]! as num).toDouble() : 0.0;
+
+    final derece = tam('derece', 1).clamp(1, GostergeTablosu.enUstDerece);
+    return MaasGirdisi(
+      derece: derece,
+      kademe: GostergeTablosu.kademeSinirla(derece, tam('kademe', 1)),
+      hizmetYili: tam('hizmetYili', 0).clamp(0, 60),
+      ekGosterge: tam('ekGosterge', 0).clamp(0, 100000),
+      yanOdemePuani: tam('yanOdemePuani', 0).clamp(0, 100000),
+      ozelHizmetTazminatiOrani: ondalik('ozelHizmetTazminatiOrani').clamp(0.0, 10.0),
+      digerBrut: ondalik('digerBrut').clamp(0.0, 10000000.0),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is MaasGirdisi &&
+      other.derece == derece &&
+      other.kademe == kademe &&
+      other.hizmetYili == hizmetYili &&
+      other.ekGosterge == ekGosterge &&
+      other.yanOdemePuani == yanOdemePuani &&
+      other.ozelHizmetTazminatiOrani == ozelHizmetTazminatiOrani &&
+      other.digerBrut == digerBrut;
+
+  @override
+  int get hashCode =>
+      Object.hash(derece, kademe, hizmetYili, ekGosterge, yanOdemePuani, ozelHizmetTazminatiOrani, digerBrut);
 }
 
 class MaasSonucu {

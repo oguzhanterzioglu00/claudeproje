@@ -39,6 +39,12 @@ class _BecayisIlanVerSayfasiState extends State<BecayisIlanVerSayfasi> {
   }
 
   Future<void> _dogrula() async {
+    if (widget.depo.epostam.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Önce profilinde kurumsal e-posta adresini gir.')),
+      );
+      return;
+    }
     await AltSayfa.goster<void>(
       context,
       builder: (c) => _DogrulamaSayfasi(depo: widget.depo),

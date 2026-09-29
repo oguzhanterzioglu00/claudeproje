@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../core/tema.dart';
+import '../maas/domain/memur_maas_hesaplayici.dart';
+import '../profil/domain/profil.dart';
 
-/// Yol haritasındaki bir satır (sonraki zam, kademe atlama, emeklilik).
+/// Yol haritasındaki bir satır.
 class YolHaritasiOgesi {
   const YolHaritasiOgesi({
     required this.baslik,
@@ -14,7 +16,7 @@ class YolHaritasiOgesi {
 
   final String baslik;
 
-  /// Sağda görünen değer ("94 gün", "9 ay", "12 yıl").
+  /// Sağda görünen değer ("94 gün").
   final String deger;
 
   /// İlerleme çubuğu doluluğu, 0-1.
@@ -23,36 +25,97 @@ class YolHaritasiOgesi {
   final Color ikonRengi;
 }
 
-/// Ana sayfanın gösterdiği özet. Gerçek sürümde maaş motoru ve profil
-/// bilgisinden hesaplanır; şimdilik örnek veridir.
+/// Ana sayfanın gösterdiği özet.
 class AnaSayfaVerisi {
   const AnaSayfaVerisi({
-    required this.netMaas,
-    required this.zamFarki,
-    required this.egri,
-    required this.yolHaritasi,
-    required this.yeniEslesme,
-    this.bildirimVar = true,
-    this.ornek = true,
+    this.netMaas,
+    this.zamFarki,
+    this.egri,
+    this.maasMesaji,
+    this.yolHaritasi = const [],
+    this.becayisAlt = 'Eşleşme bul',
+    this.bildirimVar = false,
+    this.ornek = false,
   });
 
-  final int netMaas;
-  final int zamFarki;
+  /// Tahmini net maaş; hesaplanamıyorsa null ([maasMesaji] gösterilir).
+  final int? netMaas;
 
-  /// Maaş grafiği için 0-1 arası (1 = en yüksek) noktalar; en az iki.
-  final List<double> egri;
+  /// Önceki döneme göre artış; bilinmiyorsa null (rozet gösterilmez).
+  final int? zamFarki;
+
+  /// Maaş grafiği için 0-1 arası noktalar; yoksa çizilmez.
+  final List<double>? egri;
+
+  /// [netMaas] null iken kartta gösterilen açıklama.
+  final String? maasMesaji;
+
   final List<YolHaritasiOgesi> yolHaritasi;
-  final int yeniEslesme;
+
+  /// Becayiş kısayolunun alt yazısı (durumuna göre).
+  final String becayisAlt;
   final bool bildirimVar;
 
   /// Veri örnekse ekranda "ÖRNEK HESAP" rozeti görünür.
   final bool ornek;
 
+  /// Sonraki katsayı dönemine (memur maaşları her yıl 1 Ocak ve 1 Temmuz'da
+  /// güncellenir) kalan gün ve dönemin ne kadarının geçtiği.
+  static (int kalanGun, double oran) sonrakiDonem(DateTime bugun) {
+    final gun = DateTime(bugun.year, bugun.month, bugun.day);
+    final ikinciYari = bugun.month >= 7;
+    final baslangic = DateTime(bugun.year, ikinciYari ? 7 : 1, 1);
+    final bitis = ikinciYari ? DateTime(bugun.year + 1, 1, 1) : DateTime(bugun.year, 7, 1);
+    final toplam = bitis.difference(baslangic).inDays;
+    return (bitis.difference(gun).inDays, gun.difference(baslangic).inDays / toplam);
+  }
+
+  /// Profilden ana sayfa özeti üretir. Uydurma rakam üretmez: maaş için profilde
+  /// bordro girdisi yoksa açıklayıcı bir mesaj gösterilir.
+  factory AnaSayfaVerisi.profilden(
+    Profil p, {
+    required DateTime bugun,
+    required String becayisAlt,
+    bool bildirimVar = false,
+    MemurMaasHesaplayici hesaplayici = const MemurMaasHesaplayici(),
+  }) {
+    int? net;
+    String? mesaj;
+    if (p.statu != Statu.memur657) {
+      mesaj = 'Maaş hesabı şu an yalnızca 657 memurları için. ${p.statu.etiket} için yakında.';
+    } else if (p.maas == null) {
+      mesaj = 'Maaşını görmek için derece, kademe ve hizmet yılını gir.';
+    } else {
+      net = hesaplayici.hesapla(p.maas!, ay: bugun.month).net.round();
+    }
+
+    final donem = p.statu == Statu.memur657 ? sonrakiDonem(bugun) : null;
+    return AnaSayfaVerisi(
+      netMaas: net,
+      maasMesaji: mesaj,
+      becayisAlt: becayisAlt,
+      bildirimVar: bildirimVar,
+      yolHaritasi: [
+        if (donem != null)
+          YolHaritasiOgesi(
+            baslik: 'Sonraki maaş dönemi',
+            deger: '${donem.$1} gün',
+            oran: donem.$2,
+            renk: PusulaRenk.amber,
+            ikonRengi: PusulaRenk.lacivert,
+          ),
+      ],
+    );
+  }
+
+  /// Tasarım/demo için örnek özet.
   static const ornekVeri = AnaSayfaVerisi(
     netMaas: 41250,
     zamFarki: 3450,
     egri: [0.24, 0.34, 0.28, 0.52, 0.44, 0.78, 1.0],
-    yeniEslesme: 1,
+    becayisAlt: '1 yeni eşleşme',
+    bildirimVar: true,
+    ornek: true,
     yolHaritasi: [
       YolHaritasiOgesi(
         baslik: 'Sonraki zam',

@@ -18,6 +18,7 @@ class AnaSayfa extends StatelessWidget {
     this.becayisiAc,
     this.maasaGit,
     this.bildirimAc,
+    this.profilAc,
   });
 
   final AnaSayfaVerisi veri;
@@ -28,38 +29,41 @@ class AnaSayfa extends StatelessWidget {
   final VoidCallback? becayisiAc;
   final VoidCallback? maasaGit;
   final VoidCallback? bildirimAc;
+  final VoidCallback? profilAc;
 
   @override
   Widget build(BuildContext context) => SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(18, 24, 18, 16),
           children: [
-            Yukselen(child: _Ust(tarih: kisaTarih(bugun ?? DateTime.now()), bildirimVar: veri.bildirimVar, onBildirim: bildirimAc)),
+            Yukselen(child: _Ust(tarih: kisaTarih(bugun ?? DateTime.now()), bildirimVar: veri.bildirimVar, onBildirim: bildirimAc, onProfil: profilAc)),
             const SizedBox(height: 14),
             Yukselen(
               gecikme: const Duration(milliseconds: 100),
               child: _MaasKarti(veri: veri, onTap: maasaGit),
             ),
-            const SizedBox(height: 16),
-            Yukselen(
-              gecikme: const Duration(milliseconds: 200),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Yol haritan', style: PusulaYazi.baslik(18, agirlik: FontWeight.w700, aralik: -0.4)),
-                  Row(children: [
-                    Text('Detay', style: PusulaYazi.metin(13, renk: PusulaRenk.mavi, agirlik: FontWeight.w700)),
-                    const SizedBox(width: 4),
-                    const Icon(LucideIcons.arrowRight, size: 16, color: PusulaRenk.mavi),
-                  ]),
-                ],
+            if (veri.yolHaritasi.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Yukselen(
+                gecikme: const Duration(milliseconds: 200),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Yol haritan', style: PusulaYazi.baslik(18, agirlik: FontWeight.w700, aralik: -0.4)),
+                    Row(children: [
+                      Text('Detay', style: PusulaYazi.metin(13, renk: PusulaRenk.mavi, agirlik: FontWeight.w700)),
+                      const SizedBox(width: 4),
+                      const Icon(LucideIcons.arrowRight, size: 16, color: PusulaRenk.mavi),
+                    ]),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 14),
-            Yukselen(
-              gecikme: const Duration(milliseconds: 300),
-              child: _YolHaritasi(ogeler: veri.yolHaritasi),
-            ),
+              const SizedBox(height: 14),
+              Yukselen(
+                gecikme: const Duration(milliseconds: 300),
+                child: _YolHaritasi(ogeler: veri.yolHaritasi),
+              ),
+            ],
             const SizedBox(height: 14),
             Yukselen(
               gecikme: const Duration(milliseconds: 400),
@@ -84,7 +88,7 @@ class AnaSayfa extends StatelessWidget {
                       ikonRengi: PusulaRenk.lacivert,
                       ikon: LucideIcons.arrowRightLeft,
                       baslik: 'Becayiş',
-                      alt: veri.yeniEslesme > 0 ? '${veri.yeniEslesme} yeni eşleşme' : 'Eşleşme bul',
+                      alt: veri.becayisAlt,
                       onTap: becayisiAc,
                     ),
                   ),
@@ -97,11 +101,12 @@ class AnaSayfa extends StatelessWidget {
 }
 
 class _Ust extends StatelessWidget {
-  const _Ust({required this.tarih, required this.bildirimVar, this.onBildirim});
+  const _Ust({required this.tarih, required this.bildirimVar, this.onBildirim, this.onProfil});
 
   final String tarih;
   final bool bildirimVar;
   final VoidCallback? onBildirim;
+  final VoidCallback? onProfil;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -132,6 +137,27 @@ class _Ust extends StatelessWidget {
               ],
             ),
           ),
+          Semantics(
+            button: true,
+            label: 'Profilim',
+            excludeSemantics: true,
+            child: Material(
+              color: PusulaRenk.beyaz,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: const BorderSide(color: PusulaRenk.lacivert, width: 1.5),
+              ),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: onProfil,
+                child: const SizedBox.square(
+                  dimension: 44,
+                  child: Icon(LucideIcons.userRound, size: 22, color: PusulaRenk.lacivert),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
           Semantics(
             button: true,
             label: bildirimVar ? 'Bildirimler, yeni var' : 'Bildirimler',
@@ -208,9 +234,10 @@ class _MaasKarti extends StatelessWidget {
                       final p = Curves.easeOutCubic.transform(((t - 0.22) / 0.78).clamp(0.0, 1.0));
                       return Stack(
                         children: [
-                          Positioned.fill(
-                            child: CustomPaint(painter: _EgriRessami(veri.egri, p)),
-                          ),
+                          if (veri.egri != null)
+                            Positioned.fill(
+                              child: CustomPaint(painter: _EgriRessami(veri.egri!, p)),
+                            ),
                           Padding(
                             padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
                             child: Column(
@@ -239,36 +266,48 @@ class _MaasKarti extends StatelessWidget {
                                   ],
                                 ),
                                 const SizedBox(height: 4),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Flexible(
-                                      child: Text(
-                                        liraTam(veri.netMaas * p),
-                                        maxLines: 1,
-                                        style: PusulaYazi.baslik(44, renk: PusulaRenk.beyaz, aralik: -2)
-                                            .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 8),
-                                      child: Container(
-                                        padding: const EdgeInsets.fromLTRB(8, 5, 10, 5),
-                                        decoration: BoxDecoration(
-                                          color: PusulaRenk.amber,
-                                          borderRadius: BorderRadius.circular(999),
+                                if (veri.netMaas != null)
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          liraTam(veri.netMaas! * p),
+                                          maxLines: 1,
+                                          style: PusulaYazi.baslik(44, renk: PusulaRenk.beyaz, aralik: -2)
+                                              .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
                                         ),
-                                        child: Row(mainAxisSize: MainAxisSize.min, children: [
-                                          const Icon(LucideIcons.trendingUp, size: 14, color: PusulaRenk.lacivert),
-                                          const SizedBox(width: 4),
-                                          Text('+${liraTam(veri.zamFarki)} zam',
-                                              style: PusulaYazi.metin(12, agirlik: FontWeight.w700)),
-                                        ]),
                                       ),
+                                      if (veri.zamFarki != null) ...[
+                                        const SizedBox(width: 10),
+                                        Padding(
+                                          padding: const EdgeInsets.only(bottom: 8),
+                                          child: Container(
+                                            padding: const EdgeInsets.fromLTRB(8, 5, 10, 5),
+                                            decoration: BoxDecoration(
+                                              color: PusulaRenk.amber,
+                                              borderRadius: BorderRadius.circular(999),
+                                            ),
+                                            child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                              const Icon(LucideIcons.trendingUp, size: 14, color: PusulaRenk.lacivert),
+                                              const SizedBox(width: 4),
+                                              Text('+${liraTam(veri.zamFarki!)} zam',
+                                                  style: PusulaYazi.metin(12, agirlik: FontWeight.w700)),
+                                            ]),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  )
+                                else
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8, right: 8),
+                                    child: Text(
+                                      veri.maasMesaji ?? 'Maaşını görmek için profilini tamamla.',
+                                      style: PusulaYazi.baslik(20, renk: PusulaRenk.beyaz, aralik: -0.6)
+                                          .copyWith(height: 1.25),
                                     ),
-                                  ],
-                                ),
+                                  ),
                               ],
                             ),
                           ),

@@ -18,6 +18,8 @@ class MaasSayfasi extends StatefulWidget {
     this.hesaplayici = const MemurMaasHesaplayici(),
     this.ay,
     this.baslangic = const MaasGirdisi(derece: 8, kademe: 3, hizmetYili: 10),
+    this.kayitliGirdi,
+    this.kaydet,
   });
 
   final MemurMaasHesaplayici hesaplayici;
@@ -25,6 +27,12 @@ class MaasSayfasi extends StatefulWidget {
   /// Kümülatif vergi için ay (1-12); boşsa bugünün ayı.
   final int? ay;
   final MaasGirdisi baslangic;
+
+  /// Profilde kayıtlı girdi (varsa); değişiklik bununla karşılaştırılır.
+  final MaasGirdisi? kayitliGirdi;
+
+  /// "Profilime kaydet" düğmesi; boşsa düğme gösterilmez.
+  final ValueChanged<MaasGirdisi>? kaydet;
 
   @override
   State<MaasSayfasi> createState() => _MaasSayfasiState();
@@ -34,6 +42,7 @@ class _MaasSayfasiState extends State<MaasSayfasi> {
   static const _gruplar = ['Memur 4/A', 'Sözleşmeli', 'İşçi'];
 
   late MaasGirdisi _g = widget.baslangic;
+  late MaasGirdisi? _kayitli = widget.kayitliGirdi;
   int _grup = 0;
   bool _gelismis = false;
 
@@ -185,6 +194,28 @@ class _MaasSayfasiState extends State<MaasSayfasi> {
             ),
             const SizedBox(height: 14),
             _Dokum(sonuc: s!),
+            if (widget.kaydet != null) ...[
+              const SizedBox(height: 14),
+              BirincilDugme(
+                yukseklik: 54,
+                ikon: _g == _kayitli ? LucideIcons.check : LucideIcons.save,
+                metin: _g == _kayitli ? 'Profilinde kayıtlı' : 'Bilgilerimi profilime kaydet',
+                zemin: _g == _kayitli ? PusulaRenk.yesilZemin : PusulaRenk.lacivert,
+                yazi: _g == _kayitli ? PusulaRenk.yesilYazi : PusulaRenk.beyaz,
+                onPressed: _g == _kayitli
+                    ? () {}
+                    : () {
+                        widget.kaydet!(_g);
+                        setState(() => _kayitli = _g);
+                      },
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Kaydedersen ana sayfada tahmini net maaşını görürsün. Bilgiler yalnızca bu cihazda saklanır.',
+                textAlign: TextAlign.center,
+                style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500),
+              ),
+            ],
             const SizedBox(height: 14),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,

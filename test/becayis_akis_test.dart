@@ -6,13 +6,20 @@ import 'package:pusula/features/becayis/data/becayis_deposu.dart';
 import 'package:pusula/features/becayis/data/ornek_veri.dart';
 import 'package:pusula/features/becayis/data/servisler.dart';
 import 'package:pusula/features/becayis/domain/eslesme.dart';
-import 'package:pusula/features/becayis/domain/statu.dart';
+import 'package:pusula/features/profil/domain/profil.dart';
 import 'package:pusula/features/becayis/presentation/becayis_eslesme_sayfasi.dart';
 import 'package:pusula/features/becayis/presentation/becayis_sekmesi.dart';
 
 import 'yardimci/yazilar.dart';
 
-const _memur = Profil(ad: 'Ayşe Yılmaz', statu: Statu.memur657);
+const _memur = Profil(
+  ad: 'Ayşe Yılmaz',
+  statu: Statu.memur657,
+  kurumAdi: 'Sağlık Bakanlığı',
+  sinif: 'Sağlık Hizmetleri',
+  unvan: 'Hemşire',
+  il: 'İzmir',
+);
 
 void main() {
   setUpAll(pusulaYazilariniYukle);

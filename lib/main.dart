@@ -1,28 +1,36 @@
 import 'package:flutter/material.dart';
 
 import 'core/tema.dart';
-import 'features/becayis/data/becayis_deposu.dart';
-import 'features/becayis/data/ornek_veri.dart';
-import 'features/becayis/domain/statu.dart';
+import 'core/ucgenler.dart';
 import 'features/kabuk/pusula_kabugu.dart';
+import 'features/profil/data/profil_deposu.dart';
+import 'features/profil/data/profil_kaydi.dart';
+import 'features/profil/presentation/profil_sayfasi.dart';
 
 void main() => runApp(const PusulaUygulamasi());
 
+/// Uygulama kökü: profil yüklenir; profil yoksa ilk kurulum, varsa ana kabuk açılır.
 class PusulaUygulamasi extends StatefulWidget {
-  const PusulaUygulamasi({super.key});
+  const PusulaUygulamasi({super.key, this.profilKaydi = const YerelProfilKaydi()});
+
+  final ProfilKaydi profilKaydi;
 
   @override
   State<PusulaUygulamasi> createState() => _PusulaUygulamasiState();
 }
 
 class _PusulaUygulamasiState extends State<PusulaUygulamasi> {
-  // Profil ve veriler arka uç bağlanana kadar örnektir.
-  static const _profil = Profil(ad: 'Ayşe Yılmaz', statu: Statu.memur657);
-  final BecayisDeposu _depo = BecayisOrnekVeri.depo();
+  late final ProfilDeposu _profil = ProfilDeposu(widget.profilKaydi);
+
+  @override
+  void initState() {
+    super.initState();
+    _profil.yukle();
+  }
 
   @override
   void dispose() {
-    _depo.dispose();
+    _profil.dispose();
     super.dispose();
   }
 
@@ -31,6 +39,27 @@ class _PusulaUygulamasiState extends State<PusulaUygulamasi> {
         title: 'Kamu Pusulası',
         debugShowCheckedModeBanner: false,
         theme: pusulaTema(),
-        home: PusulaKabugu(profil: _profil, becayisDeposu: _depo),
+        home: ListenableBuilder(
+          listenable: _profil,
+          builder: (context, _) {
+            if (!_profil.yuklendi) return const _Acilis();
+            if (_profil.profil == null) {
+              // Kayıt tamamlanınca depo değişir ve kabuk kendiliğinden açılır.
+              return ProfilSayfasi(depo: _profil, ilkKurulum: true, onBitti: () {});
+            }
+            return PusulaKabugu(profilDeposu: _profil);
+          },
+        ),
+      );
+}
+
+/// Profil okunurken kısa açılış ekranı.
+class _Acilis extends StatelessWidget {
+  const _Acilis();
+
+  @override
+  Widget build(BuildContext context) => const Scaffold(
+        backgroundColor: PusulaRenk.lacivert,
+        body: Center(child: PusulaUcgenler(boyut: 96, orta: PusulaRenk.mavi)),
       );
 }
