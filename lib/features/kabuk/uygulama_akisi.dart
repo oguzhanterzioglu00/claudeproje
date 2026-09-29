@@ -4,6 +4,7 @@ import '../../core/depolama.dart';
 import '../../core/logo.dart';
 import '../../core/tema.dart';
 import '../haberler/haber_kaynagi.dart';
+import '../haberler/yeni_haber_takibi.dart';
 import '../hatirlatici/hatirlatici_deposu.dart';
 import '../ilanlar/arka_plan.dart';
 import '../ilanlar/kayitli_ilanlar.dart';
@@ -24,7 +25,15 @@ import 'pusula_kabugu.dart';
 
 /// Bir hesaba ait cihaz içi kullanıcı verisi (profil ve fotoğraf).
 class _KullaniciVerisi {
-  _KullaniciVerisi(this.hesapId, this.profil, this.fotograf, this.hatirlatici, this.ilanTakibi, this.kayitliIlanlar);
+  _KullaniciVerisi(
+    this.hesapId,
+    this.profil,
+    this.fotograf,
+    this.hatirlatici,
+    this.ilanTakibi,
+    this.kayitliIlanlar,
+    this.haberTakibi,
+  );
 
   final String hesapId;
   final ProfilDeposu profil;
@@ -32,6 +41,7 @@ class _KullaniciVerisi {
   final HatirlaticiDeposu? hatirlatici;
   final YeniIlanTakibi? ilanTakibi;
   final KayitliIlanlar kayitliIlanlar;
+  final YeniHaberTakibi? haberTakibi;
 
   bool get yuklendi => profil.yuklendi && fotograf.yuklendi;
 
@@ -41,6 +51,7 @@ class _KullaniciVerisi {
     hatirlatici?.dispose();
     ilanTakibi?.dispose();
     kayitliIlanlar.dispose();
+    haberTakibi?.dispose();
   }
 }
 
@@ -129,6 +140,7 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
     // Hesap değişince/çıkılınca eski hesabın bildirimleri bu cihazdan kaldırılır.
     _veri?.hatirlatici?.hepsiniIptal();
     _veri?.ilanTakibi?.oturumKapandi();
+    _veri?.haberTakibi?.oturumKapandi();
     _veri?.dispose();
     _veri = null;
     _kurulumGoruldu = false;
@@ -149,6 +161,15 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
                 arkaPlan: widget.arkaPlan,
               ),
         KayitliIlanlar(widget.depolama, hesapId: hesap.id),
+        widget.hatirlatici == null || widget.haberKaynagi == null
+            ? null
+            : YeniHaberTakibi(
+                kaynak: widget.haberKaynagi!,
+                servis: widget.hatirlatici!,
+                depolama: widget.depolama,
+                hesapId: hesap.id,
+                arkaPlan: widget.arkaPlan,
+              ),
       );
       _veri = v;
       v.kayitliIlanlar.yukle();
@@ -210,6 +231,7 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
               hatirlatici: veri.hatirlatici,
               ilanTakibi: veri.ilanTakibi,
               kayitliIlanlar: veri.kayitliIlanlar,
+              haberTakibi: veri.haberTakibi,
 
               ilanKaynagi: widget.ilanKaynagi ?? const OrnekIlanKaynagi(),
               haberKaynagi: widget.haberKaynagi ?? const OrnekHaberKaynagi(),

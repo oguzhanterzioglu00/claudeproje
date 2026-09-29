@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/bilesenler.dart';
 import '../../core/tema.dart';
 import '../../core/yukselen.dart';
+import '../haberler/yeni_haber_takibi.dart';
 import '../hatirlatici/hatirlatici_deposu.dart';
 import '../ilanlar/ilan_modeli.dart';
 import '../ilanlar/yeni_ilan_takibi.dart';
@@ -24,6 +25,7 @@ class AyarlarSayfasi extends StatelessWidget {
     this.fotografVar = false,
     this.hatirlatici,
     this.ilanTakibi,
+    this.haberTakibi,
   });
 
   final Hesap? hesap;
@@ -35,6 +37,9 @@ class AyarlarSayfasi extends StatelessWidget {
 
   /// Verilir ve platform destekliyorsa "Yeni ilan bildirimi" bölümü görünür.
   final YeniIlanTakibi? ilanTakibi;
+
+  /// Verilir ve platform destekliyorsa "Resmî Gazete bildirimi" bölümü görünür.
+  final YeniHaberTakibi? haberTakibi;
 
   void _sayfaAc(BuildContext context, Widget sayfa) =>
       Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => sayfa));
@@ -71,6 +76,10 @@ class AyarlarSayfasi extends StatelessWidget {
           if (ilanTakibi != null && ilanTakibi!.destekleniyor) ...[
             const SizedBox(height: 14),
             _YeniIlanBildirimi(takip: ilanTakibi!, statu: profil?.statu),
+          ],
+          if (haberTakibi != null && haberTakibi!.destekleniyor) ...[
+            const SizedBox(height: 14),
+            _HaberBildirimi(takip: haberTakibi!),
           ],
           const SizedBox(height: 22),
           const _Baslik('Gizlilik ve yasal'),
@@ -440,5 +449,78 @@ class _YeniIlanBildirimi extends StatelessWidget {
         ],
       );
     },
+  );
+}
+
+/// Resmî Gazete bildirimi: kamu personelini ilgilendiren yeni maddeler için tek anahtar.
+class _HaberBildirimi extends StatelessWidget {
+  const _HaberBildirimi({required this.takip});
+
+  final YeniHaberTakibi takip;
+
+  Future<void> _degistir(BuildContext context, bool ac) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final tamam = await takip.ayarla(ac);
+    if (tamam) return;
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          'Bildirim izni verilmedi. İstersen telefonun ayarlarından izin verebilirsin.',
+          style: PusulaYazi.metin(14, renk: PusulaRenk.beyaz, agirlik: FontWeight.w600),
+        ),
+        backgroundColor: PusulaRenk.lacivert,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: takip,
+    builder: (context, _) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        PusulaKart(
+          radius: 22,
+          padding: const EdgeInsets.fromLTRB(16, 8, 10, 8),
+          child: Semantics(
+            container: true,
+            toggled: takip.acik,
+            label: 'Resmî Gazete bildirimi',
+            child: Row(
+              children: [
+                const Icon(LucideIcons.scrollText, size: 20, color: PusulaRenk.lacivert),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Resmî Gazete bildirimi', style: PusulaYazi.metin(15, agirlik: FontWeight.w700)),
+                      Text(
+                        'Kamu personelini ilgilendiren yeni maddeler',
+                        style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: takip.acik,
+                  activeThumbColor: PusulaRenk.lacivert,
+                  activeTrackColor: PusulaRenk.amber,
+                  onChanged: (v) => _degistir(context, v),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (takip.acik) ...[
+          const SizedBox(height: 8),
+          const _Bilgi(
+            'Memur, personel, kadro, sözleşmeli, ek ödeme, atama gibi başlıklı yeni Resmî Gazete maddeleri '
+            'yayımlanınca haber verilir. Kaynak: resmigazete.gov.tr. Kontrol sıklığı ilan bildirimiyle aynıdır.',
+          ),
+        ],
+      ],
+    ),
   );
 }

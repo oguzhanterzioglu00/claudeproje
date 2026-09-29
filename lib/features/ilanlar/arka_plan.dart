@@ -4,6 +4,8 @@ import 'package:workmanager/workmanager.dart';
 import '../../core/akis.dart';
 import '../../core/depolama.dart';
 import '../hatirlatici/hatirlatici_servisi.dart';
+import '../haberler/haber_kaynagi.dart';
+import '../haberler/yeni_haber_takibi.dart';
 import 'ilan_kaynagi.dart';
 import 'yeni_ilan_takibi.dart';
 
@@ -82,26 +84,69 @@ class SahteArkaPlanZamanlayici implements ArkaPlanZamanlayici {
   Future<void> durdur() async => durduruldu++;
 }
 
-/// Arka plan işinin yaptığı: kayıtlı hesabın tercihini okur, açıksa ilan akışına bakıp yeni ilanları bildirir.
-/// Ayrı bir izolatta çalıştığı için yalnızca cihaz depolamasına ve ağa dayanır. Tercih açık değilse ya da hesap
-/// kaydı yoksa hiçbir şey yapmaz; kontrol edilirse true döner.
+/// Bu hesapta ilan ya da Resmî Gazete bildirimlerinden biri açıksa arka plan işini başlatır (hesap kaydıyla
+/// birlikte), ikisi de kapalıysa durdurur. Tercihleri depolamadan okur, böylece iki takipçi birbirini bilmeden
+/// aynı işi paylaşır.
+Future<void> arkaPlaniGuncelle({
+  required AnahtarDeger depolama,
+  required String hesapId,
+  ArkaPlanZamanlayici? zamanlayici,
+}) async {
+  final ilanAcik = IlanBildirimTercihi.acikMi(await depolama.oku(YeniIlanTakibi.tercihAnahtari(hesapId)));
+  final haberAcik = YeniHaberTakibi.tercihAcikMi(await depolama.oku(YeniHaberTakibi.tercihAnahtari(hesapId)));
+  if (ilanAcik || haberAcik) {
+    await depolama.yaz(YeniIlanTakibi.arkaPlanHesapAnahtari, hesapId);
+    await zamanlayici?.baslat();
+  } else {
+    if (await depolama.oku(YeniIlanTakibi.arkaPlanHesapAnahtari) == hesapId) {
+      await depolama.sil(YeniIlanTakibi.arkaPlanHesapAnahtari);
+    }
+    await zamanlayici?.durdur();
+  }
+}
+
+/// Arka plan işinin yaptığı: kayıtlı hesabın tercihlerini okur, açık olanlar için ilan ve Resmî Gazete akışına
+/// bakıp yenileri bildirir. Ayrı bir izolatta çalıştığı için yalnızca cihaz depolamasına ve ağa dayanır. Hesap
+/// kaydı yoksa ya da hiçbir bildirim açık değilse hiçbir şey yapmaz; bir kontrol yapıldıysa true döner.
 Future<bool> arkaPlanKontrolu({
   required AnahtarDeger depolama,
   required IlanKaynagi kaynak,
   required HatirlaticiServisi servis,
+  HaberKaynagi? haberKaynagi,
   DateTime Function()? simdi,
 }) async {
   final hesapId = await depolama.oku(YeniIlanTakibi.arkaPlanHesapAnahtari);
   if (hesapId == null || hesapId.isEmpty) return false;
-  final takip = YeniIlanTakibi(kaynak: kaynak, servis: servis, depolama: depolama, hesapId: hesapId, simdi: simdi);
+  var kontrolEdildi = false;
+  final ilan = YeniIlanTakibi(kaynak: kaynak, servis: servis, depolama: depolama, hesapId: hesapId, simdi: simdi);
   try {
-    await takip.yukle();
-    if (!takip.tercih.acik) return false;
-    await takip.kontrolEt();
-    return true;
+    await ilan.yukle();
+    if (ilan.tercih.acik) {
+      await ilan.kontrolEt();
+      kontrolEdildi = true;
+    }
   } finally {
-    takip.dispose();
+    ilan.dispose();
   }
+  if (haberKaynagi != null) {
+    final haber = YeniHaberTakibi(
+      kaynak: haberKaynagi,
+      servis: servis,
+      depolama: depolama,
+      hesapId: hesapId,
+      simdi: simdi,
+    );
+    try {
+      await haber.yukle();
+      if (haber.acik) {
+        await haber.kontrolEt();
+        kontrolEdildi = true;
+      }
+    } finally {
+      haber.dispose();
+    }
+  }
+  return kontrolEdildi;
 }
 
 /// Arka plan izolatının giriş noktası (`Workmanager().initialize` buna bağlanır).
@@ -109,9 +154,11 @@ Future<bool> arkaPlanKontrolu({
 void arkaPlanGirisi() {
   Workmanager().executeTask((gorev, girdi) async {
     try {
+      final istemci = AkisIstemcisi(onbellek: Duration.zero);
       await arkaPlanKontrolu(
         depolama: const YerelDepolama(),
-        kaynak: AkisIlanKaynagi(AkisIstemcisi(onbellek: Duration.zero)),
+        kaynak: AkisIlanKaynagi(istemci),
+        haberKaynagi: AkisHaberKaynagi(istemci),
         servis: YerelHatirlaticiServisi(),
       );
       return true;

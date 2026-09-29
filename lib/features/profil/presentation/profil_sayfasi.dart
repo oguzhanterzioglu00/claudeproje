@@ -7,6 +7,7 @@ import '../../../core/tema.dart';
 import '../../../core/yukselen.dart';
 import '../../ayarlar/ayarlar_sayfasi.dart';
 import '../../hatirlatici/hatirlatici_deposu.dart';
+import '../../haberler/yeni_haber_takibi.dart';
 import '../../ilanlar/kayitli_ilanlar.dart';
 import '../../ilanlar/yeni_ilan_takibi.dart';
 import '../../hesap/data/oturum_deposu.dart';
@@ -30,7 +31,8 @@ class ProfilSayfasi extends StatefulWidget {
     this.oturum,
     this.hatirlatici,
         this.ilanTakibi,
-    this.kayitliIlanlar,
+        this.kayitliIlanlar,
+    this.haberTakibi,
     this.tarihSec = _varsayilanTarihSec,
   });
 
@@ -50,7 +52,11 @@ class ProfilSayfasi extends StatefulWidget {
     final YeniIlanTakibi? ilanTakibi;
 
   /// Verilirse hesap silinirken kaydedilen ilanlar da silinir.
-  final KayitliIlanlar? kayitliIlanlar;
+    final KayitliIlanlar? kayitliIlanlar;
+
+  /// Verilirse Ayarlar'da Resmî Gazete bildirimi görünür.
+  final YeniHaberTakibi? haberTakibi;
+
 
 
   /// Tarih seçici; testlerde değiştirilir. Vazgeçilirse null döner.
@@ -314,7 +320,9 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                             profil: widget.depo.profil,
                             fotografVar: widget.fotograf?.foto != null,
                             hatirlatici: widget.hatirlatici,
-                            ilanTakibi: widget.ilanTakibi,
+                                                        ilanTakibi: widget.ilanTakibi,
+                            haberTakibi: widget.haberTakibi,
+
                           ),
                         ),
                       ),
@@ -327,6 +335,7 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                           await widget.hatirlatici?.tercihiSil();
                           await widget.ilanTakibi?.tercihiSil();
                           await widget.kayitliIlanlar?.temizle();
+                          await widget.haberTakibi?.tercihiSil();
                           await widget.depo.sil();
                           await widget.fotograf?.kaldir();
                         },

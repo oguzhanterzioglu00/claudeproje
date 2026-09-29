@@ -8,6 +8,8 @@ import 'package:pusula/features/ilanlar/arka_plan.dart';
 import 'package:pusula/features/ilanlar/ilan_kaynagi.dart';
 import 'package:pusula/features/ilanlar/ilan_modeli.dart';
 import 'package:pusula/features/becayis/data/ornek_veri.dart';
+import 'package:pusula/features/haberler/haber_modeli.dart';
+import 'package:pusula/features/haberler/yeni_haber_takibi.dart';
 import 'package:pusula/features/haberler/haber_kaynagi.dart';
 import 'package:pusula/features/ilanlar/yeni_ilan_takibi.dart';
 import 'package:pusula/features/kabuk/pusula_kabugu.dart';
@@ -422,6 +424,8 @@ void main() {
     });
   });
 
+  haberTestleri();
+
   group('Ayarlar: Yeni ilan bildirimi', () {
     Future<YeniIlanTakibi> ac(WidgetTester tester, {bool izin = true, bool destek = true}) async {
       tester.view.physicalSize = const Size(390, 1400);
@@ -482,3 +486,217 @@ void main() {
 List<KamuIlani> _sirasiz(
   ({YeniIlanTakibi takip, _Kaynak kaynak, SahteHatirlaticiServisi servis, BellekDepolama depo}) k,
 ) => [_ilan('a'), _ilan('b')];
+
+// ---------------------------------------------------------------------------------------------
+// Resmî Gazete bildirimi
+
+class _HaberKaynagi implements HaberKaynagi {
+  List<Haber> liste = [];
+  bool hata = false;
+
+  @override
+  Future<List<Haber>> getir() async {
+    if (hata) throw Exception('ağ yok');
+    return liste;
+  }
+}
+
+Haber _haber(String id, {DateTime? yayin, bool resmi = true, String baslik = 'Kamu Görevlilerinin Ek Ödeme Kararı'}) =>
+    Haber(
+      id: id,
+      baslik: baslik,
+      tur: HaberTuru.maas,
+      kaynakAdi: 'Resmî Gazete',
+      yayinTarihi: yayin ?? DateTime(2026, 9, 29),
+      resmiKaynak: resmi,
+    );
+
+void haberTestleri() {
+  final simdi = DateTime(2026, 9, 29, 10);
+
+  ({
+    YeniHaberTakibi takip,
+    _HaberKaynagi kaynak,
+    SahteHatirlaticiServisi servis,
+    BellekDepolama depo,
+    SahteArkaPlanZamanlayici ap,
+  })
+  kur({bool izin = true, BellekDepolama? depo}) {
+    final kaynak = _HaberKaynagi()..liste = [_haber('rg-20260929-1-1'), _haber('rg-20260929')];
+    final servis = SahteHatirlaticiServisi(izinVerilir: izin);
+    final d = depo ?? BellekDepolama();
+    final ap = SahteArkaPlanZamanlayici();
+    return (
+      takip: YeniHaberTakibi(
+        kaynak: kaynak,
+        servis: servis,
+        depolama: d,
+        hesapId: 'h1',
+        arkaPlan: ap,
+        simdi: () => simdi,
+      ),
+      kaynak: kaynak,
+      servis: servis,
+      depo: d,
+      ap: ap,
+    );
+  }
+
+  group('YeniHaberTakibi', () {
+    test('varsayılan kapalı; açılınca izin istenir, mevcut maddeler bildirilmez, arka plan başlar', () async {
+      final k = kur();
+      await k.takip.yukle();
+      expect(k.takip.acik, isFalse);
+      expect(await k.takip.kontrolEt(), 0);
+      expect(await k.takip.ayarla(true), isTrue);
+      expect(k.servis.izinIstegi, 1);
+      expect(k.ap.baslatildi, 1);
+      expect(await k.takip.kontrolEt(), 0);
+      expect(k.servis.gosterilenler, isEmpty);
+    });
+
+    test('yeni personel maddesi bildirilir; günlük sayı künyesi, resmî olmayan ve eski haber bildirilmez', () async {
+      final k = kur();
+      await k.takip.yukle();
+      await k.takip.ayarla(true);
+      k.kaynak.liste = [
+        ...k.kaynak.liste,
+        _haber('rg-20260929-2-5', baslik: 'Sözleşmeli Personel Esaslarında Değişiklik Kararı'),
+        _haber('rg-20260930'),
+        _haber('bilinmeyen', resmi: false),
+        _haber('rg-20260920-1-1', yayin: DateTime(2026, 9, 20)),
+      ];
+      expect(await k.takip.kontrolEt(), 1);
+      expect(k.servis.gosterilenler.single.baslik, 'Resmî Gazete');
+      expect(k.servis.gosterilenler.single.govde, 'Sözleşmeli Personel Esaslarında Değişiklik Kararı');
+      expect(await k.takip.kontrolEt(), 0);
+    });
+
+    test('çok sayıda yeni madde tek özet bildirimi olur; uzun başlık kısaltılır', () async {
+      final k = kur();
+      await k.takip.yukle();
+      await k.takip.ayarla(true);
+      k.kaynak.liste = [for (var i = 0; i < 5; i++) _haber('rg-20260929-9-$i')];
+      expect(await k.takip.kontrolEt(), 1);
+      expect(k.servis.gosterilenler.single.baslik, '5 yeni Resmî Gazete maddesi');
+
+      final u = kur();
+      await u.takip.yukle();
+      await u.takip.ayarla(true);
+      u.kaynak.liste = [_haber('rg-20260929-7-1', baslik: 'A' * 200)];
+      await u.takip.kontrolEt();
+      expect(u.servis.gosterilenler.single.govde, '${'A' * 120}...');
+    });
+
+    test('akış alınamazsa 0; izin verilmezse açılmaz; kapatınca arka plan durur', () async {
+      final k = kur();
+      await k.takip.yukle();
+      await k.takip.ayarla(true);
+      k.kaynak.hata = true;
+      expect(await k.takip.kontrolEt(), 0);
+      await k.takip.ayarla(false);
+      expect(k.ap.durduruldu, 1);
+
+      final red = kur(izin: false);
+      await red.takip.yukle();
+      expect(await red.takip.ayarla(true), isFalse);
+      expect(red.takip.acik, isFalse);
+    });
+
+    test('ilan bildirimi de açıksa haber kapatılınca arka plan işi durmaz; ikisi kapanınca durur', () async {
+      final depo = BellekDepolama({'ilan_bildirim_v1_h1': '{"acik":true,"turler":["memur"]}'});
+      final k = kur(depo: depo);
+      await k.takip.yukle();
+      await k.takip.ayarla(true);
+      await k.takip.ayarla(false);
+      expect(k.ap.durduruldu, 0, reason: 'ilan bildirimi hâlâ açık');
+      expect(await depo.oku(YeniIlanTakibi.arkaPlanHesapAnahtari), 'h1');
+
+      await depo.yaz('ilan_bildirim_v1_h1', '{"acik":false,"turler":[]}');
+      await k.takip.ayarla(false);
+      expect(k.ap.durduruldu, 1);
+      expect(await depo.oku(YeniIlanTakibi.arkaPlanHesapAnahtari), isNull);
+    });
+
+    test('tercih saklanır; tercihiSil hepsini temizler; bozuk kayıt kapalı sayılır', () async {
+      final depo = BellekDepolama();
+      final a = kur(depo: depo);
+      await a.takip.yukle();
+      await a.takip.ayarla(true);
+      final b = kur(depo: depo);
+      await b.takip.yukle();
+      expect(b.takip.acik, isTrue);
+      expect(await b.takip.kontrolEt(), 0, reason: 'görülen maddeler hatırlanır');
+      await b.takip.tercihiSil();
+      expect(await depo.oku('haber_bildirim_v1_h1'), isNull);
+      expect(await depo.oku('haber_gorulen_v1_h1'), isNull);
+
+      final bozuk = kur(depo: BellekDepolama({'haber_bildirim_v1_h1': '{bozuk'}));
+      await bozuk.takip.yukle();
+      expect(bozuk.takip.acik, isFalse);
+    });
+
+    test('arkaPlanKontrolu: haber bildirimi açıksa Resmî Gazete akışına da bakar', () async {
+      final depo = BellekDepolama({
+        YeniIlanTakibi.arkaPlanHesapAnahtari: 'h1',
+        'haber_bildirim_v1_h1': '{"acik":true}',
+        'haber_gorulen_v1_h1': '["rg-20260929-1-1"]',
+      });
+      final haberler = _HaberKaynagi()
+        ..liste = [_haber('rg-20260929-1-1'), _haber('rg-20260929-2-2', baslik: 'Yeni Kadro Kararı')];
+      final servis = SahteHatirlaticiServisi();
+      final ilanKaynagi = _Kaynak();
+      final sonuc = await arkaPlanKontrolu(
+        depolama: depo,
+        kaynak: ilanKaynagi,
+        haberKaynagi: haberler,
+        servis: servis,
+        simdi: () => simdi,
+      );
+      expect(sonuc, isTrue);
+      expect(servis.gosterilenler.map((g) => g.govde), ['Yeni Kadro Kararı']);
+      expect(ilanKaynagi.cagri, 0, reason: 'ilan bildirimi kapalı');
+    });
+  });
+
+  testWidgets('Ayarlar: Resmî Gazete anahtarı açılır, açıklama görünür; destek yoksa gizlidir', (tester) async {
+    tester.view.physicalSize = const Size(390, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final k = kur();
+    await k.takip.yukle();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: pusulaTema(),
+        home: AyarlarSayfasi(
+          profil: const Profil(ad: 'A', statu: Statu.memur657),
+          haberTakibi: k.takip,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Resmî Gazete bildirimi'), findsOneWidget);
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+    expect(k.takip.acik, isTrue);
+    expect(find.textContaining('yeni Resmî Gazete maddeleri'), findsOneWidget);
+
+    final desteksiz = YeniHaberTakibi(
+      kaynak: _HaberKaynagi(),
+      servis: SahteHatirlaticiServisi(destekleniyor: false),
+      depolama: BellekDepolama(),
+      hesapId: 'h1',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: pusulaTema(),
+        home: AyarlarSayfasi(
+          profil: const Profil(ad: 'A', statu: Statu.memur657),
+          haberTakibi: desteksiz,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Resmî Gazete bildirimi'), findsNothing);
+  });
+}

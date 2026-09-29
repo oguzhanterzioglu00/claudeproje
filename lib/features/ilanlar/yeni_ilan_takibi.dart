@@ -19,6 +19,16 @@ class IlanBildirimTercihi {
   final bool acik;
   final Set<IlanTuru> turler;
 
+  /// Kayıtlı ham tercih metninde bildirim açık mı (arka plan işi diğer tercihleri okurken kullanır).
+  static bool acikMi(String? ham) {
+    if (ham == null) return false;
+    try {
+      return IlanBildirimTercihi.fromJson(jsonDecode(ham)).acik;
+    } catch (_) {
+      return false;
+    }
+  }
+
   IlanBildirimTercihi kopya({bool? acik, Set<IlanTuru>? turler}) =>
       IlanBildirimTercihi(acik: acik ?? this.acik, turler: turler ?? this.turler);
 
@@ -76,6 +86,8 @@ class YeniIlanTakibi extends ChangeNotifier {
   static const _saklanacakKimlik = 500;
 
   /// Arka plan işinin hangi hesabın tercihine bakacağını bildiren kayıt anahtarı.
+  static String tercihAnahtari(String hesapId) => 'ilan_bildirim_v1_$hesapId';
+
   static const arkaPlanHesapAnahtari = 'ilan_arka_plan_hesap_v1';
 
   final ArkaPlanZamanlayici? _arkaPlan;
@@ -135,26 +147,21 @@ class YeniIlanTakibi extends ChangeNotifier {
       await _kaydet();
       notifyListeners();
       await _temelCiz();
-      await _depolama.yaz(arkaPlanHesapAnahtari, _hesapId);
-      await _arkaPlan?.baslat();
+      await _arkaPlaniGuncelle();
     } else {
       _tercih = _tercih.kopya(acik: false);
       await _kaydet();
       notifyListeners();
-      await _arkaPlan?.durdur();
+      await _arkaPlaniGuncelle();
     }
     return true;
   }
 
   /// Uygulama açılırken: bildirim açıksa arka plan kontrolünü (yeniden) kurar, kapalıysa durdurur.
-  Future<void> arkaPlaniSenkronla() async {
-    if (_tercih.acik) {
-      await _depolama.yaz(arkaPlanHesapAnahtari, _hesapId);
-      await _arkaPlan?.baslat();
-    } else {
-      await _arkaPlan?.durdur();
-    }
-  }
+  Future<void> arkaPlaniSenkronla() => _arkaPlaniGuncelle();
+
+  Future<void> _arkaPlaniGuncelle() =>
+      arkaPlaniGuncelle(depolama: _depolama, hesapId: _hesapId, zamanlayici: _arkaPlan);
 
   /// Oturum kapanınca: bu cihazda başkasının hesabına ait arka plan bildirimi kalmasın. Tercih korunur;
   /// aynı hesapla yeniden girilince [arkaPlaniSenkronla] tekrar kurar.
@@ -265,8 +272,7 @@ class YeniIlanTakibi extends ChangeNotifier {
     _tercih = const IlanBildirimTercihi();
     await _depolama.sil(_tercihAnahtari);
     await _depolama.sil(_gorulenAnahtari);
-    if (await _depolama.oku(arkaPlanHesapAnahtari) == _hesapId) await _depolama.sil(arkaPlanHesapAnahtari);
-    await _arkaPlan?.durdur();
+    await _arkaPlaniGuncelle();
     notifyListeners();
   }
 }

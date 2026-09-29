@@ -22,6 +22,7 @@ import '../becayis/presentation/becayis_sekmesi.dart';
 import '../haberler/gundem_bolumu.dart';
 import '../haberler/haber_kaynagi.dart';
 import '../haberler/haber_modeli.dart';
+import '../haberler/yeni_haber_takibi.dart';
 import '../ilanlar/ilan_kaynagi.dart';
 import '../ilanlar/ilanlar_bolumu.dart';
 import '../ilanlar/ilanlar_sayfasi.dart';
@@ -55,6 +56,7 @@ class PusulaKabugu extends StatefulWidget {
     this.hatirlatici,
     this.ilanTakibi,
     this.kayitliIlanlar,
+    this.haberTakibi,
   });
 
   final ProfilDeposu profilDeposu;
@@ -84,6 +86,9 @@ class PusulaKabugu extends StatefulWidget {
 
   /// Kaydedilen ilanlar (cihazda kalıcı); verilmezse İlanlar sekmesi bellekte tutar.
   final KayitliIlanlar? kayitliIlanlar;
+
+  /// Verilirse Resmî Gazete bildirimi (ayarlarda açılır) çalışır.
+  final YeniHaberTakibi? haberTakibi;
 
   /// Sekme sırası; kısayollar bu sabitlerle yönlendirir.
   static const anaSayfa = 0;
@@ -124,9 +129,15 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
     _anahtar = _becayisAnahtari(_profil);
     widget.profilDeposu.addListener(_profilDegisti);
     widget.hatirlatici?.yukle().then((_) => widget.hatirlatici?.esitle(widget.profilDeposu.profil));
-    if (widget.ilanTakibi != null) {
+    if (widget.haberTakibi != null) {
+      widget.haberTakibi!.yukle().then((_) {
+        _ilanlariKontrolEt();
+        unawaited(widget.haberTakibi?.arkaPlaniSenkronla());
+      });
+    }
+    if (widget.ilanTakibi != null || widget.haberTakibi != null) {
       WidgetsBinding.instance.addObserver(this);
-      widget.ilanTakibi!.yukle().then((_) {
+      widget.ilanTakibi?.yukle().then((_) {
         _ilanlariKontrolEt();
         unawaited(widget.ilanTakibi?.arkaPlaniSenkronla());
       });
@@ -142,6 +153,8 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
   void _ilanlariKontrolEt() {
     final takip = widget.ilanTakibi;
     if (takip != null) unawaited(takip.kontrolEt());
+    final haber = widget.haberTakibi;
+    if (haber != null) unawaited(haber.kontrolEt());
   }
 
   @override
@@ -180,6 +193,7 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
         hatirlatici: widget.hatirlatici,
         ilanTakibi: widget.ilanTakibi,
         kayitliIlanlar: widget.kayitliIlanlar,
+        haberTakibi: widget.haberTakibi,
       ),
     ),
   );
