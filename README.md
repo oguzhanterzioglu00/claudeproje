@@ -1,8 +1,16 @@
-# Pusula
+# Kamu Pusulası
 
 Kamu çalışanının cebindeki maaş, hak, becayiş, ilan ve haber rehberi. Flutter ile yazılıyor.
 
-Uygulama adı çalışma adıdır; mağaza, TÜRKPATENT ve alan adı kontrolü yapılmadan kesinleşmiş sayılmaz. Yedek ad: Basamak. Paket kimliği: `tr.com.ayasyazilim.pusula` (mağazaya ilk yüklemeden önce değiştirilebilir).
+**Ad:** Kamu Pusulası. Ana ekran simgesinin altında kısa hali "Pusula" görünür (Android `android:label`, iOS `CFBundleDisplayName`). Kod tarafında paket ve sınıf adları `pusula`/`Pusula` önekiyle gider.
+
+Ad, mağaza, TÜRKPATENT ve alan adı kontrolü yapılmadan kesinleşmiş sayılmaz. Yedek ad: Basamak. Paket kimliği: `tr.com.ayasyazilim.pusula` (kullanıcıya görünmez; mağazaya ilk yüklemeden önce değiştirilebilir).
+
+## Mağaza kartı önerisi
+
+- **App Store:** Ad "Kamu Pusulası"; alt başlık "Memur ve kamu çalışanı rehberi".
+- **Google Play:** Başlık "Kamu Pusulası: Maaş & Becayiş" (29 karakter; sınır 30).
+- Anahtar kelimeler: maaş hesaplama, becayiş, kadro derecesi, memur, kamu ilanları, haklarım.
 
 Tasarım: "Memur Uygulaması İlk Tasarım" (Claude Artifact). Renkler Ayas Software logosundan, ikonlar Lucide, yazı tipleri Sora ve Figtree.
 

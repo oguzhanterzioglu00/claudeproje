@@ -10,10 +10,10 @@ class PusulaUygulamasi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Pusula',
+      title: 'Kamu Pusulası',
       debugShowCheckedModeBanner: false,
       theme: pusulaTema(),
-      home: const Scaffold(body: Center(child: Text('Pusula'))),
+      home: const Scaffold(body: Center(child: Text('Kamu Pusulası'))),
     );
   }
 }

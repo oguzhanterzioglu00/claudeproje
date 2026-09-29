@@ -1,4 +1,4 @@
-# Pusula · Becayiş modülü: ürün ve arka uç şartnamesi
+# Kamu Pusulası · Becayiş modülü: ürün ve arka uç şartnamesi
 
 Bu belge, "Memur Uygulaması İlk Tasarım" tasarımındaki Becayiş ekranlarının (Tayin sekmesi, İlanlar, İlan ver, Eşleşme, Dilekçe) Flutter uygulamasına ve arka uca nasıl çevrileceğini tanımlar. Modül Pusula'nın kendi özelliğidir; harici bir siteye veya servise bağlı çalışmaz.
 

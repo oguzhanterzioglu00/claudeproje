@@ -8,6 +8,6 @@ void main() {
 
   testWidgets('uygulama açılır', (tester) async {
     await tester.pumpWidget(const PusulaUygulamasi());
-    expect(find.text('Pusula'), findsOneWidget);
+    expect(find.text('Kamu Pusulası'), findsOneWidget);
   });
 }
