@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../core/bilesenler.dart';
 import '../../../core/tema.dart';
 import '../../../core/ucgenler.dart';
 import '../../../core/yukselen.dart';
@@ -333,7 +334,7 @@ class _EslesmeKarti extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
           child: Row(
             children: [
-              _SkorHalkasi(skor: eslesme.skor),
+              SkorHalkasi(skor: eslesme.skor),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -369,44 +370,6 @@ class _EslesmeKarti extends StatelessWidget {
                 decoration: BoxDecoration(color: PusulaRenk.amber, borderRadius: BorderRadius.circular(14)),
                 child: const Icon(LucideIcons.chevronRight, size: 20, color: PusulaRenk.lacivert),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SkorHalkasi extends StatelessWidget {
-  const _SkorHalkasi({required this.skor});
-
-  final int skor;
-
-  @override
-  Widget build(BuildContext context) {
-    final hareketsiz = MediaQuery.disableAnimationsOf(context);
-    return Semantics(
-      label: 'Uyum skoru yüzde $skor',
-      excludeSemantics: true,
-      child: SizedBox.square(
-        dimension: 56,
-        child: TweenAnimationBuilder<double>(
-          tween: Tween(begin: hareketsiz ? skor / 100 : 0, end: skor / 100),
-          duration: hareketsiz ? Duration.zero : const Duration(milliseconds: 1400),
-          curve: Curves.easeOutCubic,
-          builder: (context, v, _) => Stack(
-            alignment: Alignment.center,
-            children: [
-              SizedBox.expand(
-                child: CircularProgressIndicator(
-                  value: v,
-                  strokeWidth: 5,
-                  strokeCap: StrokeCap.round,
-                  backgroundColor: PusulaRenk.cizgi,
-                  color: PusulaRenk.amber,
-                ),
-              ),
-              Text('${(v * 100).round()}', style: PusulaYazi.baslik(15, aralik: -0.5)),
             ],
           ),
         ),

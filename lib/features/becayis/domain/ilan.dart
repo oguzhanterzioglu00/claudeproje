@@ -45,6 +45,20 @@ class Ilan {
   /// Gizlilik gereği yalnızca baş harf + soyad (ör. "M. Demir"). Eşleşmeyi etkilemez.
   final String gorunenAd;
 
+  Ilan copyWith({List<String>? hedefIller, bool? zincirIzni, bool? maviTik}) => Ilan(
+        id: id,
+        kullaniciId: kullaniciId,
+        kurumId: kurumId,
+        sinif: sinif,
+        unvan: unvan,
+        mevcutIl: mevcutIl,
+        hedefIller: hedefIller ?? this.hedefIller,
+        zincirIzni: zincirIzni ?? this.zincirIzni,
+        maviTik: maviTik ?? this.maviTik,
+        kurumAdi: kurumAdi,
+        gorunenAd: gorunenAd,
+      );
+
   /// Yasal olarak karşılaştırılabilir grup: aynı kurum + aynı sınıf.
   String get grup => '${normalize(kurumId)}|${normalize(sinif)}';
 
