@@ -5,6 +5,7 @@ import '../../core/logo.dart';
 import '../../core/tema.dart';
 import '../haberler/haber_kaynagi.dart';
 import '../hatirlatici/hatirlatici_deposu.dart';
+import '../ilanlar/arka_plan.dart';
 import '../ilanlar/ilan_kaynagi.dart';
 import '../ilanlar/yeni_ilan_takibi.dart';
 import '../hatirlatici/hatirlatici_servisi.dart';
@@ -55,6 +56,7 @@ class UygulamaAkisi extends StatefulWidget {
     this.hatirlatici,
     this.ilanKaynagi,
     this.haberKaynagi,
+    this.arkaPlan,
   });
 
   final OturumDeposu oturum;
@@ -71,6 +73,9 @@ class UygulamaAkisi extends StatefulWidget {
   /// Boşsa kabuğun varsayılan (örnek) kaynakları kullanılır; uygulamada gerçek akış kaynakları verilir.
   final IlanKaynagi? ilanKaynagi;
   final HaberKaynagi? haberKaynagi;
+
+  /// Uygulama kapalıyken yeni ilan kontrolü (Android); boşsa yalnızca uygulama açıkken kontrol edilir.
+  final ArkaPlanZamanlayici? arkaPlan;
 
   /// Ana kabuğu üretir; testlerde örnek servislerle değiştirilebilir.
   final Widget Function(BuildContext context, ProfilDeposu profil, FotografDeposu fotograf)? kabukUret;
@@ -120,6 +125,7 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
     if (hesap?.id == _veri?.hesapId) return;
     // Hesap değişince/çıkılınca eski hesabın bildirimleri bu cihazdan kaldırılır.
     _veri?.hatirlatici?.hepsiniIptal();
+    _veri?.ilanTakibi?.oturumKapandi();
     _veri?.dispose();
     _veri = null;
     _kurulumGoruldu = false;
@@ -137,6 +143,7 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
                 servis: widget.hatirlatici!,
                 depolama: widget.depolama,
                 hesapId: hesap.id,
+                arkaPlan: widget.arkaPlan,
               ),
       );
       _veri = v;

@@ -4,6 +4,7 @@ import 'package:pusula/core/depolama.dart';
 import 'package:pusula/core/tema.dart';
 import 'package:pusula/features/ayarlar/ayarlar_sayfasi.dart';
 import 'package:pusula/features/hatirlatici/hatirlatici_servisi.dart';
+import 'package:pusula/features/ilanlar/arka_plan.dart';
 import 'package:pusula/features/ilanlar/ilan_kaynagi.dart';
 import 'package:pusula/features/ilanlar/ilan_modeli.dart';
 import 'package:pusula/features/becayis/data/ornek_veri.dart';
@@ -177,6 +178,131 @@ void main() {
       final k = kur(depo: depo);
       await k.takip.yukle();
       expect(k.takip.tercih.acik, isFalse);
+    });
+  });
+
+  group('Arka plan', () {
+    YeniIlanTakibi takipKur(
+      BellekDepolama depo,
+      SahteArkaPlanZamanlayici ap, {
+      _Kaynak? kaynak,
+      SahteHatirlaticiServisi? servis,
+    }) => YeniIlanTakibi(
+      kaynak: kaynak ?? _Kaynak(),
+      servis: servis ?? SahteHatirlaticiServisi(),
+      depolama: depo,
+      hesapId: 'h1',
+      arkaPlan: ap,
+      simdi: () => simdi,
+    );
+
+    test('bildirim açılınca arka plan işi başlar ve hesap kaydedilir; kapatılınca durur', () async {
+      final depo = BellekDepolama();
+      final ap = SahteArkaPlanZamanlayici();
+      final t = takipKur(depo, ap);
+      await t.yukle();
+      expect(t.arkaPlanVar, isTrue);
+      await t.ayarla(true, statu: Statu.memur657);
+      expect(ap.baslatildi, 1);
+      expect(await depo.oku(YeniIlanTakibi.arkaPlanHesapAnahtari), 'h1');
+      await t.ayarla(false);
+      expect(ap.durduruldu, 1);
+    });
+
+    test('izin verilmezse arka plan işi başlamaz', () async {
+      final ap = SahteArkaPlanZamanlayici();
+      final t = YeniIlanTakibi(
+        kaynak: _Kaynak(),
+        servis: SahteHatirlaticiServisi(izinVerilir: false),
+        depolama: BellekDepolama(),
+        hesapId: 'h1',
+        arkaPlan: ap,
+      );
+      await t.yukle();
+      expect(await t.ayarla(true), isFalse);
+      expect(ap.baslatildi, 0);
+    });
+
+    test(
+      'arkaPlaniSenkronla: tercih açıksa başlatır, kapalıysa durdurur; oturumKapandi hesabı siler, tercihi korur',
+      () async {
+        final depo = BellekDepolama({'ilan_bildirim_v1_h1': '{"acik":true,"turler":["memur"]}'});
+        final ap = SahteArkaPlanZamanlayici();
+        final t = takipKur(depo, ap);
+        await t.yukle();
+        await t.arkaPlaniSenkronla();
+        expect(ap.baslatildi, 1);
+        expect(await depo.oku(YeniIlanTakibi.arkaPlanHesapAnahtari), 'h1');
+        await t.oturumKapandi();
+        expect(ap.durduruldu, 1);
+        expect(await depo.oku(YeniIlanTakibi.arkaPlanHesapAnahtari), isNull);
+        expect(await depo.oku('ilan_bildirim_v1_h1'), isNotNull, reason: 'tercih korunur');
+
+        final kapali = takipKur(BellekDepolama(), ap);
+        await kapali.yukle();
+        await kapali.arkaPlaniSenkronla();
+        expect(ap.durduruldu, 2);
+      },
+    );
+
+    test('tercihiSil arka plan işini durdurur ve hesap kaydını siler', () async {
+      final depo = BellekDepolama();
+      final ap = SahteArkaPlanZamanlayici();
+      final t = takipKur(depo, ap);
+      await t.yukle();
+      await t.ayarla(true, statu: Statu.isci);
+      await t.tercihiSil();
+      expect(ap.durduruldu, 1);
+      expect(await depo.oku(YeniIlanTakibi.arkaPlanHesapAnahtari), isNull);
+    });
+
+    test(
+      'arkaPlanKontrolu: kayıtlı hesabın tercihine göre yeni ilanı bildirir (uygulama kapalıyken çalışan iş)',
+      () async {
+        final depo = BellekDepolama({
+          YeniIlanTakibi.arkaPlanHesapAnahtari: 'h1',
+          'ilan_bildirim_v1_h1': '{"acik":true,"turler":["memur"]}',
+          'ilan_gorulen_v1_h1': '["a"]',
+        });
+        final kaynak = _Kaynak()..liste = [_ilan('a'), _ilan('yeni')];
+        final servis = SahteHatirlaticiServisi();
+        expect(await arkaPlanKontrolu(depolama: depo, kaynak: kaynak, servis: servis, simdi: () => simdi), isTrue);
+        expect(servis.gosterilenler.map((g) => g.govde), ['Alım ilanı yeni']);
+        expect(await arkaPlanKontrolu(depolama: depo, kaynak: kaynak, servis: servis, simdi: () => simdi), isTrue);
+        expect(servis.gosterilenler, hasLength(1), reason: 'aynı ilan ikinci kez bildirilmez');
+      },
+    );
+
+    test('arkaPlanKontrolu: hesap kaydı yok ya da tercih kapalıysa hiçbir şey yapmaz', () async {
+      final kaynak = _Kaynak()..liste = [_ilan('yeni')];
+      final servis = SahteHatirlaticiServisi();
+      expect(await arkaPlanKontrolu(depolama: BellekDepolama(), kaynak: kaynak, servis: servis), isFalse);
+      final kapali = BellekDepolama({YeniIlanTakibi.arkaPlanHesapAnahtari: 'h1'});
+      expect(await arkaPlanKontrolu(depolama: kapali, kaynak: kaynak, servis: servis), isFalse);
+      expect(kaynak.cagri, 0);
+      expect(servis.gosterilenler, isEmpty);
+    });
+
+    testWidgets('Ayarlar: arka plan destekleniyorsa "uygulama kapalıyken de" açıklaması görünür', (tester) async {
+      tester.view.physicalSize = const Size(390, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final t = takipKur(BellekDepolama(), SahteArkaPlanZamanlayici());
+      await t.yukle();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: pusulaTema(),
+          home: AyarlarSayfasi(
+            profil: const Profil(ad: 'A', statu: Statu.memur657),
+            ilanTakibi: t,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Uygulama kapalıyken de yaklaşık 15-30 dakikada bir'), findsOneWidget);
+      expect(find.textContaining('Uygulama kapalıyken bildirim gelmez'), findsNothing);
     });
   });
 

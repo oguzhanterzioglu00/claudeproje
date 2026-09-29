@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../../core/depolama.dart';
 import '../hatirlatici/hatirlatici_servisi.dart';
 import '../profil/domain/profil.dart';
+import 'arka_plan.dart';
 import 'ilan_kaynagi.dart';
 import 'ilan_modeli.dart';
 
@@ -56,8 +57,11 @@ class YeniIlanTakibi extends ChangeNotifier {
     required HatirlaticiServisi servis,
     required AnahtarDeger depolama,
     required String hesapId,
+    ArkaPlanZamanlayici? arkaPlan,
     DateTime Function()? simdi,
   }) : _kaynak = kaynak,
+       _arkaPlan = arkaPlan,
+       _hesapId = hesapId,
        _servis = servis,
        _depolama = depolama,
        _tercihAnahtari = 'ilan_bildirim_v1_$hesapId',
@@ -68,6 +72,11 @@ class YeniIlanTakibi extends ChangeNotifier {
   static const enFazlaBireysel = 3;
   static const _saklanacakKimlik = 500;
 
+  /// Arka plan işinin hangi hesabın tercihine bakacağını bildiren kayıt anahtarı.
+  static const arkaPlanHesapAnahtari = 'ilan_arka_plan_hesap_v1';
+
+  final ArkaPlanZamanlayici? _arkaPlan;
+  final String _hesapId;
   final IlanKaynagi _kaynak;
   final HatirlaticiServisi _servis;
   final AnahtarDeger _depolama;
@@ -83,6 +92,9 @@ class YeniIlanTakibi extends ChangeNotifier {
   IlanBildirimTercihi get tercih => _tercih;
   bool get yuklendi => _yuklendi;
   bool get destekleniyor => _servis.destekleniyor;
+
+  /// Uygulama kapalıyken de kontrol yapılabiliyor mu (Android).
+  bool get arkaPlanVar => _arkaPlan?.destekleniyor ?? false;
 
   @override
   void notifyListeners() {
@@ -120,12 +132,32 @@ class YeniIlanTakibi extends ChangeNotifier {
       await _kaydet();
       notifyListeners();
       await _temelCiz();
+      await _depolama.yaz(arkaPlanHesapAnahtari, _hesapId);
+      await _arkaPlan?.baslat();
     } else {
       _tercih = _tercih.kopya(acik: false);
       await _kaydet();
       notifyListeners();
+      await _arkaPlan?.durdur();
     }
     return true;
+  }
+
+  /// Uygulama açılırken: bildirim açıksa arka plan kontrolünü (yeniden) kurar, kapalıysa durdurur.
+  Future<void> arkaPlaniSenkronla() async {
+    if (_tercih.acik) {
+      await _depolama.yaz(arkaPlanHesapAnahtari, _hesapId);
+      await _arkaPlan?.baslat();
+    } else {
+      await _arkaPlan?.durdur();
+    }
+  }
+
+  /// Oturum kapanınca: bu cihazda başkasının hesabına ait arka plan bildirimi kalmasın. Tercih korunur;
+  /// aynı hesapla yeniden girilince [arkaPlaniSenkronla] tekrar kurar.
+  Future<void> oturumKapandi() async {
+    if (await _depolama.oku(arkaPlanHesapAnahtari) == _hesapId) await _depolama.sil(arkaPlanHesapAnahtari);
+    await _arkaPlan?.durdur();
   }
 
   Future<void> turAyarla(IlanTuru tur, bool secili) async {
@@ -214,6 +246,8 @@ class YeniIlanTakibi extends ChangeNotifier {
     _tercih = const IlanBildirimTercihi();
     await _depolama.sil(_tercihAnahtari);
     await _depolama.sil(_gorulenAnahtari);
+    if (await _depolama.oku(arkaPlanHesapAnahtari) == _hesapId) await _depolama.sil(arkaPlanHesapAnahtari);
+    await _arkaPlan?.durdur();
     notifyListeners();
   }
 }

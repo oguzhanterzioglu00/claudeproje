@@ -120,7 +120,10 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
     widget.hatirlatici?.yukle().then((_) => widget.hatirlatici?.esitle(widget.profilDeposu.profil));
     if (widget.ilanTakibi != null) {
       WidgetsBinding.instance.addObserver(this);
-      widget.ilanTakibi!.yukle().then((_) => _ilanlariKontrolEt());
+      widget.ilanTakibi!.yukle().then((_) {
+        _ilanlariKontrolEt();
+        unawaited(widget.ilanTakibi?.arkaPlaniSenkronla());
+      });
       _ilanZamanlayici = Timer.periodic(const Duration(minutes: 15), (_) => _ilanlariKontrolEt());
     }
   }

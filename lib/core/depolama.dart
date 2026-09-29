@@ -27,7 +27,12 @@ class YerelDepolama implements AnahtarDeger {
   const YerelDepolama();
 
   @override
-  Future<String?> oku(String anahtar) async => (await SharedPreferences.getInstance()).getString(anahtar);
+  Future<String?> oku(String anahtar) async {
+    final tercihler = await SharedPreferences.getInstance();
+    // Arka plan izolatı da aynı dosyaya yazar; önbellek eskimesin diye okumadan önce yenilenir.
+    await tercihler.reload();
+    return tercihler.getString(anahtar);
+  }
 
   @override
   Future<void> yaz(String anahtar, String deger) async =>

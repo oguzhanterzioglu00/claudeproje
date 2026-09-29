@@ -371,9 +371,13 @@ class _YeniIlanBildirimi extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            const _Bilgi(
-              'Uygulamayı açtığında, ön plana getirdiğinde ve açıkken 15 dakikada bir yeni ilanlara bakılır. '
-              'Uygulama kapalıyken bildirim gelmez. Kaynak: Kariyer Kapısı (kariyerkapisi.gov.tr).',
+            _Bilgi(
+              takip.arkaPlanVar
+                  ? 'Uygulama kapalıyken de yaklaşık 15-30 dakikada bir yeni ilanlara bakılır; telefonun pil tasarrufu '
+                        'ayarları gecikmeye neden olabilir (gerekirse Kamu Pusulası\'nı pil kısıtlamasından muaf tut). '
+                        'Kaynak: Kariyer Kapısı (kariyerkapisi.gov.tr).'
+                  : 'Uygulamayı açtığında, ön plana getirdiğinde ve açıkken 15 dakikada bir yeni ilanlara bakılır. '
+                        'Uygulama kapalıyken bildirim gelmez. Kaynak: Kariyer Kapısı (kariyerkapisi.gov.tr).',
             ),
           ],
         ],

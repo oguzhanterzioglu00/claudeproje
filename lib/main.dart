@@ -11,13 +11,16 @@ import 'features/hatirlatici/hatirlatici_servisi.dart';
 import 'features/hesap/data/kimlik_servisi.dart';
 import 'features/hesap/data/oturum_deposu.dart';
 import 'features/hesap/data/yerel_kimlik_servisi.dart';
+import 'features/ilanlar/arka_plan.dart';
 import 'features/ilanlar/ilan_kaynagi.dart';
 import 'features/kabuk/uygulama_akisi.dart';
 import 'features/profil/data/fotograf_deposu.dart';
 import 'features/profil/data/profil_kaydi.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   _yaziTipiLisanslariniKaydet();
+  await WorkmanagerZamanlayici.hazirla();
   runApp(const PusulaUygulamasi());
 }
 
@@ -47,6 +50,7 @@ class PusulaUygulamasi extends StatefulWidget {
     this.hatirlatici,
     this.ilanKaynagi,
     this.haberKaynagi,
+    this.arkaPlan = const WorkmanagerZamanlayici(),
   });
 
   /// Boşsa cihazda çalışan örnek servis ([YerelKimlikServisi]).
@@ -62,6 +66,9 @@ class PusulaUygulamasi extends StatefulWidget {
   /// Boşsa gerçek akış (Kariyer Kapısı ilanları, Resmî Gazete haberleri); testlerde örnek/sahte kaynak verilir.
   final IlanKaynagi? ilanKaynagi;
   final HaberKaynagi? haberKaynagi;
+
+  /// Uygulama kapalıyken yeni ilan kontrolü; varsayılan Android'de `workmanager` (testlerde sahtesi verilir).
+  final ArkaPlanZamanlayici arkaPlan;
 
   @override
   State<PusulaUygulamasi> createState() => _PusulaUygulamasiState();
@@ -106,6 +113,7 @@ class _PusulaUygulamasiState extends State<PusulaUygulamasi> {
       hatirlatici: _hatirlatici,
       ilanKaynagi: _ilanKaynagi,
       haberKaynagi: _haberKaynagi,
+      arkaPlan: widget.arkaPlan,
     ),
   );
 }
