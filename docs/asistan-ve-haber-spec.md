@@ -22,6 +22,8 @@ Bu belge, Flutter uygulamasındaki üç modülün (Hakkım ne?, İlanlar ve iler
 - Cevap ve soru günlükleri anonim tutulur; KVKK aydınlatma metni ve saklama süresi tanımlanır.
 - Değerlendirme seti: doğrulanmış soru-cevap-madde üçlüleri ile sürüm başına doğruluk ölçümü; eşik altında yayına çıkmaz.
 
+**Şu anki kapsam (yerel bilgi bankası, `lib/features/asistan/bilgi_bankasi.dart`):** 657 sayılı Kanun'dan resmî mevzuat.gov.tr birleştirilmiş metninden birebir alıntılarla becayiş, yıllık izin, mazeret izni, rapor/hastalık izni, aylıksız izin, kademe ve derece, tayin, disiplin cezaları, adaylık ve çalışma saatleri. Emeklilik (5510) kapsam dışıdır; asistan bunu açıkça söyler. Kapsam dışı ve eşleşmeyen sorularda tahmin yürütülmez.
+
 **Açık karar:** dış bir dil modeli sağlayıcısı kullanılıp kullanılmayacağı (veri aktarımı, KVKK, maliyet) ve mevzuat derleminin hangi kurumla lisanslanacağı.
 
 ## 2. İlanlar (kamu iş ilanları)

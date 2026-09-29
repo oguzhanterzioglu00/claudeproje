@@ -301,6 +301,136 @@ abstract final class BilgiBankasi {
           'Tayin talebinin kabulü kurumun atama yönetmeliğine, boş kadroya ve puan/hizmet süresi gibi kurum kriterlerine bağlıdır; kendi durumun için kurumunun personel birimine danış.',
     ),
     BilgiKonusu(
+      id: 'disiplin',
+      baslik: 'Disiplin cezaları ve savunma hakkı',
+      etiket: 'Disiplin',
+      ornekSoru: 'Disiplin cezaları nelerdir?',
+      anahtarlar: [
+        'disiplin',
+        'ceza',
+        'cezalar',
+        'uyarma',
+        'kinama',
+        'ayliktan kesme',
+        'kademe ilerlemesinin durdurulma',
+        'durdurulma',
+        'savunma',
+        'memuriyetten cikar',
+        'devlet memurlugundan cikar',
+        'ihrac',
+        'sorusturma',
+        'ozluk dosya'
+      ],
+      cevap:
+          'Disiplin cezaları 125. maddede sayılır: uyarma (memura görevinde ve davranışlarında daha dikkatli olması gerektiğinin yazıyla bildirilmesi), kınama (kusurlu olduğunun yazıyla bildirilmesi), aylıktan kesme (brüt aylıktan 1/30 ile 1/8 arasında kesinti), kademe ilerlemesinin durdurulması (bulunduğu kademede ilerlemenin fiilin ağırlığına göre 1-3 yıl durdurulması) ve Devlet memurluğundan çıkarma (bir daha atanmamak üzere memurluktan çıkarma). Savunması alınmadan hakkında disiplin cezası verilemez; savunma için verilen süre 7 günden az olamaz ve bu süre içinde savunma yapmayan savunma hakkından vazgeçmiş sayılır. Disiplin cezaları özlük dosyasına işlenir; memurluktan çıkarma dışındaki bir ceza alan memur, uyarma ve kınamada 5, diğer cezalarda 10 yıl sonra atamaya yetkili amire başvurarak cezanın özlük dosyasından silinmesini isteyebilir (davranışları isteği haklı kılıyorsa).',
+      kaynaklar: [
+        MevzuatKaynagi(
+            baslik: '657 sayılı Devlet Memurları Kanunu, md. 125/A (Uyarma)',
+            alinti:
+                'A - Uyarma : Memura, görevinde ve davranışlarında daha dikkatli olması gerektiğinin yazı ile bildirilmesidir.'),
+        MevzuatKaynagi(
+            baslik: '657 sayılı Devlet Memurları Kanunu, md. 125/B (Kınama)',
+            alinti: 'B - Kınama : Memura, görevinde ve davranışlarında kusurlu olduğunun yazı ile bildirilmesidir.'),
+        MevzuatKaynagi(
+            baslik: '657 sayılı Devlet Memurları Kanunu, md. 125/C (Aylıktan kesme)',
+            alinti: 'C - Aylıktan kesme : Memurun, brüt aylığından 1/30 - 1/8 arasında kesinti yapılmasıdır.'),
+        MevzuatKaynagi(
+            baslik: '657 sayılı Devlet Memurları Kanunu, md. 125/D (Kademe ilerlemesinin durdurulması)',
+            alinti:
+                'D - Kademe ilerlemesinin durdurulması : Fiilin ağırlık derecesine göre memurun, bulunduğu kademede ilerlemesinin 1 - 3 yıl durdurulmasıdır.'),
+        MevzuatKaynagi(
+            baslik: '657 sayılı Devlet Memurları Kanunu, md. 125/E (Devlet memurluğundan çıkarma)',
+            alinti:
+                'E - Devlet memurluğundan çıkarma : Bir daha Devlet memurluğuna atanmamak üzere memurluktan çıkarmaktır.'),
+        MevzuatKaynagi(
+            baslik: '657 sayılı Devlet Memurları Kanunu, md. 130 (Savunma hakkı)',
+            alinti:
+                'Devlet memuru hakkında savunması alınmadan disiplin cezası verilemez. Soruşturmayı yapanın veya yetkili disiplin kurulunun 7 günden az olmamak üzere verdiği süre içinde veya belirtilen bir tarihte savunmasını yapmıyan memur, savunma hakkından vazgeçmiş sayılır.'),
+        MevzuatKaynagi(
+            baslik: '657 sayılı Devlet Memurları Kanunu, md. 133 (Özlük dosyasından silme)',
+            alinti:
+                'Disiplin cezaları memurun özlük dosyasına işlenir. Devlet memurluğundan çıkarma cezasından başka bir disiplin cezasına çarptırılmış olan memur uyarma ve kınama cezalarının uygulanmasından 5 sene, diğer cezaların uygulanmasından 10 sene sonra atamaya yetkili amire başvurarak, verilmiş olan cezalarının özlük dosyasından silinmesini isteyebilir.'),
+      ],
+      uyari:
+          'Hangi fiile hangi cezanın verileceği 125. maddede ayrıntılı sayılır; itiraz yolları ve süreleri için kurumunun disiplin kuruluna ya da personel birimine danış.',
+    ),
+    BilgiKonusu(
+      id: 'adaylik',
+      baslik: 'Adaylık (aday memurluk)',
+      etiket: 'Adaylık',
+      ornekSoru: 'Adaylık süresi ne kadar?',
+      anahtarlar: [
+        'aday',
+        'adaylik',
+        'aday memur',
+        'asli memur',
+        'asalet',
+        'staj',
+        'temel egitim',
+        'hazirlayici egitim'
+      ],
+      cevap:
+          'Sınavı kazanıp Devlet memurluğuna girenler önce memur adayı olarak atanır. Adaylık süresi en az bir yıl, en çok iki yıldır ve bu süre içinde aday memurun başka kurumlara nakli yapılamaz (md. 54). Adaylar önce temel eğitime, sonra sınıflarına ilişkin hazırlayıcı eğitime ve staja tabi tutulur; Devlet memuru olarak atanabilmeleri için bunlarda başarılı olmaları şarttır (md. 55). Adaylık süresi içinde eğitim ya da stajın herhangi birinde başarısız olanların, birden fazla uyarma ve/veya kınama cezası alanların ile aylıktan kesme ya da kademe ilerlemesinin durdurulması cezası alanların ilişiği kesilir; ilişiği kesilenler (sağlık nedenleri hariç) üç yıl süreyle Devlet memurluğuna alınmaz (md. 56, Ocak 2026\'da değiştirildi). Eğitimde başarılı olan adaylar asli memurluğa atanır (md. 58).',
+      kaynaklar: [
+        MevzuatKaynagi(
+            baslik: '657 sayılı Devlet Memurları Kanunu, md. 54 (Aday olarak atanma)',
+            alinti:
+                'Aday olarak atanmış Devlet memurunun adaylık süresi bir yıldan az iki yıldan çok olamaz ve bu süre içinde aday memurun başka kurumlara nakli yapılamaz.'),
+        MevzuatKaynagi(
+            baslik: '657 sayılı Devlet Memurları Kanunu, md. 55 (Adayların yetiştirilmesi)',
+            alinti:
+                'Aday olarak atanan memurların önce bütün memurların ortak vasıfları ile ilgili temel eğitime, bilahara sınıfları ile ilgili hazırlayıcı eğitime ve staja tabi tutulmaları ve Devlet memuru olarak atanabilmeleri için başarılı olmaları şarttır.'),
+        MevzuatKaynagi(
+            baslik: '657 sayılı Devlet Memurları Kanunu, md. 56 (Adaylık devresinde göreve son verme)',
+            alinti:
+                'Adaylık süresi içinde; temel ve hazırlayıcı eğitim ve staj devrelerinin herhangi birinde başarısız olanlar, birden fazla uyarma ve/veya kınama cezası almış olanlar ile aylıktan kesme ya da kademe ilerlemesinin durdurulması cezası almış olanların disiplin amirlerinin teklifi ve atamaya yetkili amirin onayı ile ilişikleri kesilir. İlişikleri kesilenler ilgili kurumlarca derhal Kamu Personel Bilgi Sisteminin bulunduğu kuruma bildirilir. Bu madde hükümlerine göre ilişikleri kesilenler (sağlık nedenleri hariç) üç yıl süre ile Devlet memurluğuna alınmazlar.'),
+        MevzuatKaynagi(
+            baslik: '657 sayılı Devlet Memurları Kanunu, md. 58 (Asli memurluğa atanma)',
+            alinti:
+                'Adaylık devresi içinde eğitimde başarılı olan adaylar disiplin amirlerinin teklifi ve atamaya yetkili amirin onayı ile onay tarihinden geçerli olmak üzere asli memurluğa atanırlar.'),
+      ],
+      uyari:
+          'Eğitim süreleri, programları ve değerlendirme esasları yönetmelikle belirlenir (md. 55). Aynı kurum içinde karşılıklı yer değiştirme (becayiş) için 73. madde aday memurlardan ayrıca söz etmez; uygulamada yönetmelik ve kurum kuralları belirleyicidir.',
+    ),
+    BilgiKonusu(
+      id: 'calisma_saati',
+      baslik: 'Çalışma süresi ve saatleri',
+      etiket: 'Çalışma saatleri',
+      ornekSoru: 'Haftalık çalışma süresi kaç saat?',
+      anahtarlar: [
+        'calisma saat',
+        'calisma suresi',
+        'calisma gun',
+        'mesai',
+        'haftalik',
+        '40 saat',
+        'hafta tatili',
+        'cumartesi',
+        'pazar',
+        'ogle',
+        'giris cikis saat',
+        'kacta'
+      ],
+      cevap:
+          'Memurların haftalık çalışma süresi genel olarak 40 saattir; bu süre Cumartesi ve Pazar günleri tatil olmak üzere düzenlenir (md. 99). Ancak kanun, özel kanunlar, Cumhurbaşkanlığı kararnameleri veya bunlara dayanan yönetmeliklerle kurumların ve hizmetlerin özellikleri dikkate alınarak farklı çalışma süreleri belirlenebilir. Günlük çalışmanın başlama ve bitme saatleri ile öğle dinlenme süresi, bölgelerin ve hizmetin özelliklerine göre merkezde Cumhurbaşkanınca, illerde valiler tarafından belirlenir (md. 100).',
+      kaynaklar: [
+        MevzuatKaynagi(
+            baslik: '657 sayılı Devlet Memurları Kanunu, md. 99 (Haftalık çalışma süresi)',
+            alinti:
+                'Memurların haftalık çalışma süresi genel olarak 40 saattir. Bu süre Cumartesi ve Pazar günleri tatil olmak üzere düzenlenir.'),
+        MevzuatKaynagi(
+            baslik: '657 sayılı Devlet Memurları Kanunu, md. 99 (Farklı çalışma süreleri)',
+            alinti:
+                'Ancak bu kanuna, özel kanunlara, Cumhurbaşkanlığı kararnamelerine veya bunlara dayanılarak çıkarılacak yönetmeliklerle, kurumların ve hizmetlerin özellikleri dikkate alınmak suretiyle farklı çalışma süreleri tespit olunabilir.'),
+        MevzuatKaynagi(
+            baslik: '657 sayılı Devlet Memurları Kanunu, md. 100 (Günlük çalışma saatleri)',
+            alinti:
+                'Günlük çalışmanın başlama ve bitme saatleri ile öğle dinlenme süresi, bölgelerin ve hizmetin özelliklerine göre merkezde Cumhurbaşkanınca, illerde valiler tarafından tesbit olunur.'),
+      ],
+      uyari:
+          'Fazla çalışma, nöbet ve vardiya gibi konular ayrı maddelerde ve yönetmeliklerde düzenlenir; bu cevap yalnızca normal çalışma süresini kapsar.',
+    ),
+    BilgiKonusu(
       id: 'emeklilik',
       baslik: 'Emeklilik',
       etiket: 'Emeklilik',

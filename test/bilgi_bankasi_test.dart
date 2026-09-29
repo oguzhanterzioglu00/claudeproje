@@ -79,6 +79,12 @@ void main() {
         'Tayin şartları nelerdir?': 'tayin',
         'Eş durumu tayini yapılır mı': 'tayin',
         'Kurumlar arası nakil mümkün mü': 'tayin',
+        'Disiplin cezaları nelerdir?': 'disiplin',
+        'Uyarma ve kınama cezası ne zaman verilir': 'disiplin',
+        'Adaylık süresi ne kadar?': 'adaylik',
+        'Asaleti onaylanmak için ne gerekir': 'adaylik',
+        'Haftalık çalışma süresi kaç saat?': 'calisma_saati',
+        'Mesai saatleri kaça kadar': 'calisma_saati',
         'Emeklilik için ne kadar süre gerekir?': 'emeklilik',
       };
       beklenen.forEach((soru, id) => expect(konu(soru), id, reason: soru));

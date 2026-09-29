@@ -40,7 +40,8 @@ class _AsistanSayfasiState extends State<AsistanSayfasi> {
     _Mesaj.asistan(
       metin: 'Merhaba! Sorunu ilgili kanun maddesini bularak, alıntısıyla birlikte yanıtlarım. '
           'Şu an 657 sayılı Devlet Memurları Kanunu\'na dayanarak becayiş, yıllık izin, mazeret izni, '
-          'rapor/hastalık izni, aylıksız izin, kademe ve derece yükselmesi ile tayin sorularını yanıtlıyorum. '
+          'rapor/hastalık izni, aylıksız izin, kademe ve derece yükselmesi, tayin, disiplin cezaları, '
+          'adaylık ve çalışma saatleri sorularını yanıtlıyorum. '
           'Emeklilik ve diğer kanunlar henüz yok; bilmediğim konuda tahmin yürütmem.',
     ),
   ];
