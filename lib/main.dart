@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'core/depolama.dart';
 import 'core/tema.dart';
+import 'core/telefon_cercevesi.dart';
 import 'features/hesap/data/kimlik_servisi.dart';
 import 'features/hesap/data/oturum_deposu.dart';
 import 'features/hesap/data/yerel_kimlik_servisi.dart';
@@ -54,6 +55,7 @@ class _PusulaUygulamasiState extends State<PusulaUygulamasi> {
         title: 'Kamu Pusulası',
         debugShowCheckedModeBanner: false,
         theme: pusulaTema(),
+        builder: (context, child) => TelefonCercevesi(child: child!),
         home: UygulamaAkisi(
           oturum: _oturum,
           depolama: widget.depolama,

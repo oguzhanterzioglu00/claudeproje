@@ -2,7 +2,7 @@
 //
 //   flutter test tool/simge_uret_test.dart
 //
-// Android (eski + uyarlanabilir ön plan) ve iOS simgelerini doğrudan proje
+// Android (eski + uyarlanabilir ön plan), iOS ve web simgelerini doğrudan proje
 // klasörlerine yazar. Simge tasarımı değişince yeniden çalıştırılır.
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -53,5 +53,14 @@ void main() {
       await _yaz('android/app/src/main/res/mipmap-${e.key}/ic_launcher.png', (48 * e.value).round(), eski);
       await _yaz('android/app/src/main/res/mipmap-${e.key}/ic_launcher_foreground.png', (108 * e.value).round(), onPlan);
     }
+
+    // Web: sekme simgesi, PWA simgeleri ve (tam kare, güvenli alanlı) maskelenebilir simgeler.
+    const webSimge = PusulaLogoRessami(koseOrani: 0.22);
+    const webMaske = PusulaLogoRessami(koseOrani: 0, icerikOlcegi: 0.72);
+    await _yaz('web/favicon.png', 32, webSimge);
+    await _yaz('web/icons/Icon-192.png', 192, webSimge);
+    await _yaz('web/icons/Icon-512.png', 512, webSimge);
+    await _yaz('web/icons/Icon-maskable-192.png', 192, webMaske);
+    await _yaz('web/icons/Icon-maskable-512.png', 512, webMaske);
   });
 }

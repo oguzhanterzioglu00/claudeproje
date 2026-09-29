@@ -1,0 +1,71 @@
+name: Web (tarayıcıda önizleme)
+
+# Her push'ta uygulamanın web sürümü derlenir ve `gh-pages` dalına yayınlanır;
+# birkaç dakika sonra tarayıcıdan (bilgisayar ya da telefon) açılır:
+#   https://<kullanıcı>.github.io/<repo>/
+# Bir kez yapılacak ayar: GitHub → repo → Settings → Pages → Source: "Deploy from a branch",
+# Branch: gh-pages, klasör: / (root).
+# Not: Özel (private) depoda GitHub Pages ücretsiz planda çalışmaz; bunun yerine Netlify
+# adımını kullan (README "Tarayıcıda önizleme" bölümü) ya da depoyu herkese açık yap.
+on:
+  push:
+    branches: [main, 'claude/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: web-onizleme
+  cancel-in-progress: true
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.47.5'
+          cache: true
+
+      - run: flutter pub get
+      - run: flutter analyze
+
+      # GitHub Pages proje sitesi alt yolda (/<repo>/) yayınlanır.
+      - name: Web derlemesi
+        run: flutter build web --release --no-web-resources-cdn --base-href "/${{ github.event.repository.name }}/"
+
+      - name: GitHub Pages'e yayınla (gh-pages dalı)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+          force_orphan: true
+          commit_message: "Web önizleme: ${{ github.sha }}"
+
+      # Netlify (isteğe bağlı): NETLIFY_AUTH_TOKEN ve NETLIFY_SITE_ID gizli değerleri tanımlıysa çalışır.
+      # Netlify siteyi kök adreste (/) sunar; bu yüzden temel yol değiştirilir.
+      - name: Netlify'a yayınla
+        if: env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != ''
+        run: |
+          cp -r build/web build/netlify
+          sed -i 's|<base href="/${{ github.event.repository.name }}/">|<base href="/">|' build/netlify/index.html
+          npx --yes netlify-cli@latest deploy --dir=build/netlify --prod --site "$NETLIFY_SITE_ID" --auth "$NETLIFY_AUTH_TOKEN" --message "${{ github.sha }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kamu-pusulasi-web
+          path: build/web
+          retention-days: 14
+
+      - name: Özet
+        run: |
+          echo "### Web önizleme hazır" >> "$GITHUB_STEP_SUMMARY"
+          echo "GitHub Pages: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" >> "$GITHUB_STEP_SUMMARY"

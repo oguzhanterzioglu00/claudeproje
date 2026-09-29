@@ -43,6 +43,22 @@ GitHub'da **Actions** sekmesi → son çalışma → **Artifacts** → `kamu-pus
 `app-release.apk`'yı Android telefonda aç (ilk seferde "bilinmeyen kaynaklardan yüklemeye izin ver" gerekir).
 Bu APK debug anahtarıyla imzalıdır; yalnızca deneme içindir.
 
+## Tarayıcıda önizleme (APK indirmeden)
+
+Her push'ta `.github/workflows/web.yml` uygulamanın web sürümünü derler ve `gh-pages` dalına yayınlar.
+Bilgisayarda telefon boyutlu bir çerçevede, telefon tarayıcısında tam ekran açılır.
+
+**Bir kez yapılacak ayar (GitHub Pages):** repo → Settings → Pages → *Build and deployment* → Source: **Deploy from a branch**,
+Branch: **gh-pages** / **(root)** → Save. Adres: `https://<kullanıcı>.github.io/<repo>/` (birkaç dakika sürer).
+
+> Depo **özel (private)** ise GitHub Pages ücretsiz planda çalışmaz. İki seçenek: (1) depoyu herkese açık yapmak, ya da
+> (2) ücretsiz Netlify: netlify.com'da hesap aç → *Add new site → Deploy manually* ile boş bir site oluştur →
+> Site ID'yi ve (User settings → Applications → Personal access token) jetonunu repoda
+> Settings → Secrets and variables → Actions'a `NETLIFY_SITE_ID` ve `NETLIFY_AUTH_TOKEN` adıyla ekle. Sonraki her push'ta site güncellenir.
+
+Yeni sürüm görünmezse sayfayı sert yenile (Ctrl+Shift+R). Web sürümünde kamera/galeri, tarayıcı izinlerine bağlıdır;
+gerçek cihaz davranışı için APK kullan.
+
 ## Yayın öncesi yapılacaklar
 
 - Paket kimliği (`tr.com.ayasyazilim.pusula`) onaylanmalı; mağazada kalıcıdır.
