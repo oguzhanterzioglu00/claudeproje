@@ -8,18 +8,49 @@ Becayiş, 657 sayılı Kanun'un 73. maddesi kapsamında iki (veya üç) memurun 
 
 Kullanıcı akışı:
 
-1. **İlan ver:** Unvan, kurum ve mevcut il Kadro profilinden gelir. Kullanıcı hedef illeri seçer ve 3'lü zincir tercihini belirler. İlan ücretsizdir.
+1. **İlan ver:** Kurum, hizmet sınıfı, unvan ve mevcut il Kadro profilinden gelir. Kullanıcı hedef illeri seçer ve 3'lü zincir tercihini belirler. İlan ücretsizdir.
 2. **Mavi tik (isteğe bağlı):** Kurumsal e-postaya 6 haneli kod gider. Doğrulanan ilan öne çıkar.
 3. **Eşleşme:** Sistem ikili ve 3'lü zincir eşleşmeleri arar, bulunca bildirim gönderir.
 4. **İlgileniyorum:** Taraflar sırayla onay verir. Ödeme yalnızca **tüm taraflar onayladıktan sonra** istenir.
 5. **İletişimi aç:** Uygulama içi mağaza ödemesi (tek seferlik). İlana bağlı tüm eşleşmelerin iletişimi açılır.
 6. **Dilekçe:** Taraf bilgileriyle otomatik doldurulur, PDF olarak indirilir.
 
+## 1.1 Hukuki dayanak ve kapsam
+
+Araştırma tarihi: 29 Eylül 2026. **Birincil metin (mevzuat.gov.tr) sunucu tarafından okunamadı**; aşağıdaki bulgular aynı ifadeyi aktaran üç bağımsız ikincil kaynaktan derlendi. Yayın öncesi metin, mevzuat.gov.tr'den ve bir idare hukuku uzmanından teyit edilmelidir.
+
+**Doğrulanan çekirdek kural.** 657 sayılı Devlet Memurları Kanunu md. 73: *"Aynı Kurumun başka başka yerlerde bulunan aynı sınıftaki memurları, karşılıklı olarak yer değiştirme suretiyle atanmalarını isteyebilirler. Bu isteğin yerine getirilmesi atamaya yetkili amirlerince uygun bulunmasına bağlıdır."*
+
+Buradan çıkan ürün kuralları:
+
+| Kural | Mevzuattaki durum | Üründe |
+|---|---|---|
+| Aynı kurum | Yasal şart | Eşleşme yalnızca aynı kurum içinde |
+| Aynı sınıf | Yasal şart | Profilde hizmet sınıfı zorunlu alan; eşleşme yalnızca aynı sınıfta |
+| Farklı yer | Yasal şart | Aynı ildeki ilanlar eşleşmez |
+| Aynı unvan | Yasada yok; kurum uygulaması | Zorunlu değil, skoru artırır; farklı unvanda uyarı gösterilir |
+| Kadro derecesi | Kanun metninde şart olarak geçmiyor; kurumlar aranabilir | Zorunlu tutulmaz; kurum kuralı olarak eklenebilir |
+| Atamaya yetkili amirin uygun bulması | Yasal şart, takdir yetkisi | Uygulama bunu garanti etmez; ekranlarda açıkça yazar |
+| Ret halinde yargı yolu | İdare mahkemesi, genel iptal davası süresi (60 gün) | Bilgi metninde, hukuki tavsiye olmadan |
+
+**Kurum bazlı ek kurallar** (ör. Sağlık Bakanlığı hizmet grupları ve branş uyumu, MEB'de alan ve norm kadro) kurum yönetmelikleri ve uygulamalarından gelir ve zamanla değişir. Bunlar motorda `KurumKurali` olarak eklenir; tek bir genel kural gibi kodlanmaz. İlk sürümde yalnızca yasal asgari uygulanır ve arayüzde "Kurum ek şart arayabilir" uyarısı gösterilir.
+
+**Karıştırılmaması gereken düzenleme.** *Devlet Memurlarının Yer Değiştirme Suretiyle Atanmalarına İlişkin Yönetmelik* (R.G. 25/6/1983, S. 18088) olağan yer değiştirmeyi (tayin: hizmet bölgeleri, zorunlu çalışma süresi, Haziran–Eylül dönemi, mazeret atamaları) düzenler. Becayişi düzenleyen ayrı bir genel yönetmelik bulunamadı; bu yönetmeliğin dönem ve süre kuralları becayişe uygulanmaz.
+
+**Başvuru usulü.** Memurlar taleplerini disiplin amirleri kanalıyla atamaya yetkili amire iletir; iki taraf da dilekçe verir. Dilekçe ekranı bu yüzden "aynı gün, disiplin amiri kanalıyla, iki taraf da" uyarısını gösterir.
+
+**Doğrulanamayan veya belirsiz noktalar** (hukuk teyidi gerekir):
+- Aday memurların becayişi: yönetmelik kapsamı aday memurları dışarıda bırakıyor; becayiş için ayrı ve açık bir düzenleme bulunamadı. Ürün, aday memurları ilan vermekten şimdilik dışlar.
+- Sözleşmeli personel (4/B): ayrı mevzuata tabi olduğu belirtiliyor. Ürün yalnızca 657 kapsamındaki memurlara açık.
+- Asgari hizmet süresi, disiplin kaydı gibi koşullar kurumdan kuruma değişiyor; kanun metninde yok.
+- İkincil kaynaklardan birinde "derece kaldırıldı" tablosu, diğerlerinde "sınıf ve derece" ifadesi geçiyor. Kanun metninin kendisi teyit edilene kadar derece şart sayılmaz.
+- Kişisel iletişim bilgisinin ücret karşılığı açılması ve KVKK açısından işlenmesi mevzuat dışı bir konudur; ayrıca hukuk ve KVKK görüşü alınmalıdır.
+
 ## 2. Veri modeli
 
 | Varlık | Alanlar |
 |---|---|
-| `Ilan` | `id`, `kullanici_id`, `unvan`, `kurum_id`, `mevcut_il`, `hedef_iller[]`, `zincir_izni`, `durum` (taslak/yayında/kapalı), `mavi_tik`, `olusturma`, `guncelleme` |
+| `Ilan` | `id`, `kullanici_id`, `kurum_id`, `sinif`, `unvan`, `mevcut_il`, `hedef_iller[]`, `zincir_izni`, `durum` (taslak/yayında/kapalı), `mavi_tik`, `olusturma`, `guncelleme` |
 | `Eslesme` | `id`, `tip` (ikili/zincir), `ilan_idleri[2..3]`, `skor`, `durum` (yeni/onay_bekliyor/hazir/acik/iptal), `olusturma` |
 | `EslesmeOnayi` | `eslesme_id`, `ilan_id`, `onay` (bekliyor/evet/hayir), `zaman` |
 | `Yetki` | `ilan_id`, `urun_kodu`, `magaza` (apple/google), `islem_id`, `dogrulandi_zaman` — bir ilan için iletişimin açıldığını kanıtlar |
@@ -29,10 +60,10 @@ Kullanıcı akışı:
 
 ## 3. Eşleştirme
 
-- **Aday grubu:** Aynı kurum ve aynı unvan. Kadro derecesi ve benzeri şartlar hukuki açıdan doğrulanmalıdır (açık karar, bkz. §8).
+- **Aday grubu:** Aynı kurum ve aynı hizmet sınıfı (bkz. §1.1). Unvan ve derece yasal şart değildir; kurum kuralları `KurumKurali` olarak eklenir.
 - **İkili:** A ve B için `A.mevcut_il ∈ B.hedef_iller` ve `B.mevcut_il ∈ A.hedef_iller`.
 - **3'lü zincir:** Yönlü graf kurulur; `A → B`, "B'nin ilinde A gitmek istiyor" demektir. Uzunluğu 3 olan çevrimler (A → B → C → A) bulunur. Yalnızca `zincir_izni = true` olan ilanlar dahil edilir.
-- **Skor (ürün kararı, ayarlanabilir):** il uyumu, kurum, unvan ve hedef tercih sırası ağırlıklı toplanıp 0–100 aralığında gösterilir. İkili eşleşmeler zincirlerden önce sıralanır.
+- **Skor (ürün kararı, ayarlanabilir; uygulaması `lib/features/becayis/domain/eslestirici.dart`):** kurum + sınıf 50 puan, aynı unvan +20, hedef tercih sırası en çok +20, tüm taraflar mavi tikliyse +10, zincirde −10; 0–100 aralığında. İkili eşleşmeler zincirlerden önce sıralanır.
 - **Çalışma zamanı:** İlan yayınlanınca veya değişince artımlı çalışır (yalnızca aynı kurum + unvan grubu yeniden taranır). Ek olarak gece toplu yeniden tarama yapılır.
 - **Gizlilik:** Eşleşme listesinde yalnızca baş harf + soyad, il ve mavi tik bilgisi görünür.
 
@@ -79,7 +110,7 @@ Kimlik doğrulama Kadro hesabı ile yapılır. Tüm uçlar oturum ister; iletiş
 
 ## 8. Açık kararlar (yayın öncesi)
 
-1. Aday grubu kuralları: yalnızca kurum + unvan mı, kadro derecesi ve sınıfı da mı? (hukuk görüşü)
+1. Mevzuat teyidi: md. 73 metni mevzuat.gov.tr'den, aday memur ve sözleşmeli durumu ile kurum ek şartları bir idare hukuku uzmanından (bkz. §1.1).
 2. Fiyat ve mağaza fiyat basamağı.
 3. Aynı ilana ikinci eşleşme geldiğinde ek ödeme istenmeyeceği (bu şartnamede: istenmez) ürün olarak onaylanacak.
 4. Bildirimler için Kadro'nun mevcut push altyapısı mı, ayrı servis mi.
