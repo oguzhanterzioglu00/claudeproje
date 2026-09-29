@@ -47,13 +47,16 @@ Aynı ilkeler: resmî kaynak (Resmî Gazete, kurum duyuruları, Hazine ve Maliye
 
 **Uygulama:** `lib/features/haberler/` — `Haber` (başlık, tür, kaynak adı, yayın tarihi, kısa özet, `resmiKaynak`, `otomatikOzet`, bağlantı), `HaberKaynagi` arayüzü (`getir()`, en yeni başta) ve şimdilik `OrnekHaberKaynagi`. Ana sayfada `GundemBolumu` (en yeni 3 haber; kaynak yüklenemezse sessizce gizlenir), `Tümü` ile `HaberlerSayfasi` (tür süzgeci, hata/boş durum). Ayrıntı alt sayfasında kaynak, tarih, "Resmî kaynak" rozeti ve — özet yapay zekâ ürettiyse — "Otomatik özet" etiketi + uyarı görünür. Haber metni saklanmaz; yalnızca başlık, kısa özet ve bağlantı.
 
+**Görselli slaytlar:** Ana sayfada "Gündem" ve maaş ekranında "Maaş ve mevzuat haberleri" bölümleri yana kaydırılan görselli slaytlardır (`HaberSlaytlari`); kendiliğinden ilerler, dokununca durur, hareketi azalt ayarı ve gizli sekmede ilerlemez. `Haber.gorsel` (URL) doluysa kapak olarak yüklenir; yoksa ya da yüklenemezse türe göre çizilmiş kapak gösterilir. **Görsel telifi:** yalnızca yayın hakkı olan (kurumun kendi duyurusundaki ya da lisanslı) görseller kullanılmalı; üçüncü taraf haber sitelerinin görselleri kopyalanmaz. "Kaynağı aç" `url_launcher` ile yalnızca `https` adreslerini açar; bağlantısı olmayan içerikte düğme pasiftir.
+
 ## 4. Profil ve statü
 
-Modüllerin çoğu kullanıcının statüsüne (`Statu`: 657 memuru, 4/B sözleşmeli, işçi, akademik, diğer) göre değişir: Becayiş yalnızca 657 memurlarına açıktır, maaş hesabı şu an yalnızca memurlar içindir, ilan süzgeçleri ve uyum skoru statüye bağlıdır. Profil ekranı (`lib/features/profil/`) ilk açılışta gösterilir; ad, statü, kurum, hizmet sınıfı, unvan, il, sicil no, kurumsal e-posta, aday memur bilgisi ve maaş girdileri cihazda (`shared_preferences`) saklanır, ekrandan silinebilir. Ana sayfa, maaş ve becayiş bu profilden beslenir. Profil verisi KVKK kapsamındadır: açık rıza, minimum veri, silme hakkı.
+Modüllerin çoğu kullanıcının statüsüne (`Statu`: 657 memuru, 4/B sözleşmeli, işçi, akademik, diğer) göre değişir: Becayiş yalnızca 657 memurlarına açıktır, maaş hesabı şu an yalnızca memurlar içindir, ilan süzgeçleri ve uyum skoru statüye bağlıdır. Profil ekranı (`lib/features/profil/`) hesap açıldıktan sonra 4 adımlı kurulumla doldurulur (bkz. `docs/hesap-spec.md`); ad, statü, kurum, hizmet sınıfı, unvan, il, sicil no, kurumsal e-posta, aday memur bilgisi ve maaş girdileri cihazda (`shared_preferences`) saklanır, ekrandan silinebilir. Ana sayfa, maaş ve becayiş bu profilden beslenir. Profil verisi KVKK kapsamındadır: açık rıza, minimum veri, silme hakkı.
 
 ## 5. Açık işler
 
 1. Gerçek `MevzuatAsistani`, `IlanKaynagi` ve `HaberKaynagi` uygulamaları (HTTP istemcisi) ve arka uç.
-2. Uygulama içi "Kaynağı aç" için `url_launcher` bağlantısı (ilan ve haber ayrıntılarında düğme şimdilik pasif).
+2. Gerçek kimlik sağlayıcı, Google/Apple girişi ve hesap eşitleme (bkz. `docs/hesap-spec.md`).
 3. Profilin bulutla eşitlenmesi (açık rıza + KVKK aydınlatması), statüye göre ilan uyum skoru.
 4. 657 dışı statüler (4/B, işçi, akademik) için maaş hesabı.
+5. Bildirimler şimdilik uygulama içi ve profilden türetilir; itme bildirimi (push) için arka uç gerekir.

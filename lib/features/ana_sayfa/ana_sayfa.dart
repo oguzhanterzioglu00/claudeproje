@@ -68,16 +68,30 @@ class AnaSayfa extends StatelessWidget {
               const SizedBox(height: 16),
               Yukselen(
                 gecikme: const Duration(milliseconds: 200),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Yol haritan', style: PusulaYazi.baslik(18, agirlik: FontWeight.w700, aralik: -0.4)),
-                    Row(children: [
-                      Text('Detay', style: PusulaYazi.metin(13, renk: PusulaRenk.mavi, agirlik: FontWeight.w700)),
-                      const SizedBox(width: 4),
-                      const Icon(LucideIcons.arrowRight, size: 16, color: PusulaRenk.mavi),
-                    ]),
-                  ],
+                child: Semantics(
+                  container: true,
+                  button: maasaGit != null,
+                  label: 'Yol haritan, detay',
+                  excludeSemantics: true,
+                  onTap: maasaGit,
+                  child: InkWell(
+                    onTap: maasaGit,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Yol haritan', style: PusulaYazi.baslik(18, agirlik: FontWeight.w700, aralik: -0.4)),
+                          Row(children: [
+                            Text('Detay',
+                                style: PusulaYazi.metin(13, renk: PusulaRenk.mavi, agirlik: FontWeight.w700)),
+                            const SizedBox(width: 4),
+                            const Icon(LucideIcons.arrowRight, size: 16, color: PusulaRenk.mavi),
+                          ]),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 14),

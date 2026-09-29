@@ -51,8 +51,13 @@ class _SecimState extends State<_Secim> {
         yazilan.isNotEmpty &&
         !widget.secenekler.any((s) => normalize(s) == normalize(yazilan));
 
+    // Klavye açıkken (alt sayfa klavye kadar yukarı kalkar) liste ekrandan taşmasın.
+    final ekran = MediaQuery.sizeOf(context).height;
+    final klavye = MediaQuery.viewInsetsOf(context).bottom;
+    final yukseklik = (ekran - klavye - 130).clamp(180.0, ekran * 0.6);
+
     return SizedBox(
-      height: MediaQuery.sizeOf(context).height * 0.6,
+      height: yukseklik,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

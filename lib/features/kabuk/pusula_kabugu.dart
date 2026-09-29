@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/alt_cubuk.dart';
+import '../../core/bilesenler.dart';
 import '../ana_sayfa/ana_sayfa.dart';
 import '../ana_sayfa/ana_sayfa_verisi.dart';
+import '../ana_sayfa/bildirimler.dart';
 import '../asistan/asistan_servisi.dart';
 import '../asistan/asistan_sayfasi.dart';
 import '../becayis/data/becayis_deposu.dart';
@@ -134,6 +136,25 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
   /// Zincirler ayrı sayıldığı için ana sayfada yalnızca ikili eşleşmeler görünür.
   int get _ikiliSayisi => _becayis.eslesmeler.where((e) => e.tip == EslesmeTipi.ikili).length;
 
+  List<Bildirim> _bildirimler(Profil p) =>
+      bildirimleriUret(p, becayisYayinda: _becayis.yayinda, ikiliEslesme: _ikiliSayisi);
+
+  Future<void> _bildirimleriAc() async {
+    final secilen = await AltSayfa.goster<Bildirim>(
+      context,
+      builder: (c) => BildirimListesi(bildirimler: _bildirimler(_profil), onSec: (b) => Navigator.pop(c, b)),
+    );
+    if (secilen == null || !mounted) return;
+    switch (secilen.hedef) {
+      case BildirimHedefi.profil:
+        _profilAc();
+      case BildirimHedefi.maas:
+        _git(PusulaKabugu.maas);
+      case BildirimHedefi.becayis:
+        _git(PusulaKabugu.becayis);
+    }
+  }
+
   String _becayisAlt(Profil p) {
     if (p.becayisKapaliNedeni != null) return 'Yalnızca memurlar';
     if (p.eksikBecayisAlanlari.isNotEmpty) return 'Profilini tamamla';
@@ -152,15 +173,15 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
                   Listenable.merge([widget.profilDeposu, _becayis, if (widget.fotograf != null) widget.fotograf!]),
               builder: (context, _) {
                 final p = _profil;
-                final yeni = p.becayisYapabilir && p.eksikBecayisAlanlari.isEmpty ? _ikiliSayisi : 0;
                 return AnaSayfa(
                   veri: AnaSayfaVerisi.profilden(
                     p,
                     bugun: widget.bugun ?? DateTime.now(),
                     becayisAlt: _becayisAlt(p),
-                    bildirimVar: yeni > 0,
+                    bildirimVar: _bildirimler(p).isNotEmpty,
                   ),
                   bugun: widget.bugun,
+                  bildirimAc: _bildirimleriAc,
                   maasaGit: () => _git(PusulaKabugu.maas),
                   asistanaGit: () => _git(PusulaKabugu.asistanSekmesi),
                   becayisiAc: () => _git(PusulaKabugu.becayis),

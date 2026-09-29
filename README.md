@@ -18,13 +18,14 @@ Tasarım: "Memur Uygulaması İlk Tasarım" (Claude Artifact). Renkler Ayas Soft
 
 - `lib/core/` — tema, logo (`logo.dart`) ve ortak parçalar
 - `tool/simge_uret_test.dart` — uygulama simgelerini logodan üretir: `flutter test tool/simge_uret_test.dart`
-- `lib/features/profil/` — tanıtım kaydırması, 3 adımlı ilk kurulum, profil ve statü (cihazda saklanır)
+- `lib/features/hesap/` — giriş/kayıt, Google ve Apple ile giriş (örnek), şifre değiştirme, hesap silme
+- `lib/features/profil/` — tanıtım, 4 adımlı ilk kurulum, profil fotoğrafı, statü (cihazda saklanır)
 - `lib/features/ana_sayfa/` — profil odaklı ana sayfa ve Gündem bölümü
 - `lib/features/maas/` — memur maaş motoru ve ekranı
 - `lib/features/becayis/` — Becayiş modülü (`domain/` eşleştirme motoru)
 - `lib/features/asistan/`, `ilanlar/`, `haberler/` — Hakkım ne?, kamu ilanları, Gündem (şimdilik örnek servislerle)
 - `test/` — birim ve widget testleri
-- `docs/becayis-spec.md`, `docs/maas-spec.md`, `docs/asistan-ve-haber-spec.md` — ürün ve arka uç şartnameleri (hukuki dayanak dahil)
+- `docs/becayis-spec.md`, `docs/maas-spec.md`, `docs/asistan-ve-haber-spec.md`, `docs/hesap-spec.md` — ürün ve arka uç şartnameleri (hukuki dayanak dahil)
 
 ## Çalıştırma
 
@@ -48,4 +49,5 @@ Bu APK debug anahtarıyla imzalıdır; yalnızca deneme içindir.
 - Becayiş mevzuat teyidi ve hukuk/KVKK görüşü: `docs/becayis-spec.md` §1.1 ve §8.
 - Maaş motorundaki vergi/SGK/asgari ücret parametreleri ikincil kaynaklıdır; resmî kaynakla doğrulanmalı (`docs/maas-spec.md`).
 - Ödeme, doğrulama, asistan, ilan ve haber servisleri şimdilik örnektir; arka uç bağlanmadan yayınlanmamalı.
+- Hesaplar cihazda tutulur; **Google ve Apple ile giriş gerçek değildir** (örnek hesap açar). Gerçek kimlik sağlayıcı, sağlayıcıların resmî düğme varlıkları ve Kullanım Koşulları/Aydınlatma metinleri hazırlanmadan yayınlanmamalı (`docs/hesap-spec.md`).
 - Android ve iOS klasörleri repoda; gerçek cihaz/emülatörde `flutter run` ve mağaza imzalama (Android anahtar deposu, iOS sertifikaları) henüz denenmedi. Web klasörü eklenmedi; kod tabanı ayrı bir kopyada `flutter build web --release` ile başarıyla derlendi.
