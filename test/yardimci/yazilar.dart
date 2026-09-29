@@ -22,6 +22,7 @@ Future<void> pusulaYazilariniYukle() async {
   final lucide = FontLoader('packages/lucide_icons_flutter/Lucide')
     ..addFont(rootBundle.load('packages/lucide_icons_flutter/assets/lucide.ttf'));
   await lucide.load();
+  await yukle('PusulaLira', ['PusulaLira-400.ttf', 'PusulaLira-700.ttf']);
   await yukle('Figtree', [
     'Figtree-Regular.ttf',
     'Figtree-Medium.ttf',

@@ -23,6 +23,10 @@ abstract final class PusulaYazi {
   static const baslikAilesi = 'Sora';
   static const metinAilesi = 'Figtree';
 
+  /// Sora ve Figtree'de olmayan ₺ işareti için gömülü yedek yazı.
+  static const liraAilesi = 'PusulaLira';
+  static const _yedek = [liraAilesi];
+
   static TextStyle baslik(
     double boyut, {
     Color renk = PusulaRenk.lacivert,
@@ -31,6 +35,7 @@ abstract final class PusulaYazi {
   }) =>
       TextStyle(
         fontFamily: baslikAilesi,
+        fontFamilyFallback: _yedek,
         fontSize: boyut,
         fontWeight: agirlik,
         letterSpacing: aralik,
@@ -45,6 +50,7 @@ abstract final class PusulaYazi {
   }) =>
       TextStyle(
         fontFamily: metinAilesi,
+        fontFamilyFallback: _yedek,
         fontSize: boyut,
         fontWeight: agirlik,
         color: renk,

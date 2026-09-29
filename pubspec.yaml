@@ -20,9 +20,16 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   # Yazı tipleri uygulamaya gömülüdür (çevrimdışı çalışır, ağdan yazı tipi çekilmez).
-  # Sora ve Figtree: SIL Open Font License 1.1. Her ikisinde de ₺ işareti yok;
-  # ₺ sistem yazı tipinden gelir.
+  # Sora, Figtree ve Noto Sans: SIL Open Font License 1.1. Sora ve Figtree'de ₺
+  # işareti yok; PusulaLira, Noto Sans'tan yalnızca ₺ glifi alınarak üretilmiş
+  # küçük bir yedek yazıdır (fontFamilyFallback olarak kullanılır).
   fonts:
+    - family: PusulaLira
+      fonts:
+        - asset: assets/fonts/PusulaLira-400.ttf
+          weight: 400
+        - asset: assets/fonts/PusulaLira-700.ttf
+          weight: 700
     - family: Sora
       fonts:
         - asset: assets/fonts/Sora-Medium.ttf

@@ -8,6 +8,7 @@ import '../ana_sayfa/ana_sayfa_verisi.dart';
 import '../becayis/data/becayis_deposu.dart';
 import '../becayis/domain/statu.dart';
 import '../becayis/presentation/becayis_sekmesi.dart';
+import '../maas/presentation/maas_sayfasi.dart';
 
 /// Uygulama kabuğu: beş sekme ve yüzen alt çubuk. Sekmeler değişince durumları
 /// korunur ([IndexedStack]).
@@ -63,7 +64,7 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
               asistanaGit: () => _git(PusulaKabugu.asistan),
               becayisiAc: () => _git(PusulaKabugu.becayis),
             ),
-            const _Yakinda('Maaş hesapla'),
+            MaasSayfasi(ay: widget.bugun?.month),
             const _Yakinda('Hakkım ne?'),
             BecayisSekmesi(profil: widget.profil, depo: widget.becayisDeposu),
             const _Yakinda('İlanlar'),
