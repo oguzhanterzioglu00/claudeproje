@@ -21,11 +21,24 @@ void main() {
     expect(satir, 'version: ${UygulamaBilgisi.surum}+${UygulamaBilgisi.derleme}');
   });
 
-  group('yasal metin taslakları', () {
-    test('taslaklar açıkça işaretli; doldurulacak yerler sayılır', () {
-      expect(YasalMetinler.taslakUyarisi, contains('TASLAK'));
-      expect(YasalMetinler.aydinlatma.doldurulacakYerSayisi, greaterThan(0));
-      expect(YasalMetinler.kosullar.doldurulacakYerSayisi, greaterThan(0));
+  group('yasal metinler', () {
+    test('doldurulmamış yer tutucu kalmamış; gerçek veri sorumlusu bilgileri var', () {
+      expect(YasalMetinler.aydinlatma.doldurulacakYerSayisi, 0);
+      expect(YasalMetinler.kosullar.doldurulacakYerSayisi, 0);
+      final metin = [
+        ...YasalMetinler.aydinlatma.bolumler,
+        ...YasalMetinler.kosullar.bolumler,
+      ].map((b) => b.metin).join(' ');
+      for (final bilgi in [
+        'Oğuzhan Terzioğlu',
+        '8400627830',
+        'Ünye',
+        'bilgi@ayasyazilim.com.tr',
+        'hs01.kep.tr',
+        'otuz gün',
+      ]) {
+        expect(metin, contains(bilgi));
+      }
     });
 
     test('aydınlatma metni KVKK md. 10 unsurlarını kapsar', () {
@@ -70,13 +83,15 @@ void main() {
       tester.view.physicalSize = const Size(390, 1800);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
-      await tester.pumpWidget(MaterialApp(
-        theme: pusulaTema(),
-        home: const AyarlarSayfasi(
-          hesap: Hesap(id: 'u-1', saglayici: GirisSaglayici.eposta, eposta: 'a@b.co'),
-          profil: Profil(ad: 'Ayşe', statu: Statu.diger),
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: pusulaTema(),
+          home: const AyarlarSayfasi(
+            hesap: Hesap(id: 'u-1', saglayici: GirisSaglayici.eposta, eposta: 'a@b.co'),
+            profil: Profil(ad: 'Ayşe', statu: Statu.diger),
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
     }
 
@@ -89,11 +104,11 @@ void main() {
       }
     });
 
-    testWidgets('yasal metin sayfası taslak uyarısını ve tüm bölümleri gösterir', (tester) async {
+    testWidgets('yasal metin sayfası taslak uyarısı olmadan bölümleri gösterir', (tester) async {
       await ac(tester);
       await tester.tap(find.text('Aydınlatma Metni'));
       await tester.pumpAndSettle();
-      expect(find.textContaining('TASLAK'), findsOneWidget);
+      expect(find.textContaining('TASLAK'), findsNothing);
       expect(find.text('Aydınlatma Metni (KVKK md. 10)'), findsOneWidget);
       expect(find.textContaining('1. Veri sorumlusu'), findsOneWidget);
     });

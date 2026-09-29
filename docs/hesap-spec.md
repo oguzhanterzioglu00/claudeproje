@@ -21,7 +21,7 @@ Bu belge, uygulamadaki hesap katmanının bugünkü durumunu ve gerçek arka uç
 5. **Hesap silme:** mağaza kuralları (özellikle Apple 5.1.1(v)) gereği uygulama içinden hesabı silmek zorunludur; sunucuda da kalıcı silme (KVKK silme hakkı) uygulanmalıdır. `KimlikServisi.hesabiSil` bunun için vardır.
 6. **Şifre sıfırlama:** sunucu tarafında zaman sınırlı, tek kullanımlık bağlantı e-postası; yanıtta hesabın var olup olmadığı belli edilmemelidir.
 7. **Oturum güvenliği:** jetonlar `flutter_secure_storage` gibi güvenli depoda tutulmalı; `shared_preferences` yalnızca gizli olmayan verilere uygundur.
-8. **KVKK:** giriş ekranındaki Kullanım Koşulları ve Aydınlatma Metni bağlantıları için hukuk onaylı metinler hazırlanmalı (şimdilik yalnızca cümle olarak geçer). Profil ve fotoğrafın sunucuyla eşitlenmesi ancak açık rızayla yapılmalıdır.
+8. **KVKK:** aydınlatma metni ve kullanım koşulları veri sorumlusunun (Ayas Yazılım) KVKK sayfalarındaki bilgilerle dolduruldu (`lib/features/ayarlar/yasal_metinler.dart`). Sunucu tabanlı özellik eklenirken bu metinler (aktarım, saklama, yurt dışı) güncellenmelidir. Profil ve fotoğrafın sunucuyla eşitlenmesi ancak açık rızayla yapılmalıdır.
 9. Fotoğraf sunucuya yüklenecekse boyut/tür denetimi, virüs taraması ve silme (hesapla birlikte) tanımlanmalıdır.
 
 ## 3. Bilinen sınırlar

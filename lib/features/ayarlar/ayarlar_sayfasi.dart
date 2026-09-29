@@ -45,70 +45,74 @@ class AyarlarSayfasi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(18, 24, 18, 32),
-            children: [
-              const Yukselen(child: GeriBaslik(ustYazi: 'Kamu Pusulası', baslik: 'Ayarlar', sag: SizedBox.shrink())),
-              if (hatirlatici != null && hatirlatici!.destekleniyor) ...[
-                const SizedBox(height: 22),
-                _Hatirlaticilar(depo: hatirlatici!, profil: profil),
-              ],
-              const SizedBox(height: 22),
-              const _Baslik('Gizlilik ve yasal'),
-              _Satir(
-                ikon: LucideIcons.shieldCheck,
-                metin: 'Aydınlatma Metni',
-                alt: 'Verilerin nasıl işlendiği (KVKK)',
-                onTap: () => _sayfaAc(context, const YasalSayfasi(metin: YasalMetinler.aydinlatma)),
-              ),
-              const SizedBox(height: 8),
-              _Satir(
-                ikon: LucideIcons.fileText,
-                metin: 'Kullanım Koşulları',
-                alt: 'Hizmetin kapsamı ve sınırları',
-                onTap: () => _sayfaAc(context, const YasalSayfasi(metin: YasalMetinler.kosullar)),
-              ),
-              const SizedBox(height: 22),
-              const _Baslik('Verilerim'),
-              _Satir(
-                ikon: LucideIcons.copy,
-                metin: 'Verilerimi kopyala',
-                alt: 'Cihazdaki bilgilerinin dökümünü panoya al',
-                onTap: () => _verileriKopyala(context),
-              ),
-              const SizedBox(height: 8),
-              const _Bilgi(
-                'Profilini ve hesabını silmek için Profil sayfasındaki "Profil bilgilerimi sil" ve '
-                '"Hesabımı ve verilerimi sil" düğmelerini kullanabilirsin.',
-              ),
-              const SizedBox(height: 22),
-              const _Baslik('Hakkında'),
-              _Satir(
-                ikon: LucideIcons.scrollText,
-                metin: 'Açık kaynak lisansları',
-                alt: 'Kullanılan yazı tipleri ve kütüphaneler',
-                onTap: () => showLicensePage(
-                  context: context,
-                  applicationName: UygulamaBilgisi.ad,
-                  applicationVersion: UygulamaBilgisi.surumMetni,
-                ),
-              ),
-              const SizedBox(height: 14),
-              Center(
-                child: Column(
-                  children: [
-                    Text(UygulamaBilgisi.ad, style: PusulaYazi.metin(14, agirlik: FontWeight.w700)),
-                    const SizedBox(height: 2),
-                    Text('Sürüm ${UygulamaBilgisi.surumMetni}',
-                        style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500)),
-                  ],
-                ),
-              ),
-            ],
+    body: SafeArea(
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(18, 24, 18, 32),
+        children: [
+          const Yukselen(
+            child: GeriBaslik(ustYazi: 'Kamu Pusulası', baslik: 'Ayarlar', sag: SizedBox.shrink()),
           ),
-        ),
-      );
+          if (hatirlatici != null && hatirlatici!.destekleniyor) ...[
+            const SizedBox(height: 22),
+            _Hatirlaticilar(depo: hatirlatici!, profil: profil),
+          ],
+          const SizedBox(height: 22),
+          const _Baslik('Gizlilik ve yasal'),
+          _Satir(
+            ikon: LucideIcons.shieldCheck,
+            metin: 'Aydınlatma Metni',
+            alt: 'Verilerin nasıl işlendiği (KVKK)',
+            onTap: () => _sayfaAc(context, const YasalSayfasi(metin: YasalMetinler.aydinlatma)),
+          ),
+          const SizedBox(height: 8),
+          _Satir(
+            ikon: LucideIcons.fileText,
+            metin: 'Kullanım Koşulları',
+            alt: 'Hizmetin kapsamı ve sınırları',
+            onTap: () => _sayfaAc(context, const YasalSayfasi(metin: YasalMetinler.kosullar)),
+          ),
+          const SizedBox(height: 22),
+          const _Baslik('Verilerim'),
+          _Satir(
+            ikon: LucideIcons.copy,
+            metin: 'Verilerimi kopyala',
+            alt: 'Cihazdaki bilgilerinin dökümünü panoya al',
+            onTap: () => _verileriKopyala(context),
+          ),
+          const SizedBox(height: 8),
+          const _Bilgi(
+            'Profilini ve hesabını silmek için Profil sayfasındaki "Profil bilgilerimi sil" ve '
+            '"Hesabımı ve verilerimi sil" düğmelerini kullanabilirsin.',
+          ),
+          const SizedBox(height: 22),
+          const _Baslik('Hakkında'),
+          _Satir(
+            ikon: LucideIcons.scrollText,
+            metin: 'Açık kaynak lisansları',
+            alt: 'Kullanılan yazı tipleri ve kütüphaneler',
+            onTap: () => showLicensePage(
+              context: context,
+              applicationName: UygulamaBilgisi.ad,
+              applicationVersion: UygulamaBilgisi.surumMetni,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Center(
+            child: Column(
+              children: [
+                Text(UygulamaBilgisi.ad, style: PusulaYazi.metin(14, agirlik: FontWeight.w700)),
+                const SizedBox(height: 2),
+                Text(
+                  'Sürüm ${UygulamaBilgisi.surumMetni}',
+                  style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _Baslik extends StatelessWidget {
@@ -118,9 +122,9 @@ class _Baslik extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: Text(metin, style: PusulaYazi.baslik(18, agirlik: FontWeight.w700, aralik: -0.4)),
-      );
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Text(metin, style: PusulaYazi.baslik(18, agirlik: FontWeight.w700, aralik: -0.4)),
+  );
 }
 
 class _Bilgi extends StatelessWidget {
@@ -130,10 +134,12 @@ class _Bilgi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Text(metin,
-            style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500).copyWith(height: 1.45)),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 4),
+    child: Text(
+      metin,
+      style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500).copyWith(height: 1.45),
+    ),
+  );
 }
 
 class _Satir extends StatelessWidget {
@@ -146,47 +152,50 @@ class _Satir extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        container: true,
-        button: true,
-        label: '$metin. $alt',
-        excludeSemantics: true,
+    container: true,
+    button: true,
+    label: '$metin. $alt',
+    excludeSemantics: true,
+    onTap: onTap,
+    child: Material(
+      color: PusulaRenk.beyaz,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: PusulaRenk.lacivert, width: 1.5),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
         onTap: onTap,
-        child: Material(
-          color: PusulaRenk.beyaz,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: PusulaRenk.lacivert, width: 1.5),
-          ),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(20),
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Row(
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(color: PusulaRenk.cizgi, borderRadius: BorderRadius.circular(14)),
-                    child: Icon(ikon, size: 20, color: PusulaRenk.lacivert),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(metin, style: PusulaYazi.metin(15, agirlik: FontWeight.w700)),
-                        Text(alt, style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500)),
-                      ],
-                    ),
-                  ),
-                  const Icon(LucideIcons.chevronRight, size: 18, color: PusulaRenk.soluk),
-                ],
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(color: PusulaRenk.cizgi, borderRadius: BorderRadius.circular(14)),
+                child: Icon(ikon, size: 20, color: PusulaRenk.lacivert),
               ),
-            ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(metin, style: PusulaYazi.metin(15, agirlik: FontWeight.w700)),
+                    Text(
+                      alt,
+                      style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(LucideIcons.chevronRight, size: 18, color: PusulaRenk.soluk),
+            ],
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 /// Kademe ilerlemesi hatırlatıcısı anahtarı. Bildirimler yalnızca bu cihazda kurulur.
@@ -216,47 +225,49 @@ class _Hatirlaticilar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-        listenable: depo,
-        builder: (context, _) => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const _Baslik('Hatırlatıcılar'),
-            PusulaKart(
-              radius: 22,
-              padding: const EdgeInsets.fromLTRB(16, 8, 10, 8),
-              child: Semantics(
-                container: true,
-                toggled: depo.kademeAcik,
-                label: 'Kademe hatırlatıcısı',
-                child: Row(
-                  children: [
-                    const Icon(LucideIcons.bellRing, size: 20, color: PusulaRenk.lacivert),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Kademe hatırlatıcısı', style: PusulaYazi.metin(15, agirlik: FontWeight.w700)),
-                          Text('1 hafta önce ve süre dolduğu gün',
-                              style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500)),
-                        ],
+    listenable: depo,
+    builder: (context, _) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _Baslik('Hatırlatıcılar'),
+        PusulaKart(
+          radius: 22,
+          padding: const EdgeInsets.fromLTRB(16, 8, 10, 8),
+          child: Semantics(
+            container: true,
+            toggled: depo.kademeAcik,
+            label: 'Kademe hatırlatıcısı',
+            child: Row(
+              children: [
+                const Icon(LucideIcons.bellRing, size: 20, color: PusulaRenk.lacivert),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Kademe hatırlatıcısı', style: PusulaYazi.metin(15, agirlik: FontWeight.w700)),
+                      Text(
+                        '1 hafta önce ve süre dolduğu gün',
+                        style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500),
                       ),
-                    ),
-                    Switch(
-                      value: depo.kademeAcik,
-                      activeThumbColor: PusulaRenk.lacivert,
-                      activeTrackColor: PusulaRenk.amber,
-                      onChanged: (v) => _degistir(context, v),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+                Switch(
+                  value: depo.kademeAcik,
+                  activeThumbColor: PusulaRenk.lacivert,
+                  activeTrackColor: PusulaRenk.amber,
+                  onChanged: (v) => _degistir(context, v),
+                ),
+              ],
             ),
-            if (depo.kademeAcik && !_kademeVar) ...[
-              const SizedBox(height: 8),
-              const _Bilgi('Bildirim kurulması için Profil sayfasından kademeye geliş tarihini girmelisin.'),
-            ],
-          ],
+          ),
         ),
-      );
+        if (depo.kademeAcik && !_kademeVar) ...[
+          const SizedBox(height: 8),
+          const _Bilgi('Bildirim kurulması için Profil sayfasından kademeye geliş tarihini girmelisin.'),
+        ],
+      ],
+    ),
+  );
 }

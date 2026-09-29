@@ -179,12 +179,12 @@ void main() {
     expect(find.text('Apple ile devam et'), findsOneWidget);
   });
 
-  testWidgets('Kullanım Koşulları ve Aydınlatma Metni bağlantıları taslak metni açar', (tester) async {
+  testWidgets('Kullanım Koşulları ve Aydınlatma Metni bağlantıları ilgili metni açar', (tester) async {
     await ac(tester);
     await tester.scrollUntilVisible(find.text('Kullanım Koşulları'), 200, scrollable: find.byType(Scrollable).first);
     await tester.tap(find.text('Kullanım Koşulları'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('TASLAK'), findsOneWidget);
+    expect(find.textContaining('TASLAK'), findsNothing);
     expect(find.textContaining('1. Hizmetin tanımı'), findsOneWidget);
     await tester.tap(find.byIcon(LucideIcons.arrowLeft));
     await tester.pumpAndSettle();
