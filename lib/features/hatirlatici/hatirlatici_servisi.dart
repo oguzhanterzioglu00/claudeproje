@@ -15,6 +15,9 @@ abstract interface class HatirlaticiServisi {
   Future<void> planla({required int id, required String baslik, required String govde, required DateTime zaman});
 
   Future<void> iptal(int id);
+
+  /// Bildirimi hemen gösterir (ör. yeni ilan bulunduğunda).
+  Future<void> hemenGoster({required int id, required String baslik, required String govde});
 }
 
 /// Android ve iOS'ta `flutter_local_notifications` ile çalışır; diğer platformlarda hiçbir şey yapmaz.
@@ -27,7 +30,7 @@ class YerelHatirlaticiServisi implements HatirlaticiServisi {
   static const _kanal = AndroidNotificationDetails(
     'hatirlaticilar',
     'Hatırlatıcılar',
-    channelDescription: 'Kademe ilerlemesi gibi tarihli hatırlatmalar',
+    channelDescription: 'Kademe ilerlemesi, yeni kamu ilanı gibi hatırlatmalar',
     importance: Importance.defaultImportance,
     priority: Priority.defaultPriority,
   );
@@ -97,6 +100,18 @@ class YerelHatirlaticiServisi implements HatirlaticiServisi {
       }, null);
 
   @override
+  Future<void> hemenGoster({required int id, required String baslik, required String govde}) => _guvenli(() async {
+    if (!destekleniyor) return;
+    await _hazirla();
+    await _eklenti.show(
+      id: id,
+      title: baslik,
+      body: govde,
+      notificationDetails: const NotificationDetails(android: _kanal, iOS: DarwinNotificationDetails()),
+    );
+  }, null);
+
+  @override
   Future<void> iptal(int id) => _guvenli(() async {
     if (!destekleniyor) return;
     await _hazirla();
@@ -113,6 +128,7 @@ class SahteHatirlaticiServisi implements HatirlaticiServisi {
   final bool destekleniyor;
   int izinIstegi = 0;
   final Map<int, ({String baslik, String govde, DateTime zaman})> planlananlar = {};
+  final List<({int id, String baslik, String govde})> gosterilenler = [];
 
   @override
   Future<bool> izinIste() async {
@@ -127,4 +143,8 @@ class SahteHatirlaticiServisi implements HatirlaticiServisi {
 
   @override
   Future<void> iptal(int id) async => planlananlar.remove(id);
+
+  @override
+  Future<void> hemenGoster({required int id, required String baslik, required String govde}) async =>
+      gosterilenler.add((id: id, baslik: baslik, govde: govde));
 }

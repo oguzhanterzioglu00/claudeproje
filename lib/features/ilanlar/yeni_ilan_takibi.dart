@@ -1,0 +1,219 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+
+import '../../core/depolama.dart';
+import '../hatirlatici/hatirlatici_servisi.dart';
+import '../profil/domain/profil.dart';
+import 'ilan_kaynagi.dart';
+import 'ilan_modeli.dart';
+
+/// Yeni ilan bildirimi tercihi: açık/kapalı ve hangi ilan türleri için.
+class IlanBildirimTercihi {
+  const IlanBildirimTercihi({this.acik = false, this.turler = const {}});
+
+  final bool acik;
+  final Set<IlanTuru> turler;
+
+  IlanBildirimTercihi kopya({bool? acik, Set<IlanTuru>? turler}) =>
+      IlanBildirimTercihi(acik: acik ?? this.acik, turler: turler ?? this.turler);
+
+  Map<String, Object?> toJson() => {
+    'acik': acik,
+    'turler': [for (final t in turler) t.name],
+  };
+
+  factory IlanBildirimTercihi.fromJson(Object? j) {
+    if (j is! Map<String, Object?>) return const IlanBildirimTercihi();
+    final turler = j['turler'];
+    return IlanBildirimTercihi(
+      acik: j['acik'] == true,
+      turler: {
+        if (turler is List)
+          for (final t in turler)
+            for (final e in IlanTuru.values)
+              if (e.name == t) e,
+      },
+    );
+  }
+
+  /// Statüye göre makul başlangıç: memur ve sözleşmeli için memur+sözleşmeli alımı, işçi için işçi+sözleşmeli.
+  static Set<IlanTuru> varsayilan(Statu? s) => switch (s) {
+    Statu.memur657 || Statu.sozlesmeli => {IlanTuru.memur, IlanTuru.sozlesmeli},
+    Statu.isci => {IlanTuru.isci, IlanTuru.sozlesmeli},
+    _ => {for (final t in IlanTuru.values) t},
+  };
+}
+
+/// Yeni kamu ilanlarını fark edip bildirim gösterir.
+///
+/// Uygulama açıkken ve ön plana gelince (ve açıkken belirli aralıklarla) ilan akışına bakılır; daha önce
+/// görülmemiş, seçili türdeki ilanlar için cihazda bildirim gösterilir. Uygulama kapalıyken bildirim gelmez
+/// (bunun için sunucu tarafı anlık bildirim gerekir). Görülen ilan kimlikleri yalnızca cihazda saklanır.
+class YeniIlanTakibi extends ChangeNotifier {
+  YeniIlanTakibi({
+    required IlanKaynagi kaynak,
+    required HatirlaticiServisi servis,
+    required AnahtarDeger depolama,
+    required String hesapId,
+    DateTime Function()? simdi,
+  }) : _kaynak = kaynak,
+       _servis = servis,
+       _depolama = depolama,
+       _tercihAnahtari = 'ilan_bildirim_v1_$hesapId',
+       _gorulenAnahtari = 'ilan_gorulen_v1_$hesapId',
+       _simdi = simdi ?? DateTime.now;
+
+  static const bildirimKimligi = 8001;
+  static const enFazlaBireysel = 3;
+  static const _saklanacakKimlik = 500;
+
+  final IlanKaynagi _kaynak;
+  final HatirlaticiServisi _servis;
+  final AnahtarDeger _depolama;
+  final String _tercihAnahtari;
+  final String _gorulenAnahtari;
+  final DateTime Function() _simdi;
+
+  IlanBildirimTercihi _tercih = const IlanBildirimTercihi();
+  bool _yuklendi = false;
+  bool _atildi = false;
+  bool _kontrolde = false;
+
+  IlanBildirimTercihi get tercih => _tercih;
+  bool get yuklendi => _yuklendi;
+  bool get destekleniyor => _servis.destekleniyor;
+
+  @override
+  void notifyListeners() {
+    if (!_atildi) super.notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _atildi = true;
+    super.dispose();
+  }
+
+  Future<void> yukle() async {
+    final ham = await _depolama.oku(_tercihAnahtari);
+    try {
+      _tercih = ham == null ? const IlanBildirimTercihi() : IlanBildirimTercihi.fromJson(jsonDecode(ham));
+    } catch (_) {
+      _tercih = const IlanBildirimTercihi();
+    }
+    _yuklendi = true;
+    notifyListeners();
+  }
+
+  Future<void> _kaydet() => _depolama.yaz(_tercihAnahtari, jsonEncode(_tercih.toJson()));
+
+  /// Bildirimi açar/kapatır. Açarken izin istenir (verilmezse açılmaz, false döner) ve mevcut ilanlar
+  /// "görüldü" sayılır: yalnızca bundan sonra yayımlananlar bildirilir.
+  Future<bool> ayarla(bool ac, {Statu? statu}) async {
+    if (ac) {
+      if (!await _servis.izinIste()) return false;
+      _tercih = _tercih.kopya(
+        acik: true,
+        turler: _tercih.turler.isEmpty ? IlanBildirimTercihi.varsayilan(statu) : null,
+      );
+      await _kaydet();
+      notifyListeners();
+      await _temelCiz();
+    } else {
+      _tercih = _tercih.kopya(acik: false);
+      await _kaydet();
+      notifyListeners();
+    }
+    return true;
+  }
+
+  Future<void> turAyarla(IlanTuru tur, bool secili) async {
+    final yeni = {..._tercih.turler};
+    secili ? yeni.add(tur) : yeni.remove(tur);
+    _tercih = _tercih.kopya(turler: yeni);
+    await _kaydet();
+    notifyListeners();
+  }
+
+  Future<Set<String>> _gorulenler() async {
+    final ham = await _depolama.oku(_gorulenAnahtari);
+    if (ham == null) return {};
+    try {
+      final j = jsonDecode(ham);
+      return j is List
+          ? {
+              for (final e in j)
+                if (e is String) e,
+            }
+          : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  Future<void> _gorulenleriYaz(Iterable<String> kimlikler) {
+    final liste = kimlikler.toList();
+    final kirpilmis = liste.length > _saklanacakKimlik ? liste.sublist(liste.length - _saklanacakKimlik) : liste;
+    return _depolama.yaz(_gorulenAnahtari, jsonEncode(kirpilmis));
+  }
+
+  Future<void> _temelCiz() async {
+    try {
+      final ilanlar = await _kaynak.getir();
+      await _gorulenleriYaz({...await _gorulenler(), for (final i in ilanlar) i.id});
+    } catch (_) {
+      // Akış şu an alınamadı: ilk başarılı kontrolde bildirim gitmesin diye temel boş bırakılmaz, sonraki kontrol dener.
+      if (await _depolama.oku(_gorulenAnahtari) == null) await _gorulenleriYaz(const []);
+    }
+  }
+
+  /// Akışa bakar; yeni ve seçili türdeki ilanlar için bildirim gösterir. Gösterilen bildirim sayısını döner.
+  Future<int> kontrolEt() async {
+    if (!_tercih.acik || _kontrolde) return 0;
+    _kontrolde = true;
+    try {
+      final List<KamuIlani> ilanlar;
+      try {
+        ilanlar = await _kaynak.getir();
+      } catch (_) {
+        return 0;
+      }
+      final gorulen = await _gorulenler();
+      final bugun = _simdi();
+      final yeniler = [
+        for (final i in ilanlar)
+          if (!gorulen.contains(i.id) && _tercih.turler.contains(i.tur) && i.acikMi(bugun)) i,
+      ];
+      await _gorulenleriYaz({...gorulen, for (final i in ilanlar) i.id});
+      if (yeniler.isEmpty) return 0;
+      if (yeniler.length <= enFazlaBireysel) {
+        var sira = 0;
+        for (final i in yeniler) {
+          await _servis.hemenGoster(
+            id: bildirimKimligi + sira++,
+            baslik: i.kurum.isEmpty ? 'Yeni kamu ilanı' : 'Yeni ilan: ${i.kurum}',
+            govde: i.baslik,
+          );
+        }
+        return yeniler.length;
+      }
+      await _servis.hemenGoster(
+        id: bildirimKimligi,
+        baslik: '${yeniler.length} yeni kamu ilanı',
+        govde: '${[for (final i in yeniler.take(2)) i.kurum.isEmpty ? i.baslik : i.kurum].join(', ')} ve diğerleri',
+      );
+      return 1;
+    } finally {
+      _kontrolde = false;
+    }
+  }
+
+  /// Hesap silinirken tercih ve görülen ilan kayıtları da silinir.
+  Future<void> tercihiSil() async {
+    _tercih = const IlanBildirimTercihi();
+    await _depolama.sil(_tercihAnahtari);
+    await _depolama.sil(_gorulenAnahtari);
+    notifyListeners();
+  }
+}

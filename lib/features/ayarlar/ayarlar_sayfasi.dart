@@ -6,6 +6,8 @@ import '../../core/bilesenler.dart';
 import '../../core/tema.dart';
 import '../../core/yukselen.dart';
 import '../hatirlatici/hatirlatici_deposu.dart';
+import '../ilanlar/ilan_modeli.dart';
+import '../ilanlar/yeni_ilan_takibi.dart';
 import '../hesap/domain/hesap.dart';
 import '../profil/domain/profil.dart';
 import 'kisisel_veri_dokumu.dart';
@@ -15,7 +17,14 @@ import 'yasal_sayfasi.dart';
 
 /// Ayarlar: hakkında, gizlilik ve yasal metinler, verilerimi kopyala, lisanslar.
 class AyarlarSayfasi extends StatelessWidget {
-  const AyarlarSayfasi({super.key, this.hesap, this.profil, this.fotografVar = false, this.hatirlatici});
+  const AyarlarSayfasi({
+    super.key,
+    this.hesap,
+    this.profil,
+    this.fotografVar = false,
+    this.hatirlatici,
+    this.ilanTakibi,
+  });
 
   final Hesap? hesap;
   final Profil? profil;
@@ -23,6 +32,9 @@ class AyarlarSayfasi extends StatelessWidget {
 
   /// Verilir ve platform destekliyorsa "Hatırlatıcılar" bölümü görünür.
   final HatirlaticiDeposu? hatirlatici;
+
+  /// Verilir ve platform destekliyorsa "Yeni ilan bildirimi" bölümü görünür.
+  final YeniIlanTakibi? ilanTakibi;
 
   void _sayfaAc(BuildContext context, Widget sayfa) =>
       Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => sayfa));
@@ -55,6 +67,10 @@ class AyarlarSayfasi extends StatelessWidget {
           if (hatirlatici != null && hatirlatici!.destekleniyor) ...[
             const SizedBox(height: 22),
             _Hatirlaticilar(depo: hatirlatici!, profil: profil),
+          ],
+          if (ilanTakibi != null && ilanTakibi!.destekleniyor) ...[
+            const SizedBox(height: 14),
+            _YeniIlanBildirimi(takip: ilanTakibi!, statu: profil?.statu),
           ],
           const SizedBox(height: 22),
           const _Baslik('Gizlilik ve yasal'),
@@ -269,5 +285,99 @@ class _Hatirlaticilar extends StatelessWidget {
         ],
       ],
     ),
+  );
+}
+
+/// Yeni kamu ilanı bildirimi: anahtar ve hangi ilan türleri için bildirim gösterileceği.
+class _YeniIlanBildirimi extends StatelessWidget {
+  const _YeniIlanBildirimi({required this.takip, required this.statu});
+
+  final YeniIlanTakibi takip;
+  final Statu? statu;
+
+  Future<void> _degistir(BuildContext context, bool ac) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final tamam = await takip.ayarla(ac, statu: statu);
+    if (tamam) return;
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          'Bildirim izni verilmedi. İstersen telefonun ayarlarından izin verebilirsin.',
+          style: PusulaYazi.metin(14, renk: PusulaRenk.beyaz, agirlik: FontWeight.w600),
+        ),
+        backgroundColor: PusulaRenk.lacivert,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: takip,
+    builder: (context, _) {
+      final tercih = takip.tercih;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          PusulaKart(
+            radius: 22,
+            padding: const EdgeInsets.fromLTRB(16, 8, 10, 8),
+            child: Semantics(
+              container: true,
+              toggled: tercih.acik,
+              label: 'Yeni ilan bildirimi',
+              child: Row(
+                children: [
+                  const Icon(LucideIcons.briefcase, size: 20, color: PusulaRenk.lacivert),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Yeni ilan bildirimi', style: PusulaYazi.metin(15, agirlik: FontWeight.w700)),
+                        Text(
+                          'Kamu işe alım ilanları yayımlanınca haber ver',
+                          style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: tercih.acik,
+                    activeThumbColor: PusulaRenk.lacivert,
+                    activeTrackColor: PusulaRenk.amber,
+                    onChanged: (v) => _degistir(context, v),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (tercih.acik) ...[
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final t in IlanTuru.values)
+                  FilterChip(
+                    label: Text(t.etiket, style: PusulaYazi.metin(13, agirlik: FontWeight.w700)),
+                    selected: tercih.turler.contains(t),
+                    onSelected: (v) => takip.turAyarla(t, v),
+                    selectedColor: PusulaRenk.amber,
+                    checkmarkColor: PusulaRenk.lacivert,
+                    backgroundColor: PusulaRenk.beyaz,
+                    side: const BorderSide(color: PusulaRenk.lacivert, width: 1.5),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const _Bilgi(
+              'Uygulamayı açtığında, ön plana getirdiğinde ve açıkken 15 dakikada bir yeni ilanlara bakılır. '
+              'Uygulama kapalıyken bildirim gelmez. Kaynak: Kariyer Kapısı (kariyerkapisi.gov.tr).',
+            ),
+          ],
+        ],
+      );
+    },
   );
 }

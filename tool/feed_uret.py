@@ -36,7 +36,7 @@ TR = dt.timezone(dt.timedelta(hours=3))  # Türkiye tüm yıl UTC+3
 UA = "Mozilla/5.0 (KamuPusulasi; +https://github.com/oguzhanterzioglu00/claudeproje)"
 
 
-def indir(url: str, veri: bytes | None = None, baslik: dict | None = None, zaman: int = 40) -> str | None:
+def indir(url: str, veri: bytes | None = None, baslik: dict | None = None, zaman: int = 25) -> str | None:
     """URL'yi metin olarak indirir; ulaşılamazsa None döner (üretici tek kaynağın hatasıyla durmaz)."""
     istek = urllib.request.Request(url, data=veri, headers={"User-Agent": UA, **(baslik or {})})
     try:
@@ -331,8 +331,11 @@ def main() -> int:
     rss_metin = indir(KARIYER_KAPISI_RSS)
     rss = kariyer_kapisi_rss_ayristir(rss_metin) if rss_metin else []
     api = []
+    # API, GitHub çalıştırıcılarından (yurt dışı IP) zaman aşımına uğruyor (2026-09-29 denemesi); yalnızca
+    # erişilebilirse bitiş tarihi eklenir. Kısa zaman aşımı, her çalıştırmada uzun beklemeyi önler.
     api_metin = indir(
         KARIYER_KAPISI_API,
+        zaman=8,
         veri=json.dumps({"krM_ID": 0, "searchText": "", "il": "0", "ilanTuru": "0"}).encode(),
         baslik={"Content-Type": "application/json"},
     )

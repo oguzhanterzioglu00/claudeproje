@@ -6,6 +6,7 @@ import '../../core/tema.dart';
 import '../haberler/haber_kaynagi.dart';
 import '../hatirlatici/hatirlatici_deposu.dart';
 import '../ilanlar/ilan_kaynagi.dart';
+import '../ilanlar/yeni_ilan_takibi.dart';
 import '../hatirlatici/hatirlatici_servisi.dart';
 import '../hesap/data/oturum_deposu.dart';
 import '../hesap/domain/hesap.dart';
@@ -21,12 +22,13 @@ import 'pusula_kabugu.dart';
 
 /// Bir hesaba ait cihaz içi kullanıcı verisi (profil ve fotoğraf).
 class _KullaniciVerisi {
-  _KullaniciVerisi(this.hesapId, this.profil, this.fotograf, this.hatirlatici);
+  _KullaniciVerisi(this.hesapId, this.profil, this.fotograf, this.hatirlatici, this.ilanTakibi);
 
   final String hesapId;
   final ProfilDeposu profil;
   final FotografDeposu fotograf;
   final HatirlaticiDeposu? hatirlatici;
+  final YeniIlanTakibi? ilanTakibi;
 
   bool get yuklendi => profil.yuklendi && fotograf.yuklendi;
 
@@ -34,6 +36,7 @@ class _KullaniciVerisi {
     profil.dispose();
     fotograf.dispose();
     hatirlatici?.dispose();
+    ilanTakibi?.dispose();
   }
 }
 
@@ -127,6 +130,14 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
         ProfilDeposu(widget.profilKaydiUret(hesap.id)),
         FotografDeposu(widget.depolama, anahtar: 'profil_foto_v1_${hesap.id}'),
         widget.hatirlatici == null ? null : HatirlaticiDeposu(widget.hatirlatici!, widget.depolama, hesapId: hesap.id),
+        widget.hatirlatici == null || widget.ilanKaynagi == null
+            ? null
+            : YeniIlanTakibi(
+                kaynak: widget.ilanKaynagi!,
+                servis: widget.hatirlatici!,
+                depolama: widget.depolama,
+                hesapId: hesap.id,
+              ),
       );
       _veri = v;
       v.profil.yukle();
@@ -185,6 +196,7 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
               fotografKaynagi: widget.fotografKaynagi,
               oturum: widget.oturum,
               hatirlatici: veri.hatirlatici,
+              ilanTakibi: veri.ilanTakibi,
               ilanKaynagi: widget.ilanKaynagi ?? const OrnekIlanKaynagi(),
               haberKaynagi: widget.haberKaynagi ?? const OrnekHaberKaynagi(),
             );

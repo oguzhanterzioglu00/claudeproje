@@ -47,7 +47,19 @@ Kıdem tazminatı tavanı, toplu iş sözleşmesi hükümleri, sözleşmeli pers
 
 **Bildirim:** kaydedilen ilanların son başvuru gününe 3 gün kala ve profile yüksek uyumlu yeni ilanlarda push (kullanıcı kapatabilir).
 
+### 2.1 Gerçek akış (2026-09-29 itibarıyla uygulamada)
+
+`tool/feed_uret.py` + `.github/workflows/feed.yml`: GitHub Actions her 15 dakikada Kariyer Kapısı'nın (T.C. Cumhurbaşkanlığı) resmî RSS beslemesini (`https://kariyerkapisi.gov.tr/RSS`) okur ve `ilanlar.json` dosyasını `feed-data` dalına yayımlar; uygulama `raw.githubusercontent.com/.../feed-data/ilanlar.json` adresini okur (`AkisIlanKaynagi`, CORS açık, ~5 dk önbellek). Kariyer Kapısı bu beslemeyi üçüncü tarafların kendi site/uygulamalarında yayımlaması için sunar; "RSS Tasarım Kılavuzu" gereği ekranda **Kariyer Kapısı logosu ve "Kamu İşe Alım İlanları" ibaresi** gösterilir (`_KaynakKunyesi`), başlık kurum adı + ilan başlığı olarak sunulur, ilan tam metni kopyalanmaz, "Başvur/Kaynağı aç" ilan sayfasına götürür.
+
+Bilinen sınırlar (dürüstlük): RSS'te **son başvuru tarihi yoktur** (ekranda "Son başvuru tarihi ilan sayfasında" yazar) ve `pubDate` bazı ilanlarda gelecekte bir tarihtir (başvuru başlangıcı gibi davranır; ekran "Başvurular ... tarihinde başlar" der). Sitenin kendi arayüzünün kullandığı liste uç noktası (`api.kariyerkapisi.gov.tr/api/ilan/SearchIlanPublic`, bitiş tarihi ve kurum içerir) GitHub çalıştırıcılarından ve bu geliştirme ortamından zaman aşımına uğradı; üretici erişilebilirse otomatik olarak bitiş tarihini ekler (`ilanlari_birlestir`), erişilemezse RSS ile devam eder. "Sana uygun" süzgeci gerçek akışta gizlidir (uyum puanı verisi yok).
+
+**Yeni ilan bildirimi:** Ayarlar'dan açılır (opt-in, izin ister), tür seçimi vardır (varsayılan statüye göre); uygulama açılırken, ön plana gelince ve açıkken 15 dakikada bir akış kontrol edilir, görülmemiş ve seçili türdeki ilanlar için cihazda bildirim gösterilir (`YeniIlanTakibi`). Açarken mevcut ilanlar "görüldü" sayılır; görülen kimlikler yalnızca cihazda saklanır. **Uygulama kapalıyken bildirim gelmez** — gerçek anlık bildirim için sunucu tarafı push (FCM/APNs) gerekir: bir Firebase projesi ve `feed.yml`'in yeni ilan bulunca FCM konusuna mesaj göndermesi.
+
 ## 3. Haberler (Gündem)
+
+**Gerçek akış (2026-09-29 itibarıyla):** `haberler.json` — Resmî Gazete günlük fihristinden (`resmigazete.gov.tr`, son 5 sayı) kamu personelini ilgilendiren maddeler (memur, personel, kadro, sözleşmeli, ek ödeme, atama, disiplin, toplu sözleşme...) ve her sayının künyesi (`AkisHaberKaynagi`). Yargı ve ilân bölümleri alınmaz. Resmî Gazete, botlara benzeyen kullanıcı adlarını (içinde "bot" geçenleri) engelliyor; üretici `Mozilla/5.0 (KamuPusulasi; +depo adresi)` kullanır. **Haber ajansı ve haber siteleri (TRT Haber, AA, DHA, İHA, memur siteleri, Google Haberler) bilinçli olarak kullanılmaz:** TRT Haber kullanım şartları ticari amaçlı mobil uygulamalarda kullanımı ve arşiv oluşturmayı yasaklar; Google Haberler RSS'i yalnızca kişisel, ticari olmayan kullanım içindir. Ajans haberi istenirse lisans/iş ortaklığı anlaşması gerekir (ör. AA veya DHA abonelik/API).
+
+
 
 Aynı ilkeler: resmî kaynak (Resmî Gazete, kurum duyuruları, Hazine ve Maliye Bakanlığı genelgeleri) öncelikli; üçüncü taraf haberde yalnızca başlık ve bağlantı; her haber kaynak ve zaman damgası taşır. Otomatik özet kullanılırsa "otomatik özet" etiketi ve kaynağa bağlantı zorunludur. Maaş katsayısı gibi sayısal duyurular (bkz. `docs/maas-spec.md` §4) haber akışından **değil**, doğrulanmış parametre güncellemesiyle uygulamaya girer.
 

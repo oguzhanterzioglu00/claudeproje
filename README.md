@@ -24,7 +24,7 @@ Tasarım: "Memur Uygulaması İlk Tasarım" (Claude Artifact). Renkler Ayas Soft
 - `lib/features/ana_sayfa/` — profil odaklı ana sayfa ve Gündem bölümü
 - `lib/features/maas/` — memur maaş motoru ve ekranı
 - `lib/features/becayis/` — Becayiş modülü (`domain/` eşleştirme motoru)
-- `lib/features/asistan/`, `ilanlar/`, `haberler/` — Hakkım ne?, kamu ilanları, Gündem (şimdilik örnek servislerle)
+- `lib/features/asistan/`, `ilanlar/`, `haberler/` — Hakkım ne? (doğrulanmış mevzuat), kamu ilanları (Kariyer Kapısı), Gündem (Resmî Gazete); veri akışı `tool/feed_uret.py` + `.github/workflows/feed.yml` ile 15 dakikada bir derlenir (`docs/asistan-ve-haber-spec.md` §2.1)
 - `test/` — birim ve widget testleri
 - `docs/becayis-spec.md`, `docs/maas-spec.md`, `docs/asistan-ve-haber-spec.md`, `docs/hesap-spec.md` — ürün ve arka uç şartnameleri (hukuki dayanak dahil)
 
@@ -65,6 +65,6 @@ gerçek cihaz davranışı için APK kullan.
 - Paket kimliği (`tr.com.ayasyazilim.pusula`) onaylanmalı; mağazada kalıcıdır.
 - Becayiş mevzuat teyidi ve hukuk/KVKK görüşü: `docs/becayis-spec.md` §1.1 ve §8.
 - Maaş motorundaki vergi/SGK/asgari ücret parametreleri ikincil kaynaklıdır; resmî kaynakla doğrulanmalı (`docs/maas-spec.md`).
-- Ödeme, doğrulama, asistan, ilan ve haber servisleri şimdilik örnektir; arka uç bağlanmadan yayınlanmamalı.
+- Ödeme ve doğrulama servisleri şimdilik örnektir. İlan (Kariyer Kapısı RSS) ve haber (Resmî Gazete) akışı gerçektir ama arka uçsuz (GitHub Actions + `feed-data` dalı) çalışır; ilanlarda son başvuru tarihi yoktur, uygulama kapalıyken anlık bildirim için sunucu tarafı push gerekir (`docs/asistan-ve-haber-spec.md` §2.1).
 - Hesaplar cihazda tutulur; **Google ve Apple ile giriş gerçek değildir** (örnek hesap açar). Gerçek kimlik sağlayıcı, sağlayıcıların resmî düğme varlıkları ve Kullanım Koşulları/Aydınlatma metinleri hazırlanmadan yayınlanmamalı (`docs/hesap-spec.md`).
 - Android ve iOS klasörleri repoda; gerçek cihaz/emülatörde `flutter run` ve mağaza imzalama (Android anahtar deposu, iOS sertifikaları) henüz denenmedi. Web klasörü eklenmedi; kod tabanı ayrı bir kopyada `flutter build web --release` ile başarıyla derlendi.

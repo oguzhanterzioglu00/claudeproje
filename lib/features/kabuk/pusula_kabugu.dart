@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -22,6 +24,7 @@ import '../haberler/haber_kaynagi.dart';
 import '../haberler/haber_modeli.dart';
 import '../ilanlar/ilan_kaynagi.dart';
 import '../ilanlar/ilanlar_sayfasi.dart';
+import '../ilanlar/yeni_ilan_takibi.dart';
 import '../maas/domain/memur_maas_hesaplayici.dart';
 import '../maas/presentation/maas_sayfasi.dart';
 import '../hatirlatici/hatirlatici_deposu.dart';
@@ -48,6 +51,7 @@ class PusulaKabugu extends StatefulWidget {
     this.fotografKaynagi = const ImagePickerFotografKaynagi(),
     this.oturum,
     this.hatirlatici,
+    this.ilanTakibi,
   });
 
   final ProfilDeposu profilDeposu;
@@ -71,6 +75,10 @@ class PusulaKabugu extends StatefulWidget {
   /// Verilirse ayarlarda hatırlatıcı tercihleri görünür ve profile göre bildirimler kurulur.
   final HatirlaticiDeposu? hatirlatici;
 
+  /// Verilirse yeni ilan bildirimi (ayarlarda açılır) çalışır: uygulama açılınca, ön plana gelince ve
+  /// açıkken 15 dakikada bir ilan akışı kontrol edilir.
+  final YeniIlanTakibi? ilanTakibi;
+
   /// Sekme sırası; kısayollar bu sabitlerle yönlendirir.
   static const anaSayfa = 0;
   static const maas = 1;
@@ -82,7 +90,9 @@ class PusulaKabugu extends StatefulWidget {
   State<PusulaKabugu> createState() => _PusulaKabuguState();
 }
 
-class _PusulaKabuguState extends State<PusulaKabugu> {
+class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver {
+  Timer? _ilanZamanlayici;
+
   static const _sekmeler = [
     AltSekme(etiket: 'Ana sayfa', ikon: LucideIcons.house),
     AltSekme(etiket: 'Maaş', ikon: LucideIcons.calculator),
@@ -108,10 +118,27 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
     _anahtar = _becayisAnahtari(_profil);
     widget.profilDeposu.addListener(_profilDegisti);
     widget.hatirlatici?.yukle().then((_) => widget.hatirlatici?.esitle(widget.profilDeposu.profil));
+    if (widget.ilanTakibi != null) {
+      WidgetsBinding.instance.addObserver(this);
+      widget.ilanTakibi!.yukle().then((_) => _ilanlariKontrolEt());
+      _ilanZamanlayici = Timer.periodic(const Duration(minutes: 15), (_) => _ilanlariKontrolEt());
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState durum) {
+    if (durum == AppLifecycleState.resumed) _ilanlariKontrolEt();
+  }
+
+  void _ilanlariKontrolEt() {
+    final takip = widget.ilanTakibi;
+    if (takip != null) unawaited(takip.kontrolEt());
   }
 
   @override
   void dispose() {
+    _ilanZamanlayici?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     widget.profilDeposu.removeListener(_profilDegisti);
     _becayis.dispose();
     super.dispose();
@@ -142,6 +169,7 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
         fotografKaynagi: widget.fotografKaynagi,
         oturum: widget.oturum,
         hatirlatici: widget.hatirlatici,
+        ilanTakibi: widget.ilanTakibi,
       ),
     ),
   );
