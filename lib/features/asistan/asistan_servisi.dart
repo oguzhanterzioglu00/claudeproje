@@ -42,7 +42,8 @@ class AsistanCevabi {
 /// metinleri üzerinde kaynak gösteren bir arama/üretim hattı çalıştırır
 /// (bkz. docs/asistan-ve-haber-spec.md).
 abstract interface class MevzuatAsistani {
-  Future<AsistanCevabi> sor(String soru);
+  /// [kitle]: kullanıcının çalışan grubu biliniyorsa cevap ve öneriler ona göre seçilir.
+  Future<AsistanCevabi> sor(String soru, {Kitle? kitle});
 }
 
 /// Soru–konu eşleştirmesinin sonucu.
@@ -73,14 +74,40 @@ abstract final class BilgiArama {
     return toplam;
   }
 
-  static BilgiEslesmesi esles(String soru, {List<BilgiKonusu> konular = BilgiBankasi.konular}) {
+  /// Soruda açıkça geçen çalışan grubu ("işçi", "İş Kanunu" ya da "memur", "657"); ikisi de ya da hiçbiri
+  /// geçiyorsa null.
+  static Kitle? _sorudakiKitle(String soru) {
+    final isci = soru.contains('isci') || soru.contains('is kanunu') || soru.contains('4857') || soru.contains('1475');
+    final memur = soru.contains('memur') || soru.contains('657');
+    if (isci == memur) return null;
+    return isci ? Kitle.isci : Kitle.memur;
+  }
+
+  static bool _uygun(BilgiKonusu k, Kitle? hedef) => hedef == null || k.kitle == Kitle.herkes || k.kitle == hedef;
+
+  /// Soruya en uygun konuyu bulur. Çalışan grubu ([kitle], sorudaki açık ifade ya da kullanıcının statüsü)
+  /// biliniyorsa yalnızca o gruba ve herkese yönelik konular aranır; orada eşleşme yoksa tüm konulara bakılır.
+  /// Grup hiç bilinmiyorsa önce memur/herkes konularına bakılır (işçi konuları yalnızca "işçi" gibi bir
+  /// ifadeyle, işçi statüsüyle ya da memur konusu bulunamadığında devreye girer).
+  static BilgiEslesmesi esles(String soru, {List<BilgiKonusu> konular = BilgiBankasi.konular, Kitle? kitle}) {
     final s = aramaAnahtari(soru);
+    final hedef = _sorudakiKitle(s) ?? kitle;
+    final once = hedef ?? Kitle.memur;
+    final e = _ara(s, [
+      for (final k in konular)
+        if (_uygun(k, once)) k,
+    ]);
+    if (e.konu != null || e.adaylar.isNotEmpty) return e;
+    return _ara(s, konular);
+  }
+
+  static BilgiEslesmesi _ara(String s, List<BilgiKonusu> konular) {
     final puanlar = [for (final k in konular) (k, puan(k, s))];
     final en = puanlar.fold<double>(0, (m, e) => e.$2 > m ? e.$2 : m);
     if (en <= 0) return const BilgiEslesmesi();
     final ust = [
       for (final e in puanlar)
-        if (e.$2 == en) e.$1
+        if (e.$2 == en) e.$1,
     ];
     return ust.length == 1 ? BilgiEslesmesi(konu: ust.first) : BilgiEslesmesi(adaylar: ust);
   }
@@ -97,18 +124,24 @@ class YerelMevzuatAsistani implements MevzuatAsistani {
 
   static const becayisKaynagi = MevzuatKaynagi(
     baslik: '657 sayılı Devlet Memurları Kanunu, md. 73 (Karşılıklı yer değiştirme)',
-    alinti: 'Aynı Kurumun başka başka yerlerde bulunan aynı sınıftaki memurları, karşılıklı olarak '
+    alinti:
+        'Aynı Kurumun başka başka yerlerde bulunan aynı sınıftaki memurları, karşılıklı olarak '
         'yer değiştirme suretiyle atanmalarını isteyebilirler. Bu isteğin yerine getirilmesi '
         'atamaya yetkili amirlerince uygun bulunmasına bağlıdır.',
   );
 
   /// Hızlı soru düğmeleri: her konunun örnek sorusu.
-  static List<BilgiKonusu> get desteklenenKonular => BilgiBankasi.konular.where((k) => !k.kapsamDisi).toList();
+  static List<BilgiKonusu> get desteklenenKonular => konularIcin(null);
+
+  /// [kitle] biliniyorsa yalnızca o gruba ve herkese yönelik konular; bilinmiyorsa hepsi.
+  static List<BilgiKonusu> konularIcin(Kitle? kitle) => BilgiBankasi.konular
+      .where((k) => !k.kapsamDisi && (kitle == null || k.kitle == Kitle.herkes || k.kitle == kitle))
+      .toList();
 
   @override
-  Future<AsistanCevabi> sor(String soru) async {
+  Future<AsistanCevabi> sor(String soru, {Kitle? kitle}) async {
     await Future<void>.delayed(sure);
-    final e = BilgiArama.esles(soru);
+    final e = BilgiArama.esles(soru, kitle: kitle);
 
     if (e.konu != null) {
       final k = e.konu!;
@@ -128,9 +161,10 @@ class YerelMevzuatAsistani implements MevzuatAsistani {
     }
 
     return AsistanCevabi(
-      metin: 'Bu soru için kanun metninden dayanaklı bir cevap bulamadım, tahmin yürütmek istemem. '
+      metin:
+          'Bu soru için kanun metninden dayanaklı bir cevap bulamadım, tahmin yürütmek istemem. '
           'Şu konularda kaynak göstererek cevap verebilirim:',
-      oneriler: [for (final k in desteklenenKonular) k.ornekSoru],
+      oneriler: [for (final k in konularIcin(kitle)) k.ornekSoru],
     );
   }
 }

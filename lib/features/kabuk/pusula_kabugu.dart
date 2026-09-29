@@ -12,6 +12,7 @@ import '../araclar/presentation/izin_sayfasi.dart';
 import '../araclar/presentation/zam_sayfasi.dart';
 import '../asistan/asistan_servisi.dart';
 import '../asistan/asistan_sayfasi.dart';
+import '../asistan/bilgi_bankasi.dart';
 import '../becayis/data/becayis_deposu.dart';
 import '../becayis/data/ornek_veri.dart';
 import '../becayis/domain/eslesme.dart';
@@ -177,6 +178,13 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
     }
   }
 
+  /// Asistanın kullanıcıya uygun mevzuatı seçmesi için çalışan grubu; sözleşmeli ve diğer statülerde belirsizdir.
+  static Kitle? _kitle(Statu s) => switch (s) {
+        Statu.memur657 => Kitle.memur,
+        Statu.isci => Kitle.isci,
+        _ => null,
+      };
+
   String _becayisAlt(Profil p) {
     if (p.becayisKapaliNedeni != null) return 'Yalnızca memurlar';
     if (p.eksikBecayisAlanlari.isNotEmpty) return 'Profilini tamamla';
@@ -242,7 +250,10 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
             );
           },
         ),
-        AsistanSayfasi(asistan: widget.asistan),
+        ListenableBuilder(
+          listenable: widget.profilDeposu,
+          builder: (context, _) => AsistanSayfasi(asistan: widget.asistan, kitle: _kitle(_profil.statu)),
+        ),
         ListenableBuilder(
           listenable: widget.profilDeposu,
           builder: (context, _) => BecayisSekmesi(profil: _profil, depo: _becayis, profilAc: _profilAc),

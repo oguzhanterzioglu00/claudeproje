@@ -4,6 +4,18 @@
 
 import 'asistan_servisi.dart';
 
+/// Konunun hangi çalışan grubuna yönelik olduğu; asistan kullanıcının grubuna göre konu önerir.
+enum Kitle {
+  /// 657 sayılı Devlet Memurları Kanunu'na tabi memurlar.
+  memur,
+
+  /// 4857 sayılı İş Kanunu'na tabi işçiler.
+  isci,
+
+  /// Her iki grubu da ilgilendiren konular (ör. 5510 sayılı Kanun).
+  herkes,
+}
+
 /// Asistanın cevap verebildiği bir konu: özet cevap + kanun maddesinden alıntılar.
 class BilgiKonusu {
   const BilgiKonusu({
@@ -16,6 +28,7 @@ class BilgiKonusu {
     required this.kaynaklar,
     this.uyari,
     this.surum,
+    this.kitle = Kitle.memur,
     this.kapsamDisi = false,
   });
 
@@ -39,6 +52,9 @@ class BilgiKonusu {
   /// Konunun kaynağı 657 sayılı Kanun değilse cevabın altında gösterilen kaynak/sürüm notu.
   final String? surum;
 
+  /// Konunun yöneldiği çalışan grubu.
+  final Kitle kitle;
+
   /// Asistanın henüz cevaplayamadığı ama bilinen bir konu: dürüstçe "kapsam dışı" der.
   final bool kapsamDisi;
 }
@@ -50,6 +66,10 @@ abstract final class BilgiBankasi {
       'Kaynak: mevzuat.gov.tr birleştirilmiş metin (31/7/2026 tarihinde yürürlüğe giren 7590 sayılı Kanun değişikliğine kadar işlenmiş)';
 
   /// 5510 sayılı Kanun konuları için sürüm notu.
+  /// 4857 ve 1475 sayılı İş Kanunu konuları için sürüm notu.
+  static const surumIsKanunu =
+      'Kaynak: mevzuat.gov.tr 4857 sayılı İş Kanunu birleştirilmiş metni (22/4/2026 tarihli 7578 sayılı Kanun değişikliğine kadar işlenmiş) ve 1475 sayılı Kanun md. 14';
+
   static const surum5510 =
       'Kaynak: mevzuat.gov.tr 5510 sayılı Kanun birleştirilmiş metni (24/7/2026 tarihli 7590 sayılı Kanun değişikliğine kadar işlenmiş)';
 
@@ -86,7 +106,7 @@ abstract final class BilgiBankasi {
         'izin suresi',
         'izin kullan',
         'izin devret',
-        'izin dusme'
+        'izin dusme',
       ],
       cevap:
           'Devlet memurlarının yıllık izni, hizmeti 1 yıldan 10 yıla kadar (10 yıl dahil) olanlar için 20 gün, 10 yıldan fazla olanlar için 30 gündür. Zorunlu hallerde gidiş ve dönüş için en çok ikişer gün eklenebilir. Yıllık izin, amirin uygun bulacağı zamanlarda toptan ya da kısım kısım kullanılabilir; birbirini izleyen iki yılın izni bir arada verilebilir. Cari yıl ile bir önceki yıl dışında, önceki yıllara ait kullanılmayan izin hakları düşer. Öğretmenler yaz tatili ve dinlenme tatillerinde izinli sayıldığından ayrıca yıllık izin verilmez.',
@@ -130,7 +150,7 @@ abstract final class BilgiBankasi {
         'sut izni',
         'emzirme',
         'hamile',
-        'gebelik'
+        'gebelik',
       ],
       cevap:
           'Mazeret izinleri 104. maddede sayılır. Kadın memura doğumdan önce 8, doğumdan sonra 16 hafta olmak üzere toplam 24 hafta analık izni verilir; çoğul gebelikte doğum öncesi süreye 2 hafta eklenir (doğum sonrası süre, 1/5/2026\'da yürürlüğe giren 7578 sayılı Kanunla 8 haftadan 16 haftaya çıkarılmıştır). Eşi doğum yapan memura isteği üzerine 10 gün babalık izni verilir. Memurun veya çocuğunun evlenmesinde ya da eşinin, çocuğunun, kendisinin veya eşinin ana, baba ve kardeşinin ölümünde isteği üzerine 7 gün izin verilir. Bunların dışında mazeretler için amirin onayıyla bir yıl içinde 10 gün, zaruret hâlinde (öğretmenler hariç) 10 gün daha izin verilebilir; ikinci kez verilen izin yıllık izinden düşülür. Kadın memura doğum sonrası analık izninin bitiminden itibaren ilk altı ayda günde 3 saat, ikinci altı ayda günde 1,5 saat süt izni verilir.',
@@ -174,7 +194,7 @@ abstract final class BilgiBankasi {
         'raporlu',
         'istirahat',
         'tedavi',
-        'kanser'
+        'kanser',
       ],
       cevap:
           'Memura, aylık ve özlük hakları korunarak, rapordaki lüzum üzerine; kanser, verem, akıl hastalığı gibi uzun süreli tedavi gerektiren hastalıklarda 18 aya kadar, diğer hastalıklarda 12 aya kadar hastalık izni verilir. İzin sonunda hastalığın devam ettiği resmî sağlık kurulu raporuyla tespit edilirse izin aynı süreler kadar uzatılır; bu sürenin sonunda da iyileşemeyen memur hakkında emeklilik hükümleri uygulanır. Görevi sırasında veya görevinden dolayı kazaya ya da saldırıya uğrayan veya meslek hastalığına tutulan memur iyileşinceye kadar izinli sayılır. Bakmakla yükümlü olduğun ya da refakat etmezsen hayatı tehlikeye girecek ana, baba, eş, çocuk veya kardeşinden biri ağır bir kaza geçirir ya da tedavisi uzun süren bir hastalığa yakalanırsa, sağlık kurulu raporuyla belgelendirilmesi şartıyla 3 aya kadar refakat izni verilir; gerektiğinde bu süre bir katına kadar uzatılır.',
@@ -236,7 +256,7 @@ abstract final class BilgiBankasi {
         'terfi',
         'yukselme',
         'ilerleme',
-        'kademe ilerleme'
+        'kademe ilerleme',
       ],
       cevap:
           'Kademe, derece içinde görevin önemi veya sorumluluğu artmadan memurun aylığındaki ilerlemedir. Kademe ilerlemesi için bulunduğun kademede en az bir yıl çalışmış olman ve derecende ilerleyebileceğin bir kademenin bulunması aranır; şartları taşıyanlar, hak kazandıkları tarihten geçerli olmak üzere başka bir işleme gerek kalmadan bir ileri kademeye ilerlemiş sayılır. Derece yükselmesi için üst derecelerde boş bir kadro bulunması, derecen içinde en az 3 yıl ve bu derecenin 3. kademesinde 1 yıl bulunmuş olman ve kadronun görevi için öngörülen nitelikleri taşıman gerekir; onay mercii atamaya yetkili amirdir.',
@@ -274,7 +294,7 @@ abstract final class BilgiBankasi {
         'es durumu',
         'aile birligi',
         'kurum ici',
-        'kurumlar arasi'
+        'kurumlar arasi',
       ],
       cevap:
           'Yer değiştirme suretiyle atamalar; hizmetin gereklerine ve iller arasındaki ekonomik, sosyal, kültürel ve ulaşım benzerliğine göre belirlenen bölgeler arasında adil ve dengeli bir sistem içinde yapılır (md. 72). Kurumlar, memurları kazanılmış hak aylık dereceleriyle kurum içindeki aynı ya da başka yerlerdeki kadrolara naklen atayabilir; memurlar istekleriyle kazanılmış hak derecelerinin en çok üç derece altındaki kadrolara atanabilir (md. 76). Memurların kurumlar arasında nakli, kurumların muvafakatiyle mümkündür (md. 74). Aynı kurumun aynı sınıftaki memurları karşılıklı yer değiştirmeyi (becayiş) isteyebilir (md. 73). Aile birliği için, memur olan eşin de isteği hâlinde atanabilmesi amacıyla kurumlar arasında koordinasyon sağlanır (md. 72). Hangi yerlere ne kadar hizmetle atanılabileceği gibi ayrıntılar yönetmelikle ve kurumun atama planıyla belirlenir.',
@@ -327,37 +347,44 @@ abstract final class BilgiBankasi {
         'devlet memurlugundan cikar',
         'ihrac',
         'sorusturma',
-        'ozluk dosya'
+        'ozluk dosya',
       ],
       cevap:
           'Disiplin cezaları 125. maddede sayılır: uyarma (memura görevinde ve davranışlarında daha dikkatli olması gerektiğinin yazıyla bildirilmesi), kınama (kusurlu olduğunun yazıyla bildirilmesi), aylıktan kesme (brüt aylıktan 1/30 ile 1/8 arasında kesinti), kademe ilerlemesinin durdurulması (bulunduğu kademede ilerlemenin fiilin ağırlığına göre 1-3 yıl durdurulması) ve Devlet memurluğundan çıkarma (bir daha atanmamak üzere memurluktan çıkarma). Savunması alınmadan hakkında disiplin cezası verilemez; savunma için verilen süre 7 günden az olamaz ve bu süre içinde savunma yapmayan savunma hakkından vazgeçmiş sayılır. Disiplin cezaları özlük dosyasına işlenir; memurluktan çıkarma dışındaki bir ceza alan memur, uyarma ve kınamada 5, diğer cezalarda 10 yıl sonra atamaya yetkili amire başvurarak cezanın özlük dosyasından silinmesini isteyebilir (davranışları isteği haklı kılıyorsa).',
       kaynaklar: [
         MevzuatKaynagi(
-            baslik: '657 sayılı Devlet Memurları Kanunu, md. 125/A (Uyarma)',
-            alinti:
-                'A - Uyarma : Memura, görevinde ve davranışlarında daha dikkatli olması gerektiğinin yazı ile bildirilmesidir.'),
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 125/A (Uyarma)',
+          alinti:
+              'A - Uyarma : Memura, görevinde ve davranışlarında daha dikkatli olması gerektiğinin yazı ile bildirilmesidir.',
+        ),
         MevzuatKaynagi(
-            baslik: '657 sayılı Devlet Memurları Kanunu, md. 125/B (Kınama)',
-            alinti: 'B - Kınama : Memura, görevinde ve davranışlarında kusurlu olduğunun yazı ile bildirilmesidir.'),
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 125/B (Kınama)',
+          alinti: 'B - Kınama : Memura, görevinde ve davranışlarında kusurlu olduğunun yazı ile bildirilmesidir.',
+        ),
         MevzuatKaynagi(
-            baslik: '657 sayılı Devlet Memurları Kanunu, md. 125/C (Aylıktan kesme)',
-            alinti: 'C - Aylıktan kesme : Memurun, brüt aylığından 1/30 - 1/8 arasında kesinti yapılmasıdır.'),
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 125/C (Aylıktan kesme)',
+          alinti: 'C - Aylıktan kesme : Memurun, brüt aylığından 1/30 - 1/8 arasında kesinti yapılmasıdır.',
+        ),
         MevzuatKaynagi(
-            baslik: '657 sayılı Devlet Memurları Kanunu, md. 125/D (Kademe ilerlemesinin durdurulması)',
-            alinti:
-                'D - Kademe ilerlemesinin durdurulması : Fiilin ağırlık derecesine göre memurun, bulunduğu kademede ilerlemesinin 1 - 3 yıl durdurulmasıdır.'),
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 125/D (Kademe ilerlemesinin durdurulması)',
+          alinti:
+              'D - Kademe ilerlemesinin durdurulması : Fiilin ağırlık derecesine göre memurun, bulunduğu kademede ilerlemesinin 1 - 3 yıl durdurulmasıdır.',
+        ),
         MevzuatKaynagi(
-            baslik: '657 sayılı Devlet Memurları Kanunu, md. 125/E (Devlet memurluğundan çıkarma)',
-            alinti:
-                'E - Devlet memurluğundan çıkarma : Bir daha Devlet memurluğuna atanmamak üzere memurluktan çıkarmaktır.'),
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 125/E (Devlet memurluğundan çıkarma)',
+          alinti:
+              'E - Devlet memurluğundan çıkarma : Bir daha Devlet memurluğuna atanmamak üzere memurluktan çıkarmaktır.',
+        ),
         MevzuatKaynagi(
-            baslik: '657 sayılı Devlet Memurları Kanunu, md. 130 (Savunma hakkı)',
-            alinti:
-                'Devlet memuru hakkında savunması alınmadan disiplin cezası verilemez. Soruşturmayı yapanın veya yetkili disiplin kurulunun 7 günden az olmamak üzere verdiği süre içinde veya belirtilen bir tarihte savunmasını yapmıyan memur, savunma hakkından vazgeçmiş sayılır.'),
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 130 (Savunma hakkı)',
+          alinti:
+              'Devlet memuru hakkında savunması alınmadan disiplin cezası verilemez. Soruşturmayı yapanın veya yetkili disiplin kurulunun 7 günden az olmamak üzere verdiği süre içinde veya belirtilen bir tarihte savunmasını yapmıyan memur, savunma hakkından vazgeçmiş sayılır.',
+        ),
         MevzuatKaynagi(
-            baslik: '657 sayılı Devlet Memurları Kanunu, md. 133 (Özlük dosyasından silme)',
-            alinti:
-                'Disiplin cezaları memurun özlük dosyasına işlenir. Devlet memurluğundan çıkarma cezasından başka bir disiplin cezasına çarptırılmış olan memur uyarma ve kınama cezalarının uygulanmasından 5 sene, diğer cezaların uygulanmasından 10 sene sonra atamaya yetkili amire başvurarak, verilmiş olan cezalarının özlük dosyasından silinmesini isteyebilir.'),
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 133 (Özlük dosyasından silme)',
+          alinti:
+              'Disiplin cezaları memurun özlük dosyasına işlenir. Devlet memurluğundan çıkarma cezasından başka bir disiplin cezasına çarptırılmış olan memur uyarma ve kınama cezalarının uygulanmasından 5 sene, diğer cezaların uygulanmasından 10 sene sonra atamaya yetkili amire başvurarak, verilmiş olan cezalarının özlük dosyasından silinmesini isteyebilir.',
+        ),
       ],
       uyari:
           'Hangi fiile hangi cezanın verileceği 125. maddede ayrıntılı sayılır; itiraz yolları ve süreleri için kurumunun disiplin kuruluna ya da personel birimine danış.',
@@ -375,27 +402,31 @@ abstract final class BilgiBankasi {
         'asalet',
         'staj',
         'temel egitim',
-        'hazirlayici egitim'
+        'hazirlayici egitim',
       ],
       cevap:
           'Sınavı kazanıp Devlet memurluğuna girenler önce memur adayı olarak atanır. Adaylık süresi en az bir yıl, en çok iki yıldır ve bu süre içinde aday memurun başka kurumlara nakli yapılamaz (md. 54). Adaylar önce temel eğitime, sonra sınıflarına ilişkin hazırlayıcı eğitime ve staja tabi tutulur; Devlet memuru olarak atanabilmeleri için bunlarda başarılı olmaları şarttır (md. 55). Adaylık süresi içinde eğitim ya da stajın herhangi birinde başarısız olanların, birden fazla uyarma ve/veya kınama cezası alanların ile aylıktan kesme ya da kademe ilerlemesinin durdurulması cezası alanların ilişiği kesilir; ilişiği kesilenler (sağlık nedenleri hariç) üç yıl süreyle Devlet memurluğuna alınmaz (md. 56, Ocak 2026\'da değiştirildi). Eğitimde başarılı olan adaylar asli memurluğa atanır (md. 58).',
       kaynaklar: [
         MevzuatKaynagi(
-            baslik: '657 sayılı Devlet Memurları Kanunu, md. 54 (Aday olarak atanma)',
-            alinti:
-                'Aday olarak atanmış Devlet memurunun adaylık süresi bir yıldan az iki yıldan çok olamaz ve bu süre içinde aday memurun başka kurumlara nakli yapılamaz.'),
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 54 (Aday olarak atanma)',
+          alinti:
+              'Aday olarak atanmış Devlet memurunun adaylık süresi bir yıldan az iki yıldan çok olamaz ve bu süre içinde aday memurun başka kurumlara nakli yapılamaz.',
+        ),
         MevzuatKaynagi(
-            baslik: '657 sayılı Devlet Memurları Kanunu, md. 55 (Adayların yetiştirilmesi)',
-            alinti:
-                'Aday olarak atanan memurların önce bütün memurların ortak vasıfları ile ilgili temel eğitime, bilahara sınıfları ile ilgili hazırlayıcı eğitime ve staja tabi tutulmaları ve Devlet memuru olarak atanabilmeleri için başarılı olmaları şarttır.'),
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 55 (Adayların yetiştirilmesi)',
+          alinti:
+              'Aday olarak atanan memurların önce bütün memurların ortak vasıfları ile ilgili temel eğitime, bilahara sınıfları ile ilgili hazırlayıcı eğitime ve staja tabi tutulmaları ve Devlet memuru olarak atanabilmeleri için başarılı olmaları şarttır.',
+        ),
         MevzuatKaynagi(
-            baslik: '657 sayılı Devlet Memurları Kanunu, md. 56 (Adaylık devresinde göreve son verme)',
-            alinti:
-                'Adaylık süresi içinde; temel ve hazırlayıcı eğitim ve staj devrelerinin herhangi birinde başarısız olanlar, birden fazla uyarma ve/veya kınama cezası almış olanlar ile aylıktan kesme ya da kademe ilerlemesinin durdurulması cezası almış olanların disiplin amirlerinin teklifi ve atamaya yetkili amirin onayı ile ilişikleri kesilir. İlişikleri kesilenler ilgili kurumlarca derhal Kamu Personel Bilgi Sisteminin bulunduğu kuruma bildirilir. Bu madde hükümlerine göre ilişikleri kesilenler (sağlık nedenleri hariç) üç yıl süre ile Devlet memurluğuna alınmazlar.'),
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 56 (Adaylık devresinde göreve son verme)',
+          alinti:
+              'Adaylık süresi içinde; temel ve hazırlayıcı eğitim ve staj devrelerinin herhangi birinde başarısız olanlar, birden fazla uyarma ve/veya kınama cezası almış olanlar ile aylıktan kesme ya da kademe ilerlemesinin durdurulması cezası almış olanların disiplin amirlerinin teklifi ve atamaya yetkili amirin onayı ile ilişikleri kesilir. İlişikleri kesilenler ilgili kurumlarca derhal Kamu Personel Bilgi Sisteminin bulunduğu kuruma bildirilir. Bu madde hükümlerine göre ilişikleri kesilenler (sağlık nedenleri hariç) üç yıl süre ile Devlet memurluğuna alınmazlar.',
+        ),
         MevzuatKaynagi(
-            baslik: '657 sayılı Devlet Memurları Kanunu, md. 58 (Asli memurluğa atanma)',
-            alinti:
-                'Adaylık devresi içinde eğitimde başarılı olan adaylar disiplin amirlerinin teklifi ve atamaya yetkili amirin onayı ile onay tarihinden geçerli olmak üzere asli memurluğa atanırlar.'),
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 58 (Asli memurluğa atanma)',
+          alinti:
+              'Adaylık devresi içinde eğitimde başarılı olan adaylar disiplin amirlerinin teklifi ve atamaya yetkili amirin onayı ile onay tarihinden geçerli olmak üzere asli memurluğa atanırlar.',
+        ),
       ],
       uyari:
           'Eğitim süreleri, programları ve değerlendirme esasları yönetmelikle belirlenir (md. 55). Aynı kurum içinde karşılıklı yer değiştirme (becayiş) için 73. madde aday memurlardan ayrıca söz etmez; uygulamada yönetmelik ve kurum kuralları belirleyicidir.',
@@ -417,23 +448,26 @@ abstract final class BilgiBankasi {
         'pazar',
         'ogle',
         'giris cikis saat',
-        'kacta'
+        'kacta',
       ],
       cevap:
           'Memurların haftalık çalışma süresi genel olarak 40 saattir; bu süre Cumartesi ve Pazar günleri tatil olmak üzere düzenlenir (md. 99). Ancak kanun, özel kanunlar, Cumhurbaşkanlığı kararnameleri veya bunlara dayanan yönetmeliklerle kurumların ve hizmetlerin özellikleri dikkate alınarak farklı çalışma süreleri belirlenebilir. Günlük çalışmanın başlama ve bitme saatleri ile öğle dinlenme süresi, bölgelerin ve hizmetin özelliklerine göre merkezde Cumhurbaşkanınca, illerde valiler tarafından belirlenir (md. 100).',
       kaynaklar: [
         MevzuatKaynagi(
-            baslik: '657 sayılı Devlet Memurları Kanunu, md. 99 (Haftalık çalışma süresi)',
-            alinti:
-                'Memurların haftalık çalışma süresi genel olarak 40 saattir. Bu süre Cumartesi ve Pazar günleri tatil olmak üzere düzenlenir.'),
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 99 (Haftalık çalışma süresi)',
+          alinti:
+              'Memurların haftalık çalışma süresi genel olarak 40 saattir. Bu süre Cumartesi ve Pazar günleri tatil olmak üzere düzenlenir.',
+        ),
         MevzuatKaynagi(
-            baslik: '657 sayılı Devlet Memurları Kanunu, md. 99 (Farklı çalışma süreleri)',
-            alinti:
-                'Ancak bu kanuna, özel kanunlara, Cumhurbaşkanlığı kararnamelerine veya bunlara dayanılarak çıkarılacak yönetmeliklerle, kurumların ve hizmetlerin özellikleri dikkate alınmak suretiyle farklı çalışma süreleri tespit olunabilir.'),
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 99 (Farklı çalışma süreleri)',
+          alinti:
+              'Ancak bu kanuna, özel kanunlara, Cumhurbaşkanlığı kararnamelerine veya bunlara dayanılarak çıkarılacak yönetmeliklerle, kurumların ve hizmetlerin özellikleri dikkate alınmak suretiyle farklı çalışma süreleri tespit olunabilir.',
+        ),
         MevzuatKaynagi(
-            baslik: '657 sayılı Devlet Memurları Kanunu, md. 100 (Günlük çalışma saatleri)',
-            alinti:
-                'Günlük çalışmanın başlama ve bitme saatleri ile öğle dinlenme süresi, bölgelerin ve hizmetin özelliklerine göre merkezde Cumhurbaşkanınca, illerde valiler tarafından tesbit olunur.'),
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 100 (Günlük çalışma saatleri)',
+          alinti:
+              'Günlük çalışmanın başlama ve bitme saatleri ile öğle dinlenme süresi, bölgelerin ve hizmetin özelliklerine göre merkezde Cumhurbaşkanınca, illerde valiler tarafından tesbit olunur.',
+        ),
       ],
       uyari:
           'Fazla çalışma, nöbet ve vardiya gibi konular ayrı maddelerde ve yönetmeliklerde düzenlenir; bu cevap yalnızca normal çalışma süresini kapsar.',
@@ -466,6 +500,229 @@ abstract final class BilgiBankasi {
       uyari:
           '2008 öncesinde memuriyete başlayanlar (eski 5434 sayılı Kanuna tabi olanlar) için şartlar farklıdır ve geçici madde 4 uyarınca mülga 5434 sayılı Kanun hükümlerine göre belirlenir. Bu kanunun metni asistanda yok; kendi durumun için SGK\'dan veya e-Devlet\'teki hizmet dökümünden bilgi al.',
       surum: BilgiBankasi.surum5510,
+      kitle: Kitle.herkes,
+    ),
+    BilgiKonusu(
+      id: 'isci_yillik_izin',
+      baslik: 'İşçi yıllık ücretli izni',
+      etiket: 'İşçi yıllık izin',
+      ornekSoru: 'İşçi yıllık izin kaç gün?',
+      anahtarlar: [
+        'isci',
+        'yillik izin',
+        'yillik',
+        'ucretli izin',
+        'izin hakki',
+        'izin haklari',
+        'izin suresi',
+        'kac gun izin',
+        'kullanilmayan izin',
+        'is kanunu',
+        '4857',
+        'izin',
+      ],
+      cevap:
+          'İş Kanunu\'na tabi işçi, işyerinde işe başladığı günden itibaren (deneme süresi dahil) en az bir yıl çalıştıktan sonra yıllık ücretli izin hakkı kazanır; bu haktan vazgeçilemez. Süre en az: hizmet süresi 1–5 yıl (5 dahil) ise 14 gün, 5 yıldan fazla 15 yıldan az ise 20 gün, 15 yıl ve üzeri ise 26 gündür. Yer altı işlerinde bu süreye 4 gün eklenir; 18 ve daha küçük yaştaki ile 50 ve üzeri yaştaki işçilere en az 20 gün verilir. İzin süreleri iş sözleşmesi ve toplu iş sözleşmesiyle artırılabilir.',
+      kaynaklar: [
+        MevzuatKaynagi(
+          baslik: '4857 sayılı İş Kanunu, md. 53 (Yıllık ücretli izin hakkı)',
+          alinti:
+              'İşyerinde işe başladığı günden itibaren, deneme süresi de içinde olmak üzere, en az bir yıl çalışmış olan işçilere yıllık ücretli izin verilir. Yıllık ücretli izin hakkından vazgeçilemez.',
+        ),
+        MevzuatKaynagi(
+          baslik: '4857 sayılı İş Kanunu, md. 53 (Süreler)',
+          alinti:
+              'İşçilere verilecek yıllık ücretli izin süresi, hizmet süresi; a) Bir yıldan beş yıla kadar (beş yıl dahil) olanlara ondört günden, b) Beş yıldan fazla onbeş yıldan az olanlara yirmi günden, c) Onbeş yıl (dahil) ve daha fazla olanlara yirmialtı günden, Az olamaz.',
+        ),
+        MevzuatKaynagi(
+          baslik: '4857 sayılı İş Kanunu, md. 53 (Yer altı işleri)',
+          alinti:
+              'Yer altı işlerinde çalışan işçilerin yıllık ücretli izin süreleri dörder gün arttırılarak uygulanır.',
+        ),
+        MevzuatKaynagi(
+          baslik: '4857 sayılı İş Kanunu, md. 53 (Yaş ve artırım)',
+          alinti:
+              'Ancak onsekiz ve daha küçük yaştaki işçilerle elli ve daha yukarı yaştaki işçilere verilecek yıllık ücretli izin süresi yirmi günden az olamaz. Yıllık izin süreleri iş sözleşmeleri ve toplu iş sözleşmeleri ile artırılabilir.',
+        ),
+      ],
+      uyari:
+          'Kamu işçilerinin toplu iş sözleşmesi bu kanundaki süreleri artırmış olabilir; kendi toplu iş sözleşmene ve iş sözleşmene de bak.',
+      kitle: Kitle.isci,
+      surum: BilgiBankasi.surumIsKanunu,
+    ),
+    BilgiKonusu(
+      id: 'isci_mazeret',
+      baslik: 'İşçi doğum, süt ve mazeret izinleri',
+      etiket: 'İşçi doğum izni',
+      ornekSoru: 'İşçi doğum izni kaç hafta?',
+      anahtarlar: [
+        'isci',
+        'dogum izni',
+        'dogum',
+        'dogur',
+        'analik',
+        'emzirme',
+        'sut izni',
+        'evlenme',
+        'olum izni',
+        'evlat edin',
+        'babalik',
+        'mazeret',
+        'ucretli izin',
+        'is kanunu',
+        '4857',
+        'izin',
+      ],
+      cevap:
+          'Kadın işçiler doğumdan önce 8, doğumdan sonra 16 hafta olmak üzere toplam 24 hafta çalıştırılmaz (çoğul gebelikte doğum öncesi süreye 2 hafta eklenir). Bir yaşından küçük çocuğunu emzirmesi için kadın işçiye günde toplam 1,5 saat süt izni verilir. İşçiye evlenmesi veya evlat edinmesi ya da ana, baba, eş, kardeş veya çocuğunun ölümü hâlinde 3 gün, eşinin doğum yapması hâlinde 10 gün ücretli izin verilir.',
+      kaynaklar: [
+        MevzuatKaynagi(
+          baslik: '4857 sayılı İş Kanunu, md. 74 (Doğum izni)',
+          alinti:
+              'Kadın işçilerin doğumdan önce sekiz ve doğumdan sonra onaltı hafta olmak üzere toplam yirmidört haftalık süre için çalıştırılmamaları esastır. Çoğul gebelik halinde doğumdan önce çalıştırılmayacak sekiz haftalık süreye iki hafta süre eklenir.',
+        ),
+        MevzuatKaynagi(
+          baslik: '4857 sayılı İş Kanunu, md. 74 (Süt izni)',
+          alinti:
+              'Kadın işçilere bir yaşından küçük çocuklarını emzirmeleri için günde toplam birbuçuk saat süt izni verilir.',
+        ),
+        MevzuatKaynagi(
+          baslik: '4857 sayılı İş Kanunu, ek md. 2 (Mazeret izni)',
+          alinti:
+              'İşçiye; evlenmesi veya evlat edinmesi ya da ana veya babasının, eşinin, kardeşinin, çocuğunun ölümü hâlinde üç gün, eşinin doğum yapması hâlinde ise on gün ücretli izin verilir.',
+        ),
+      ],
+      uyari:
+          'Doğum sonrası ücretsiz izinler (ör. 6 aya kadar, ilk doğumda 60 gün yarım çalışma) ve koruyucu aile izni de kanunda düzenlidir; ayrıntı için md. 74\'ün tamamına bak.',
+      kitle: Kitle.isci,
+      surum: BilgiBankasi.surumIsKanunu,
+    ),
+    BilgiKonusu(
+      id: 'isci_calisma',
+      baslik: 'İşçi çalışma süresi ve fazla çalışma',
+      etiket: 'İşçi çalışma saati',
+      ornekSoru: 'İşçi haftalık çalışma süresi ve fazla mesai ücreti nedir?',
+      anahtarlar: [
+        'isci',
+        'calisma suresi',
+        'haftalik calisma',
+        'calisma saati',
+        '45 saat',
+        'fazla mesai',
+        'fazla calisma',
+        'mesai',
+        'is kanunu',
+        '4857',
+      ],
+      cevap:
+          'İş Kanunu\'na göre genel olarak çalışma süresi haftada en çok 45 saattir; aksi kararlaştırılmamışsa çalışılan günlere eşit bölünür. Haftalık 45 saati aşan çalışma fazla çalışmadır: her saat için normal saat ücreti %50 artırılarak ödenir. Fazla çalışma için işçinin onayı gerekir ve bir yılda toplam 270 saati aşamaz. İşçi isterse zamlı ücret yerine fazla çalıştığı her saat için 1 saat 30 dakika serbest zaman kullanabilir (altı ay içinde).',
+      kaynaklar: [
+        MevzuatKaynagi(
+          baslik: '4857 sayılı İş Kanunu, md. 63 (Çalışma süresi)',
+          alinti:
+              'Genel bakımdan çalışma süresi haftada en çok kırkbeş saattir. Aksi kararlaştırılmamışsa bu süre, işyerlerinde haftanın çalışılan günlerine eşit ölçüde bölünerek uygulanır.',
+        ),
+        MevzuatKaynagi(
+          baslik: '4857 sayılı İş Kanunu, md. 41 (Fazla çalışma)',
+          alinti: 'Fazla çalışma, Kanunda yazılı koşullar çerçevesinde, haftalık kırkbeş saati aşan çalışmalardır.',
+        ),
+        MevzuatKaynagi(
+          baslik: '4857 sayılı İş Kanunu, md. 41 (Fazla çalışma ücreti)',
+          alinti:
+              'Her bir saat fazla çalışma için verilecek ücret normal çalışma ücretinin saat başına düşen miktarının yüzde elli yükseltilmesi suretiyle ödenir.',
+        ),
+        MevzuatKaynagi(
+          baslik: '4857 sayılı İş Kanunu, md. 41 (Serbest zaman)',
+          alinti:
+              'Fazla çalışma veya fazla sürelerle çalışma yapan işçi isterse, bu çalışmalar karşılığı zamlı ücret yerine, fazla çalıştığı her saat karşılığında bir saat otuz dakikayı, fazla sürelerle çalıştığı her saat karşılığında bir saat onbeş dakikayı serbest zaman olarak kullanabilir. İşçi hak ettiği serbest zamanı altı ay zarfında, çalışma süreleri içinde ve ücretinde bir kesinti olmadan kullanır.',
+        ),
+        MevzuatKaynagi(
+          baslik: '4857 sayılı İş Kanunu, md. 41 (Onay ve sınır)',
+          alinti:
+              'Fazla saatlerle çalışmak için işçinin onayının alınması gerekir. Fazla çalışma süresinin toplamı bir yılda ikiyüzyetmiş saatten fazla olamaz.',
+        ),
+      ],
+      uyari:
+          'Yer altı maden işleri gibi özel işlerde süreler farklıdır; kamu işyerinde toplu iş sözleşmesi hükümleri de geçerli olabilir.',
+      kitle: Kitle.isci,
+      surum: BilgiBankasi.surumIsKanunu,
+    ),
+    BilgiKonusu(
+      id: 'isci_fesih',
+      baslik: 'İş sözleşmesinin feshi ve ihbar süreleri',
+      etiket: 'İşçi ihbar süresi',
+      ornekSoru: 'İhbar süresi ne kadar?',
+      anahtarlar: [
+        'isci',
+        'ihbar',
+        'ihbar suresi',
+        'bildirim suresi',
+        'fesih',
+        'isten cikar',
+        'isten cikma',
+        'isten atma',
+        'is sozlesmesi',
+        'gecerli neden',
+        'is guvencesi',
+        'is kanunu',
+        '4857',
+      ],
+      cevap:
+          'Belirsiz süreli iş sözleşmesini feshetmeden önce karşı tarafa bildirim yapılması gerekir. Bildirim süreleri en az: işi 6 aydan az sürmüş işçi için 2 hafta, 6 ay–1,5 yıl için 4 hafta, 1,5–3 yıl için 6 hafta, 3 yıldan fazla için 8 hafta. Bildirim şartına uymayan taraf, bildirim süresine ait ücret tutarında tazminat öder. En az 30 işçi çalıştıran işyerinde en az 6 aylık kıdemi olan işçiyi çıkaran işveren geçerli bir sebebe dayanmak zorundadır.',
+      kaynaklar: [
+        MevzuatKaynagi(
+          baslik: '4857 sayılı İş Kanunu, md. 17 (Bildirim süreleri)',
+          alinti:
+              'İş sözleşmeleri; a) İşi altı aydan az sürmüş olan işçi için, bildirimin diğer tarafa yapılmasından başlayarak iki hafta sonra, b) İşi altı aydan birbuçuk yıla kadar sürmüş olan işçi için, bildirimin diğer tarafa yapılmasından başlayarak dört hafta sonra, c) İşi birbuçuk yıldan üç yıla kadar sürmüş olan işçi için, bildirimin diğer tarafa yapılmasından başlayarak altı hafta sonra, d) İşi üç yıldan fazla sürmüş işçi için, bildirim yapılmasından başlayarak sekiz hafta sonra, feshedilmiş sayılır. Bu süreler asgari olup sözleşmeler ile artırılabilir. Bildirim şartına uymayan taraf, bildirim süresine ilişkin ücret tutarında tazminat ödemek zorundadır.',
+        ),
+        MevzuatKaynagi(
+          baslik: '4857 sayılı İş Kanunu, md. 18 (Feshin geçerli sebebe dayandırılması)',
+          alinti:
+              'Otuz veya daha fazla işçi çalıştıran işyerlerinde en az altı aylık kıdemi olan işçinin belirsiz süreli iş sözleşmesini fesheden işveren, işçinin yeterliliğinden veya davranışlarından ya da işletmenin, işyerinin veya işin gereklerinden kaynaklanan geçerli bir sebebe dayanmak zorundadır.',
+        ),
+      ],
+      uyari:
+          'İşten çıkarıldığında dava ve başvuru süreleri kısadır; kişisel durumun için bir avukata veya iş müfettişliğine danış.',
+      kitle: Kitle.isci,
+      surum: BilgiBankasi.surumIsKanunu,
+    ),
+    BilgiKonusu(
+      id: 'isci_kidem',
+      baslik: 'Kıdem tazminatı',
+      etiket: 'Kıdem tazminatı',
+      ornekSoru: 'Kıdem tazminatı nasıl hesaplanır?',
+      anahtarlar: ['kidem', 'kidem tazminati', 'tazminat', 'isci', 'is kanunu', '1475'],
+      cevap:
+          'Kıdem tazminatı, işçinin işe başladığı tarihten itibaren hizmet sözleşmesinin devamı süresince her tam yıl için 30 günlük ücreti tutarında ödenir; bir yıldan artan süreler için de aynı oran uygulanır. Hak; işveren tarafından haklı neden dışında fesihte, işçinin haklı nedenle feshinde, muvazzaf askerlik nedeniyle ayrılmada (ve kanunda sayılan emeklilik/aylık alma gibi diğer hallerde) doğar. Hesap son ücret üzerinden yapılır; ücrete ek olarak işçiye sağlanmış para ve para ile ölçülebilen sözleşme ve kanun kaynaklı menfaatler de hesaba katılır. Aynı kıdem süresi için bir defadan fazla kıdem tazminatı ödenmez.',
+      kaynaklar: [
+        MevzuatKaynagi(
+          baslik: '1475 sayılı İş Kanunu, md. 14 (Kıdem tazminatı hakkı)',
+          alinti:
+              'hizmet aktinin devamı süresince her geçen tam yıl için işverence işçiye 30 günlük ücreti tutarında kıdem tazminatı ödenir. Bir yıldan artan süreler için de aynı oran üzerinden ödeme yapılır.',
+        ),
+        MevzuatKaynagi(
+          baslik: '1475 sayılı İş Kanunu, md. 14 (Hak doğuran haller)',
+          alinti:
+              '1. İşveren tarafından bu Kanunun 17 nci maddesinin II numaralı bendinde gösterilen sebepler dışında, 2. İşçi tarafından bu Kanunun 16 ncı maddesi uyarınca, 3. Muvazzaf askerlik hizmeti dolayısıyle,',
+        ),
+        MevzuatKaynagi(
+          baslik: '1475 sayılı İş Kanunu, md. 14 (Hesap)',
+          alinti: 'Kıdem tazminatının hesaplanması, son ücret üzerinden yapılır.',
+        ),
+        MevzuatKaynagi(
+          baslik: '1475 sayılı İş Kanunu, md. 14 (Ücrete eklenen menfaatler)',
+          alinti:
+              'kıdem tazminatına esas olacak ücretin hesabında 26 ncı maddenin birinci fıkrasında yazılı ücrete ilaveten işçiye sağlanmış olan para ve para ile ölçülmesi mümkün akdi ve kanundan doğan menfaatler de gözönünde tutulur.',
+        ),
+        MevzuatKaynagi(
+          baslik: '1475 sayılı İş Kanunu, md. 14 (Tek ödeme)',
+          alinti: 'Aynı kıdem süresi için bir defadan fazla kıdem tazminatı veya ikramiye ödenmez.',
+        ),
+      ],
+      uyari:
+          '4857 sayılı Kanun md. 120 ve geçici md. 6 uyarınca 1475 sayılı Kanun\'un yalnızca 14. maddesi yürürlüktedir. Tazminat tutarına dönemsel bir üst sınır uygulanabilir ve kamu işçilerinde toplu iş sözleşmesi hükümleri devreye girebilir; bunlar bu metinde yok. Kesin tutar için işyerinin personel birimine veya bir avukata danış.',
+      kitle: Kitle.isci,
+      surum: BilgiBankasi.surumIsKanunu,
     ),
   ];
 }

@@ -9,14 +9,14 @@ import 'yardimci/yazilar.dart';
 
 class _Hatali implements MevzuatAsistani {
   @override
-  Future<AsistanCevabi> sor(String soru) async => throw Exception('ağ yok');
+  Future<AsistanCevabi> sor(String soru, {Kitle? kitle}) async => throw Exception('ağ yok');
 }
 
 class _Sayac implements MevzuatAsistani {
   int cagri = 0;
 
   @override
-  Future<AsistanCevabi> sor(String soru) async {
+  Future<AsistanCevabi> sor(String soru, {Kitle? kitle}) async {
     cagri++;
     await Future<void>.delayed(const Duration(milliseconds: 200));
     return const AsistanCevabi(metin: 'tamam', ornek: true);
@@ -30,10 +30,12 @@ void main() {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(MaterialApp(
-      theme: pusulaTema(),
-      home: Scaffold(body: AsistanSayfasi(asistan: asistan)),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: pusulaTema(),
+        home: Scaffold(body: AsistanSayfasi(asistan: asistan)),
+      ),
+    );
     await tester.pumpAndSettle();
   }
 
@@ -93,6 +95,8 @@ void main() {
     expect(find.textContaining('dayanaklı bir cevap bulamadım'), findsOneWidget);
     expect(find.text('Yıllık izin kaç gün?'), findsOneWidget);
 
+    await tester.ensureVisible(find.text('Yıllık izin kaç gün?'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Yıllık izin kaç gün?'));
     await tester.pump(const Duration(milliseconds: 30));
     await tester.pumpAndSettle();
@@ -143,5 +147,80 @@ void main() {
     await tester.tap(find.text('Becayiş'));
     await tester.pumpAndSettle();
     expect(find.textContaining('cevap üretemedim'), findsOneWidget);
+  });
+
+  group('çalışan grubuna göre asistan', () {
+    Future<void> acK(WidgetTester tester, Kitle? kitle) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: pusulaTema(),
+          home: Scaffold(
+            body: AsistanSayfasi(
+              asistan: const YerelMevzuatAsistani(sure: Duration(milliseconds: 10)),
+              kitle: kitle,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Finder hizliSorular() => find.descendant(of: find.byType(ListView).at(1), matching: find.byType(Scrollable));
+
+    Future<void> sonaKaydir(WidgetTester tester) async {
+      await tester.drag(hizliSorular(), const Offset(-5000, 0));
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> basaKaydir(WidgetTester tester) async {
+      await tester.drag(hizliSorular(), const Offset(5000, 0));
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> sor(WidgetTester tester, String metin) async {
+      await tester.enterText(find.byType(TextField), metin);
+      await tester.tap(find.bySemanticsLabel('Gönder'));
+      await tester.pump(const Duration(milliseconds: 30));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets(
+      'işçi: karşılama İş Kanunu\'nu anar, hızlı sorular işçi konuları; yıllık izin 4857 maddesiyle yanıtlanır',
+      (tester) async {
+        await acK(tester, Kitle.isci);
+        expect(find.textContaining('4857 sayılı İş Kanunu'), findsOneWidget);
+        expect(find.textContaining('tahmin yürütmem'), findsOneWidget);
+        expect(find.text('İşçi yıllık izin'), findsOneWidget);
+        await sonaKaydir(tester);
+        expect(find.text('Kıdem tazminatı'), findsOneWidget);
+        await basaKaydir(tester);
+        expect(find.text('Becayiş'), findsNothing);
+
+        await sor(tester, 'Yıllık izin kaç gün?');
+        expect(find.textContaining('4857 sayılı İş Kanunu, md. 53'), findsWidgets);
+        expect(find.textContaining('26 gün'), findsWidgets);
+        expect(find.textContaining('Kaynak: mevzuat.gov.tr 4857 sayılı İş Kanunu'), findsOneWidget);
+      },
+    );
+
+    testWidgets('memur: memur konuları; işçi konuları hızlı sorularda görünmez', (tester) async {
+      await acK(tester, Kitle.memur);
+      expect(find.text('Becayiş'), findsOneWidget);
+      await sonaKaydir(tester);
+      expect(find.text('Emeklilik'), findsOneWidget);
+      expect(find.text('Kıdem tazminatı'), findsNothing);
+      expect(find.textContaining('657 sayılı Devlet Memurları Kanunu'), findsOneWidget);
+    });
+
+    testWidgets('grup bilinmiyorsa (ör. sözleşmeli) her iki grubun konuları ve "işçi" ipucu görünür', (tester) async {
+      await acK(tester, null);
+      expect(find.textContaining('sorunda "işçi" yaz'), findsOneWidget);
+      expect(find.text('Becayiş'), findsOneWidget);
+      await sonaKaydir(tester);
+      expect(find.text('Kıdem tazminatı'), findsOneWidget);
+    });
   });
 }

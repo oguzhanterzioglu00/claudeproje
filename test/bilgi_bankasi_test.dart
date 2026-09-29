@@ -20,9 +20,16 @@ void main() {
         }
         expect(k.kaynaklar, isNotEmpty, reason: k.id);
         for (final kaynak in k.kaynaklar) {
-          expect(kaynak.baslik,
-              anyOf(startsWith('657 sayılı Devlet Memurları Kanunu, md. '), startsWith('5510 sayılı Kanun, ')),
-              reason: k.id);
+          expect(
+            kaynak.baslik,
+            anyOf(
+              startsWith('657 sayılı Devlet Memurları Kanunu, md. '),
+              startsWith('5510 sayılı Kanun, '),
+              startsWith('4857 sayılı İş Kanunu, '),
+              startsWith('1475 sayılı İş Kanunu, md. 14'),
+            ),
+            reason: k.id,
+          );
           expect(kaynak.alinti, isNotNull, reason: '${k.id}: ${kaynak.baslik}');
           expect(kaynak.alinti!.length, greaterThan(60), reason: '${k.id}: ${kaynak.baslik}');
         }
@@ -46,11 +53,13 @@ void main() {
       expect(cevap('yillik_izin'), allOf(contains('20 gün'), contains('30 gün')));
 
       expect(
-          alinti('mazeret_izni'),
-          allOf(
-              contains('onaltı hafta'), contains('yirmidört hafta'), contains('on gün babalık'), contains('yedi gün')));
-      expect(cevap('mazeret_izni'),
-          allOf(contains('16 hafta'), contains('24 hafta'), contains('10 gün'), contains('7 gün')));
+        alinti('mazeret_izni'),
+        allOf(contains('onaltı hafta'), contains('yirmidört hafta'), contains('on gün babalık'), contains('yedi gün')),
+      );
+      expect(
+        cevap('mazeret_izni'),
+        allOf(contains('16 hafta'), contains('24 hafta'), contains('10 gün'), contains('7 gün')),
+      );
 
       expect(alinti('hastalik_izni'), allOf(contains('onsekiz aya'), contains('oniki aya'), contains('üç aya')));
       expect(cevap('hastalik_izni'), allOf(contains('18 aya'), contains('12 aya'), contains('3 aya')));
@@ -58,8 +67,51 @@ void main() {
       expect(alinti('ayliksiz_izin'), allOf(contains('onsekiz aya'), contains('yirmidört aya'), contains('bir yıla')));
       expect(cevap('ayliksiz_izin'), allOf(contains('18 aya'), contains('24 aya'), contains('1 yıla')));
 
-      expect(alinti('kademe_derece'),
-          allOf(contains('en az bir yıl'), contains('en az 3 yıl'), contains('3 üncü kademesinde 1 yıl')));
+      expect(
+        alinti('isci_yillik_izin'),
+        allOf(contains('ondört günden'), contains('yirmi günden'), contains('yirmialtı günden')),
+      );
+      expect(cevap('isci_yillik_izin'), allOf(contains('14 gün'), contains('20 gün'), contains('26 gün')));
+      expect(
+        alinti('isci_calisma'),
+        allOf(contains('kırkbeş saat'), contains('yüzde elli'), contains('ikiyüzyetmiş saat')),
+      );
+      expect(cevap('isci_calisma'), allOf(contains('45 saat'), contains('%50'), contains('270 saat')));
+      expect(
+        alinti('isci_fesih'),
+        allOf(contains('iki hafta'), contains('dört hafta'), contains('altı hafta'), contains('sekiz hafta')),
+      );
+      expect(
+        cevap('isci_fesih'),
+        allOf(contains('2 hafta'), contains('4 hafta'), contains('6 hafta'), contains('8 hafta')),
+      );
+      expect(alinti('isci_kidem'), contains('30 günlük ücreti'));
+      expect(cevap('isci_kidem'), contains('30 günlük ücreti'));
+      expect(
+        alinti('isci_mazeret'),
+        allOf(
+          contains('sekiz ve doğumdan sonra onaltı hafta'),
+          contains('birbuçuk saat'),
+          contains('üç gün'),
+          contains('on gün'),
+        ),
+      );
+      expect(
+        cevap('isci_mazeret'),
+        allOf(
+          contains('8'),
+          contains('16 hafta'),
+          contains('24 hafta'),
+          contains('1,5 saat'),
+          contains('3 gün'),
+          contains('10 gün'),
+        ),
+      );
+
+      expect(
+        alinti('kademe_derece'),
+        allOf(contains('en az bir yıl'), contains('en az 3 yıl'), contains('3 üncü kademesinde 1 yıl')),
+      );
     });
   });
 
@@ -94,6 +146,16 @@ void main() {
         'Haftalık çalışma süresi kaç saat?': 'calisma_saati',
         'Mesai saatleri kaça kadar': 'calisma_saati',
         'Emeklilik için ne kadar süre gerekir?': 'emeklilik',
+        'İşçi yıllık izin kaç gün?': 'isci_yillik_izin',
+        'İşçiyim, 8 yıldır çalışıyorum yıllık izin hakkım nedir': 'isci_yillik_izin',
+        'İş Kanunu doğum izni kaç hafta': 'isci_mazeret',
+        'İşçi eşim doğum yaptı, ücretli izin alabilir miyim': 'isci_mazeret',
+        'İşçi fazla mesai ücreti nasıl ödenir?': 'isci_calisma',
+        'İş Kanunu haftalık çalışma süresi kaç saat': 'isci_calisma',
+        'İhbar süresi ne kadar?': 'isci_fesih',
+        'İşten çıkarılırsam ihbar tazminatı': 'isci_fesih',
+        'Kıdem tazminatı nasıl hesaplanır?': 'isci_kidem',
+        'İşçi kıdem tazminatına ne zaman hak kazanır': 'isci_kidem',
       };
       beklenen.forEach((soru, id) => expect(konu(soru), id, reason: soru));
     });
@@ -109,13 +171,60 @@ void main() {
       final e = BilgiArama.esles('izin');
       expect(e.konu, isNull);
       expect(
-          e.adaylar.map((k) => k.id), containsAll(['yillik_izin', 'mazeret_izni', 'hastalik_izni', 'ayliksiz_izin']));
+        e.adaylar.map((k) => k.id),
+        containsAll(['yillik_izin', 'mazeret_izni', 'hastalik_izni', 'ayliksiz_izin']),
+      );
     });
 
     test('her konunun kendi örnek sorusu kendi konusuna gider', () {
       for (final k in BilgiBankasi.konular) {
         expect(BilgiArama.esles(k.ornekSoru).konu?.id, k.id, reason: k.ornekSoru);
       }
+    });
+  });
+
+  group('çalışan grubuna göre eşleştirme (memur / işçi)', () {
+    String? konuK(String soru, {Kitle? kitle}) => BilgiArama.esles(soru, kitle: kitle).konu?.id;
+
+    test('grup belirtilmezse aynı konuda memur konusu öncelikli; işçi konusu yalnızca işçi ifadesiyle', () {
+      expect(konuK('Yıllık izin kaç gün?'), 'yillik_izin');
+      expect(konuK('Doğum izni kaç hafta?'), 'mazeret_izni');
+      expect(konuK('Yıllık izin kaç gün işçi için?'), 'isci_yillik_izin');
+    });
+
+    test('işçi statüsündeki kullanıcıya işçi konusu, memura memur konusu döner', () {
+      expect(konuK('Yıllık izin kaç gün?', kitle: Kitle.isci), 'isci_yillik_izin');
+      expect(konuK('Yıllık izin kaç gün?', kitle: Kitle.memur), 'yillik_izin');
+      expect(konuK('Doğum izni kaç hafta?', kitle: Kitle.isci), 'isci_mazeret');
+    });
+
+    test('sorudaki açık ifade kullanıcının statüsünden önce gelir', () {
+      expect(konuK('Memur yıllık izin kaç gün?', kitle: Kitle.isci), 'yillik_izin');
+      expect(konuK('İşçi yıllık izin kaç gün?', kitle: Kitle.memur), 'isci_yillik_izin');
+    });
+
+    test('yalnızca "izin" yazan işçiye işçi izin konuları önerilir (memur konuları değil)', () {
+      final e = BilgiArama.esles('izin', kitle: Kitle.isci);
+      expect(e.konu, isNull);
+      expect(e.adaylar.map((k) => k.id), unorderedEquals(['isci_yillik_izin', 'isci_mazeret']));
+    });
+
+    test('kendi grubunda karşılığı olmayan soru tüm konularda aranır', () {
+      expect(konuK('Kıdem tazminatı nedir?', kitle: Kitle.memur), 'isci_kidem');
+      expect(konuK('Becayiş şartları nedir?', kitle: Kitle.isci), 'becayis');
+    });
+
+    test('emeklilik (5510) her iki gruba da cevap verir', () {
+      expect(konuK('Emeklilik yaşı kaç?', kitle: Kitle.isci), 'emeklilik');
+      expect(konuK('Emeklilik yaşı kaç?', kitle: Kitle.memur), 'emeklilik');
+    });
+
+    test('konularIcin: gruba uygun konular; grup yoksa hepsi', () {
+      final isci = YerelMevzuatAsistani.konularIcin(Kitle.isci).map((k) => k.id);
+      expect(isci, containsAll(['isci_yillik_izin', 'isci_kidem', 'emeklilik']));
+      expect(isci, isNot(contains('becayis')));
+      expect(YerelMevzuatAsistani.konularIcin(Kitle.memur).map((k) => k.id), isNot(contains('isci_kidem')));
+      expect(YerelMevzuatAsistani.konularIcin(null).length, BilgiBankasi.konular.length);
     });
   });
 
@@ -144,6 +253,17 @@ void main() {
       expect(c.kaynaklar.first.alinti, allOf(contains('58, erkek ise 60'), contains('en az 9000 gün')));
       expect(c.uyari, contains('2008 öncesinde'));
       expect(c.surum, BilgiBankasi.surum5510);
+    });
+
+    test('işçi konusu İş Kanunu alıntısı, kendi sürüm notu ve toplu iş sözleşmesi uyarısıyla yanıtlanır', () async {
+      final c = await asistan.sor('yıllık izin kaç gün', kitle: Kitle.isci);
+      expect(c.kaynaklar.first.baslik, startsWith('4857 sayılı İş Kanunu, md. 53'));
+      expect(c.metin, allOf(contains('14 gün'), contains('20 gün'), contains('26 gün')));
+      expect(c.uyari, contains('toplu iş sözleşmesi'));
+      expect(c.surum, BilgiBankasi.surumIsKanunu);
+      final oneriler = (await asistan.sor('bilinmeyen bir şey', kitle: Kitle.isci)).oneriler;
+      expect(oneriler, contains('Kıdem tazminatı nasıl hesaplanır?'));
+      expect(oneriler, isNot(contains('Becayiş şartları nedir?')));
     });
 
     test('Becayiş kaynağı sabiti bilgi bankasıyla aynı maddeyi gösterir', () {
