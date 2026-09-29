@@ -12,7 +12,7 @@ void main() {
     await tester.pumpWidget(PusulaUygulamasi(profilKaydi: BellekProfilKaydi()));
     await tester.pumpAndSettle(const Duration(seconds: 3));
     expect(find.text('Kamu Pusulası'), findsOneWidget);
-    expect(find.text('Başlayalım'), findsOneWidget);
+    expect(find.text('Atla'), findsOneWidget);
   });
 
   testWidgets('profil varsa ana sayfa açılır', (tester) async {
@@ -21,6 +21,6 @@ void main() {
     ));
     await tester.pumpAndSettle(const Duration(seconds: 3));
     expect(find.text('Kamu Pusulası'), findsOneWidget);
-    expect(find.text('Başlayalım'), findsNothing);
+    expect(find.text('Atla'), findsNothing);
   });
 }

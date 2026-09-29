@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/bilesenler.dart';
 import '../../core/metin.dart';
 import '../../core/tema.dart';
+import '../../core/logo.dart';
 import '../../core/ucgenler.dart';
 import '../../core/yukselen.dart';
 import 'ana_sayfa_verisi.dart';
@@ -120,13 +121,7 @@ class _Ust extends StatelessWidget {
           Expanded(
             child: Row(
               children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(color: PusulaRenk.lacivert, borderRadius: BorderRadius.circular(14)),
-                  alignment: Alignment.center,
-                  child: const PusulaUcgenler(boyut: 28, orta: PusulaRenk.mavi),
-                ),
+                const PusulaLogo(boyut: 42, koseOrani: 0.33),
                 const SizedBox(width: 10),
                 Flexible(
                   child: Column(

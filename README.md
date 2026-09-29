@@ -16,8 +16,9 @@ Tasarım: "Memur Uygulaması İlk Tasarım" (Claude Artifact). Renkler Ayas Soft
 
 ## Klasörler
 
-- `lib/core/` — tema ve ortak parçalar
-- `lib/features/profil/` — ilk kurulum, profil ve statü (cihazda saklanır)
+- `lib/core/` — tema, logo (`logo.dart`) ve ortak parçalar
+- `tool/simge_uret_test.dart` — uygulama simgelerini logodan üretir: `flutter test tool/simge_uret_test.dart`
+- `lib/features/profil/` — tanıtım kaydırması, 3 adımlı ilk kurulum, profil ve statü (cihazda saklanır)
 - `lib/features/ana_sayfa/` — profil odaklı ana sayfa ve Gündem bölümü
 - `lib/features/maas/` — memur maaş motoru ve ekranı
 - `lib/features/becayis/` — Becayiş modülü (`domain/` eşleştirme motoru)

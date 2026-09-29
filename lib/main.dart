@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'core/tema.dart';
-import 'core/ucgenler.dart';
+import 'core/logo.dart';
 import 'features/kabuk/pusula_kabugu.dart';
 import 'features/profil/data/profil_deposu.dart';
 import 'features/profil/data/profil_kaydi.dart';
@@ -60,6 +60,6 @@ class _Acilis extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Scaffold(
         backgroundColor: PusulaRenk.lacivert,
-        body: Center(child: PusulaUcgenler(boyut: 96, orta: PusulaRenk.mavi)),
+        body: Center(child: PusulaLogo(boyut: 112, koseOrani: 0.3)),
       );
 }

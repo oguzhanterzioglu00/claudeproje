@@ -28,22 +28,54 @@ void main() {
   }
 
   Future<void> karsilamadanGec(WidgetTester tester) async {
-    await tester.tap(find.text('Başlayalım'));
+    await tester.tap(find.text('Atla'));
     await tester.pumpAndSettle();
   }
 
-  testWidgets('karşılama markayı, dört özelliği ve gizlilik güvencesini gösterir', (tester) async {
+  testWidgets('tanıtım 5 sayfadır; Devam ile ilerler, son sayfada Başlayalım kuruluma geçer', (tester) async {
     await ac(tester);
     expect(find.text('Kamu Pusulası'), findsOneWidget);
-    for (final t in ['Maaşını hesapla', 'Hakkım ne?', 'Becayiş', 'İlanlar ve gündem']) {
-      expect(find.text(t), findsOneWidget, reason: t);
-    }
+    expect(find.text('Atla'), findsOneWidget);
     expect(find.text('Bilgilerin yalnızca bu cihazda saklanır'), findsOneWidget);
-    expect(find.text('Başlayalım'), findsOneWidget);
+
+    for (final baslik in ['Maaşın, net olarak', 'Hakkını kaynağıyla öğren', 'Becayişte eşleş']) {
+      await tester.tap(find.text('Devam'));
+      await tester.pumpAndSettle();
+      expect(find.text(baslik), findsOneWidget, reason: baslik);
+      expect(find.text('Örnek görünüm'), findsOneWidget);
+    }
+    await tester.tap(find.text('Devam'));
+    await tester.pumpAndSettle();
+    expect(find.text('İlanlar ve gündem tek yerde'), findsOneWidget);
+    expect(find.text('Devam'), findsNothing);
+    expect(find.byWidgetPredicate((w) => w is Visibility && !w.visible), findsOneWidget, reason: 'Atla son sayfada gizli');
+
+    await tester.tap(find.text('Başlayalım'));
+    await tester.pumpAndSettle();
+    expect(find.text('Seni tanıyalım'), findsOneWidget);
   });
 
-  testWidgets('küçük ekranda karşılama taşmaz ve düğme erişilebilir kalır', (tester) async {
+  testWidgets('kaydırma jesti sayfayı değiştirir; Atla doğrudan kuruluma götürür', (tester) async {
+    await ac(tester);
+    await tester.drag(find.byType(PageView), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('Maaşın, net olarak'), findsOneWidget);
+    expect(find.bySemanticsLabel('Sayfa 2 / 5'), findsOneWidget);
+
+    await tester.tap(find.text('Atla'));
+    await tester.pumpAndSettle();
+    expect(find.text('Seni tanıyalım'), findsOneWidget);
+  });
+
+  testWidgets('küçük ekranda ve büyük yazı boyutunda tanıtım taşmaz, düğme erişilebilir kalır', (tester) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
     await ac(tester, boyut: const Size(320, 568));
+    for (var i = 0; i < 4; i++) {
+      expect(tester.takeException(), isNull, reason: 'sayfa $i');
+      await tester.tap(find.text('Devam'));
+      await tester.pumpAndSettle();
+    }
     expect(tester.takeException(), isNull);
     expect(find.text('Başlayalım'), findsOneWidget);
   });
@@ -142,7 +174,7 @@ void main() {
 
     await tester.tap(find.bySemanticsLabel('Geri'));
     await tester.pumpAndSettle();
-    expect(find.text('Başlayalım'), findsOneWidget);
+    expect(find.text('Atla'), findsOneWidget, reason: 'tanıtıma dönüldü');
   });
 
   testWidgets('Şimdilik atla görev adımını geçer; sicil/e-posta adımında bilgi kaydetmeden bitirir', (tester) async {
