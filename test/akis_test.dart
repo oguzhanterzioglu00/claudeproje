@@ -225,6 +225,22 @@ void main() {
       expect(find.textContaining('kaynaktan doğrula'), findsOneWidget);
     });
 
+    testWidgets('100 karakteri aşan başlık kartta "..." ile kısaltılır, ayrıntıda tamamı görünür', (tester) async {
+      final uzun = 'ÇOK UZUN BİR İLAN BAŞLIĞI ${'X' * 100}';
+      final json = {
+        'guncelleme': '2026-09-29T10:00:00+03:00',
+        'ilanlar': [
+          {'id': 'u1', 'baslik': uzun, 'kurum': '', 'tur': 'memur', 'yayin': '2026-09-20T09:00:00+03:00'},
+        ],
+      };
+      await ac(tester, AkisIlanKaynagi(_istemci((_) => json)));
+      expect(find.text('${uzun.substring(0, 100)}...'), findsOneWidget);
+      expect(find.text(uzun), findsNothing);
+      await tester.tap(find.text('${uzun.substring(0, 100)}...'));
+      await tester.pumpAndSettle();
+      expect(find.text(uzun), findsOneWidget);
+    });
+
     testWidgets('ağ hatasında "yüklenemedi" görünür; tekrar denenince liste gelir', (tester) async {
       var basarili = false;
       final istemci = AkisIstemcisi(

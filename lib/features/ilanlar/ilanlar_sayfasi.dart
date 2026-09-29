@@ -246,6 +246,10 @@ class _IlanlarSayfasiState extends State<IlanlarSayfasi> {
   );
 }
 
+/// Kariyer Kapısı RSS Tasarım Kılavuzu: 100 karakteri (boşluklar dahil) aşan başlıklar "..." ile kısaltılır
+/// (kartta; ayrıntı sayfasında başlığın tamamı görünür).
+String _kisalt(String baslik) => baslik.length <= 100 ? baslik : '${baslik.substring(0, 100).trimRight()}...';
+
 String _kisaTarih(DateTime t) => '${t.day.toString().padLeft(2, '0')}.${t.month.toString().padLeft(2, '0')}.${t.year}';
 
 /// Kariyer Kapısı "RSS Tasarım Kılavuzu" gereği: logo ve "Kamu İşe Alım İlanları" ibaresi ilan listesinin üstünde.
@@ -338,7 +342,7 @@ class _IlanKarti extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(ilan.baslik, style: PusulaYazi.metin(16, agirlik: FontWeight.w700)),
+                    Text(_kisalt(ilan.baslik), style: PusulaYazi.metin(16, agirlik: FontWeight.w700)),
                     const SizedBox(height: 2),
                     Row(
                       children: [
