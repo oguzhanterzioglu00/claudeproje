@@ -140,9 +140,9 @@ void main() {
     });
 
     test('bozuk JSON çökertmez, null döner', () async {
-      SharedPreferences.setMockInitialValues({YerelProfilKaydi.anahtar: '{bu json değil'});
+      SharedPreferences.setMockInitialValues({const YerelProfilKaydi().anahtar: '{bu json değil'});
       expect(await kayit.yukle(), isNull);
-      SharedPreferences.setMockInitialValues({YerelProfilKaydi.anahtar: '[1,2,3]'});
+      SharedPreferences.setMockInitialValues({const YerelProfilKaydi().anahtar: '[1,2,3]'});
       expect(await kayit.yukle(), isNull);
     });
   });

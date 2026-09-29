@@ -57,6 +57,30 @@ abstract final class PusulaYazi {
       );
 }
 
+/// Sayfa geçişi: hafif sağdan kayarak belirir. Sistem "hareketi azalt" açıksa geçiş anlıktır.
+class PusulaSayfaGecisi extends PageTransitionsBuilder {
+  const PusulaSayfaGecisi();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (MediaQuery.disableAnimationsOf(context)) return child;
+    final egri = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
+    return FadeTransition(
+      opacity: egri,
+      child: SlideTransition(
+        position: Tween<Offset>(begin: const Offset(0.08, 0), end: Offset.zero).animate(egri),
+        child: child,
+      ),
+    );
+  }
+}
+
 ThemeData pusulaTema() {
   final taban = ThemeData(
     useMaterial3: true,
@@ -76,6 +100,9 @@ ThemeData pusulaTema() {
   );
 
   return taban.copyWith(
+    pageTransitionsTheme: PageTransitionsTheme(builders: {
+      for (final p in TargetPlatform.values) p: const PusulaSayfaGecisi(),
+    }),
     textTheme: govde.copyWith(
       headlineSmall: PusulaYazi.baslik(24, aralik: -1),
       titleLarge: PusulaYazi.baslik(18, agirlik: FontWeight.w700, aralik: -0.4),

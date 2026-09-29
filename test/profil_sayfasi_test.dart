@@ -114,8 +114,8 @@ void main() {
       tester,
       mevcut: const Profil(ad: 'Ayşe', statu: Statu.diger),
     );
-    await tester.ensureVisible(find.text('Profilimi sil'));
-    await tester.tap(find.text('Profilimi sil'));
+    await tester.ensureVisible(find.text('Profil bilgilerimi sil'));
+    await tester.tap(find.text('Profil bilgilerimi sil'));
     await tester.pumpAndSettle();
     expect(find.text('Profil silinsin mi?'), findsOneWidget);
 
@@ -123,7 +123,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(depo.profil, isNotNull);
 
-    await tester.tap(find.text('Profilimi sil'));
+    await tester.tap(find.text('Profil bilgilerimi sil'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Sil'));
     await tester.pumpAndSettle();

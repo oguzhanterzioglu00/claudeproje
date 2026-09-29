@@ -16,6 +16,8 @@ import '../ilanlar/ilan_kaynagi.dart';
 import '../ilanlar/ilanlar_sayfasi.dart';
 import '../maas/domain/memur_maas_hesaplayici.dart';
 import '../maas/presentation/maas_sayfasi.dart';
+import '../hesap/data/oturum_deposu.dart';
+import '../profil/data/fotograf_deposu.dart';
 import '../profil/data/profil_deposu.dart';
 import '../profil/domain/profil.dart';
 import '../profil/presentation/profil_sayfasi.dart';
@@ -32,6 +34,9 @@ class PusulaKabugu extends StatefulWidget {
     this.haberKaynagi = const OrnekHaberKaynagi(),
     this.bugun,
     this.baslangicSekmesi = 0,
+    this.fotograf,
+    this.fotografKaynagi = const ImagePickerFotografKaynagi(),
+    this.oturum,
   });
 
   final ProfilDeposu profilDeposu;
@@ -43,6 +48,11 @@ class PusulaKabugu extends StatefulWidget {
   final HaberKaynagi haberKaynagi;
   final DateTime? bugun;
   final int baslangicSekmesi;
+
+  /// Profil fotoğrafı ve hesap işlemleri; verilmezse ilgili bölümler görünmez.
+  final FotografDeposu? fotograf;
+  final FotografKaynagi fotografKaynagi;
+  final OturumDeposu? oturum;
 
   /// Sekme sırası; kısayollar bu sabitlerle yönlendirir.
   static const anaSayfa = 0;
@@ -106,7 +116,14 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
   void _git(int i) => setState(() => _secili = i);
 
   void _profilAc() => Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => ProfilSayfasi(depo: widget.profilDeposu)),
+        MaterialPageRoute<void>(
+          builder: (_) => ProfilSayfasi(
+            depo: widget.profilDeposu,
+            fotograf: widget.fotograf,
+            fotografKaynagi: widget.fotografKaynagi,
+            oturum: widget.oturum,
+          ),
+        ),
       );
 
   /// Zincirler ayrı sayıldığı için ana sayfada yalnızca ikili eşleşmeler görünür.
@@ -126,7 +143,8 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
           index: _secili,
           children: [
             ListenableBuilder(
-              listenable: Listenable.merge([widget.profilDeposu, _becayis]),
+              listenable:
+                  Listenable.merge([widget.profilDeposu, _becayis, if (widget.fotograf != null) widget.fotograf!]),
               builder: (context, _) {
                 final p = _profil;
                 final yeni = p.becayisYapabilir && p.eksikBecayisAlanlari.isEmpty ? _ikiliSayisi : 0;
@@ -142,6 +160,8 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
                   asistanaGit: () => _git(PusulaKabugu.asistanSekmesi),
                   becayisiAc: () => _git(PusulaKabugu.becayis),
                   profilAc: _profilAc,
+                  avatarFoto: widget.fotograf?.foto,
+                  avatarAd: p.ad,
                   gundem: GundemBolumu(kaynak: widget.haberKaynagi, bugun: widget.bugun),
                 );
               },
@@ -154,17 +174,14 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
                   ay: widget.bugun?.month,
                   baslangic: p.maas ?? const MaasGirdisi(derece: 8, kademe: 3, hizmetYili: 10),
                   kayitliGirdi: p.maas,
-                  kaydet: p.statu == Statu.memur657
-                      ? (g) => widget.profilDeposu.kaydet(p.kopya(maas: g))
-                      : null,
+                  kaydet: p.statu == Statu.memur657 ? (g) => widget.profilDeposu.kaydet(p.kopya(maas: g)) : null,
                 );
               },
             ),
             AsistanSayfasi(asistan: widget.asistan),
             ListenableBuilder(
               listenable: widget.profilDeposu,
-              builder: (context, _) =>
-                  BecayisSekmesi(profil: _profil, depo: _becayis, profilAc: _profilAc),
+              builder: (context, _) => BecayisSekmesi(profil: _profil, depo: _becayis, profilAc: _profilAc),
             ),
             IlanlarSayfasi(kaynak: widget.ilanKaynagi, bugun: widget.bugun),
           ],

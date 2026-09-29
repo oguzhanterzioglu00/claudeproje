@@ -31,9 +31,15 @@ class BellekProfilKaydi implements ProfilKaydi {
 /// `shared_preferences` ile cihazda saklar. Bozuk kayıt sessizce yok sayılır
 /// (kullanıcı profilini yeniden girer); uygulama çökmez.
 class YerelProfilKaydi implements ProfilKaydi {
-  const YerelProfilKaydi();
+  /// [hesapId] verilirse profil o hesaba ayrılır (aynı telefonda birden çok hesap
+  /// birbirinin bilgisini görmez).
+  const YerelProfilKaydi({this.hesapId = ''});
 
-  static const anahtar = 'profil_v1';
+  final String hesapId;
+
+  static const _taban = 'profil_v1';
+
+  String get anahtar => hesapId.isEmpty ? _taban : '${_taban}_$hesapId';
 
   @override
   Future<Profil?> yukle() async {

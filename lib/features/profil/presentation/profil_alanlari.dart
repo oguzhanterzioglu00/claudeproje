@@ -94,6 +94,11 @@ class MetinAlani extends StatelessWidget {
     this.sayisal = false,
     this.eposta = false,
     this.capitalization = TextCapitalization.none,
+    this.gizli = false,
+    this.sonEk,
+    this.otomatikDoldur,
+    this.klavyeEylemi,
+    this.onGonder,
   });
 
   final String etiket;
@@ -105,6 +110,15 @@ class MetinAlani extends StatelessWidget {
   final bool eposta;
   final TextCapitalization capitalization;
 
+  /// Şifre alanı: karakterler gizlenir, öneri/otomatik düzeltme kapanır.
+  final bool gizli;
+
+  /// Alanın sağındaki simge (ör. şifreyi göster/gizle).
+  final Widget? sonEk;
+  final Iterable<String>? otomatikDoldur;
+  final TextInputAction? klavyeEylemi;
+  final VoidCallback? onGonder;
+
   @override
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,6 +128,12 @@ class MetinAlani extends StatelessWidget {
           TextField(
             controller: denetleyici,
             onChanged: (_) => onDegis(),
+            obscureText: gizli,
+            enableSuggestions: !gizli,
+            autocorrect: !gizli,
+            autofillHints: otomatikDoldur,
+            textInputAction: klavyeEylemi,
+            onSubmitted: onGonder == null ? null : (_) => onGonder!(),
             textCapitalization: capitalization,
             keyboardType: eposta
                 ? TextInputType.emailAddress
@@ -125,6 +145,7 @@ class MetinAlani extends StatelessWidget {
               hintText: ipucu,
               hintStyle: PusulaYazi.metin(14, renk: PusulaRenk.soluk, agirlik: FontWeight.w500),
               errorText: hata,
+              suffixIcon: sonEk,
               filled: true,
               fillColor: PusulaRenk.beyaz,
               isDense: true,

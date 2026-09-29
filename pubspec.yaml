@@ -7,11 +7,14 @@ environment:
   sdk: '>=3.4.0 <4.0.0'
 
 dependencies:
+  crypto: ^3.0.7
   flutter:
     sdk: flutter
+  image_picker: ^1.2.3
   in_app_purchase: ^3.2.0
   lucide_icons_flutter: ^3.1.20
   shared_preferences: ^2.5.5
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:

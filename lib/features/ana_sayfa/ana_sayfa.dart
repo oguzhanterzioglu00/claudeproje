@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../core/avatar.dart';
 import '../../core/bilesenler.dart';
 import '../../core/metin.dart';
 import '../../core/tema.dart';
@@ -21,6 +24,8 @@ class AnaSayfa extends StatelessWidget {
     this.bildirimAc,
     this.profilAc,
     this.gundem,
+    this.avatarFoto,
+    this.avatarAd = '',
   });
 
   final AnaSayfaVerisi veri;
@@ -36,12 +41,24 @@ class AnaSayfa extends StatelessWidget {
   /// Kısayolların altında gösterilen haber bölümü (isteğe bağlı).
   final Widget? gundem;
 
+  /// Profil düğmesinde gösterilen fotoğraf ve ad (baş harfler için).
+  final Uint8List? avatarFoto;
+  final String avatarAd;
+
   @override
   Widget build(BuildContext context) => SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(18, 24, 18, 16),
           children: [
-            Yukselen(child: _Ust(tarih: kisaTarih(bugun ?? DateTime.now()), bildirimVar: veri.bildirimVar, onBildirim: bildirimAc, onProfil: profilAc)),
+            Yukselen(
+                child: _Ust(
+              tarih: kisaTarih(bugun ?? DateTime.now()),
+              bildirimVar: veri.bildirimVar,
+              onBildirim: bildirimAc,
+              onProfil: profilAc,
+              avatarFoto: avatarFoto,
+              avatarAd: avatarAd,
+            )),
             const SizedBox(height: 14),
             Yukselen(
               gecikme: const Duration(milliseconds: 100),
@@ -107,12 +124,21 @@ class AnaSayfa extends StatelessWidget {
 }
 
 class _Ust extends StatelessWidget {
-  const _Ust({required this.tarih, required this.bildirimVar, this.onBildirim, this.onProfil});
+  const _Ust({
+    required this.tarih,
+    required this.bildirimVar,
+    this.onBildirim,
+    this.onProfil,
+    this.avatarFoto,
+    this.avatarAd = '',
+  });
 
   final String tarih;
   final bool bildirimVar;
   final VoidCallback? onBildirim;
   final VoidCallback? onProfil;
+  final Uint8List? avatarFoto;
+  final String avatarAd;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -128,8 +154,7 @@ class _Ust extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Kamu Pusulası',
-                          overflow: TextOverflow.ellipsis,
-                          style: PusulaYazi.baslik(20, aralik: -0.8)),
+                          overflow: TextOverflow.ellipsis, style: PusulaYazi.baslik(20, aralik: -0.8)),
                       Text(tarih, style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500)),
                     ],
                   ),
@@ -142,19 +167,18 @@ class _Ust extends StatelessWidget {
             label: 'Profilim',
             excludeSemantics: true,
             onTap: onProfil,
-            child: Material(
-              color: PusulaRenk.beyaz,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: const BorderSide(color: PusulaRenk.lacivert, width: 1.5),
-              ),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: onProfil,
-                child: const SizedBox.square(
-                  dimension: 44,
-                  child: Icon(LucideIcons.userRound, size: 22, color: PusulaRenk.lacivert),
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: onProfil,
+              child: Container(
+                width: 46,
+                height: 46,
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: PusulaRenk.lacivert, width: 1.5),
                 ),
+                child: ProfilAvatar(boyut: 40, foto: avatarFoto, ad: avatarAd),
               ),
             ),
           ),
@@ -262,8 +286,9 @@ class _MaasKarti extends StatelessWidget {
                                           borderRadius: BorderRadius.circular(999),
                                         ),
                                         child: Text('ÖRNEK HESAP',
-                                            style: PusulaYazi.metin(11, renk: PusulaRenk.amber, agirlik: FontWeight.w700)
-                                                .copyWith(letterSpacing: 0.4)),
+                                            style:
+                                                PusulaYazi.metin(11, renk: PusulaRenk.amber, agirlik: FontWeight.w700)
+                                                    .copyWith(letterSpacing: 0.4)),
                                       ),
                                   ],
                                 ),

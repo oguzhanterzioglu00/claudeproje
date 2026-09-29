@@ -5,29 +5,42 @@ import '../../../core/bilesenler.dart';
 import '../../../core/tema.dart';
 import '../data/profil_deposu.dart';
 import '../domain/profil.dart';
-import 'karsilama_sayfasi.dart';
+import '../data/fotograf_deposu.dart';
+import 'fotograf_sayfasi.dart';
 import 'profil_alanlari.dart';
 import 'secim_sayfasi.dart';
 
-/// İlk açılış akışı: karşılama → adım adım profil kurulumu.
-/// Kayıt tamamlanınca [ProfilDeposu] değişir; uygulama kökü ana kabuğa geçer.
+/// Hesap açıldıktan sonra adım adım profil kurulumu: kimlik, fotoğraf, görev ve
+/// (memurlar için) becayiş bilgileri. Kayıt tamamlanınca [ProfilDeposu] değişir;
+/// uygulama kökü ana kabuğa geçer.
 class IlkKurulumSayfasi extends StatefulWidget {
-  const IlkKurulumSayfasi({super.key, required this.depo});
+  const IlkKurulumSayfasi({
+    super.key,
+    required this.depo,
+    required this.fotograf,
+    this.fotografKaynagi = const ImagePickerFotografKaynagi(),
+    this.ilkAd = '',
+  });
 
   final ProfilDeposu depo;
+  final FotografDeposu fotograf;
+  final FotografKaynagi fotografKaynagi;
+
+  /// Hesaptan geliyorsa ad alanına önceden yazılır.
+  final String ilkAd;
 
   @override
   State<IlkKurulumSayfasi> createState() => _IlkKurulumSayfasiState();
 }
 
 class _IlkKurulumSayfasiState extends State<IlkKurulumSayfasi> {
-  final _ad = TextEditingController();
+  late final _ad = TextEditingController(text: widget.ilkAd);
   final _unvan = TextEditingController();
   final _sicil = TextEditingController();
   final _eposta = TextEditingController();
 
-  /// 0: karşılama; 1..[_adimSayisi]: kurulum adımları.
-  int _adim = 0;
+  /// 1..[_adimSayisi]: kurulum adımları (1 kimlik, 2 fotoğraf, 3 görev, 4 becayiş).
+  int _adim = 1;
   bool _ileri = true;
   Statu? _statu;
   bool _aday = false;
@@ -37,12 +50,12 @@ class _IlkKurulumSayfasiState extends State<IlkKurulumSayfasi> {
   bool _kaydediliyor = false;
 
   bool get _memur => _statu == Statu.memur657;
-  int get _adimSayisi => _memur ? 3 : 2;
+  int get _adimSayisi => _memur ? 4 : 3;
   bool get _epostaGecerli => _eposta.text.trim().isEmpty || _eposta.text.contains('@');
 
   bool get _devamEdilebilir => switch (_adim) {
         1 => _ad.text.trim().isNotEmpty && _statu != null,
-        3 => _epostaGecerli,
+        4 => _epostaGecerli,
         _ => true,
       };
 
@@ -62,7 +75,8 @@ class _IlkKurulumSayfasiState extends State<IlkKurulumSayfasi> {
 
   Future<void> _sec(String baslik, List<String> secenekler, String secili, ValueChanged<String> yaz,
       {bool serbest = false}) async {
-    final s = await SecimSayfasi.goster(context, baslik: baslik, secenekler: secenekler, secili: secili, serbest: serbest);
+    final s =
+        await SecimSayfasi.goster(context, baslik: baslik, secenekler: secenekler, secili: secili, serbest: serbest);
     if (s != null) setState(() => yaz(s));
   }
 
@@ -91,11 +105,11 @@ class _IlkKurulumSayfasiState extends State<IlkKurulumSayfasi> {
 
   @override
   Widget build(BuildContext context) => PopScope(
-        canPop: _adim == 0,
+        canPop: _adim == 1,
         onPopInvokedWithResult: (geciyor, _) {
           if (!geciyor) _git(_adim - 1);
         },
-        child: _adim == 0 ? KarsilamaSayfasi(onBasla: () => _git(1)) : _kurulum(),
+        child: _kurulum(),
       );
 
   Widget _kurulum() {
@@ -106,7 +120,7 @@ class _IlkKurulumSayfasiState extends State<IlkKurulumSayfasi> {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(18, 16, 18, 0),
-              child: _UstCubuk(adim: _adim, toplam: _adimSayisi, onGeri: () => _git(_adim - 1)),
+              child: _UstCubuk(adim: _adim, toplam: _adimSayisi, onGeri: _adim > 1 ? () => _git(_adim - 1) : null),
             ),
             Expanded(
               child: AnimatedSwitcher(
@@ -124,7 +138,8 @@ class _IlkKurulumSayfasiState extends State<IlkKurulumSayfasi> {
                     padding: const EdgeInsets.fromLTRB(18, 22, 18, 16),
                     children: switch (_adim) {
                       1 => _kimsin(),
-                      2 => _gorev(),
+                      2 => _foto(),
+                      3 => _gorev(),
                       _ => _becayis(),
                     },
                   ),
@@ -165,8 +180,7 @@ class _IlkKurulumSayfasiState extends State<IlkKurulumSayfasi> {
         const SizedBox(height: 2),
         Text(baslik, style: PusulaYazi.baslik(30, aralik: -1.4)),
         const SizedBox(height: 8),
-        Text(alt,
-            style: PusulaYazi.metin(14, renk: PusulaRenk.soluk, agirlik: FontWeight.w500).copyWith(height: 1.45)),
+        Text(alt, style: PusulaYazi.metin(14, renk: PusulaRenk.soluk, agirlik: FontWeight.w500).copyWith(height: 1.45)),
         const SizedBox(height: 22),
       ];
 
@@ -192,9 +206,15 @@ class _IlkKurulumSayfasiState extends State<IlkKurulumSayfasi> {
         ],
       ];
 
+  List<Widget> _foto() => [
+        ..._baslik('Adım 2', 'Profil fotoğrafın',
+            'İstersen bir fotoğraf ekle; yoksa adının baş harfleri gösterilir. Sonra profilinden değiştirebilirsin.'),
+        FotografAlani(depo: widget.fotograf, kaynak: widget.fotografKaynagi, ad: _ad.text),
+      ];
+
   List<Widget> _gorev() => [
-        ..._baslik('Adım 2', 'Görev bilgilerin',
-            'Becayiş eşleşmesi ve ilan uyumu kurum, hizmet sınıfı ve ilinle yapılır.'),
+        ..._baslik(
+            'Adım 3', 'Görev bilgilerin', 'Becayiş eşleşmesi ve ilan uyumu kurum, hizmet sınıfı ve ilinle yapılır.'),
         SecimAlani(
           etiket: 'Kurum',
           deger: _kurum,
@@ -228,7 +248,7 @@ class _IlkKurulumSayfasiState extends State<IlkKurulumSayfasi> {
       ];
 
   List<Widget> _becayis() => [
-        ..._baslik('Adım 3', 'Becayiş ve dilekçe',
+        ..._baslik('Adım 4', 'Becayiş ve dilekçe',
             'Yalnızca becayiş dilekçeni doldurmak ve ilanını doğrulamak için kullanılır. İstersen şimdilik atlayıp sonra profilinden ekleyebilirsin.'),
         MetinAlani(etiket: 'Sicil no', denetleyici: _sicil, onDegis: () => setState(() {}), sayisal: true),
         const SizedBox(height: 14),
@@ -249,33 +269,35 @@ class _UstCubuk extends StatelessWidget {
 
   final int adim;
   final int toplam;
-  final VoidCallback onGeri;
+  final VoidCallback? onGeri;
 
   @override
   Widget build(BuildContext context) => Row(
         children: [
-          Semantics(
-            button: true,
-            label: 'Geri',
-            excludeSemantics: true,
-            onTap: onGeri,
-            child: Material(
-              color: PusulaRenk.beyaz,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: const BorderSide(color: PusulaRenk.lacivert, width: 1.5),
-              ),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: onGeri,
-                child: const SizedBox.square(
-                  dimension: 44,
-                  child: Icon(LucideIcons.arrowLeft, size: 22, color: PusulaRenk.lacivert),
+          if (onGeri != null) ...[
+            Semantics(
+              button: true,
+              label: 'Geri',
+              excludeSemantics: true,
+              onTap: onGeri,
+              child: Material(
+                color: PusulaRenk.beyaz,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: const BorderSide(color: PusulaRenk.lacivert, width: 1.5),
+                ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: onGeri,
+                  child: const SizedBox.square(
+                    dimension: 44,
+                    child: Icon(LucideIcons.arrowLeft, size: 22, color: PusulaRenk.lacivert),
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 16),
+            const SizedBox(width: 16),
+          ],
           Expanded(
             child: Semantics(
               label: 'Adım $adim / $toplam',

@@ -1,36 +1,51 @@
 import 'package:flutter/material.dart';
 
+import 'core/depolama.dart';
 import 'core/tema.dart';
-import 'core/logo.dart';
-import 'features/kabuk/pusula_kabugu.dart';
-import 'features/profil/data/profil_deposu.dart';
+import 'features/hesap/data/kimlik_servisi.dart';
+import 'features/hesap/data/oturum_deposu.dart';
+import 'features/hesap/data/yerel_kimlik_servisi.dart';
+import 'features/kabuk/uygulama_akisi.dart';
+import 'features/profil/data/fotograf_deposu.dart';
 import 'features/profil/data/profil_kaydi.dart';
-import 'features/profil/presentation/ilk_kurulum_sayfasi.dart';
 
 void main() => runApp(const PusulaUygulamasi());
 
-/// Uygulama kökü: profil yüklenir; profil yoksa karşılama ve ilk kurulum, varsa ana kabuk açılır.
+/// Uygulama kökü. Bağımlılıklar (kimlik servisi, depolama, fotoğraf kaynağı)
+/// testlerde ve ileride gerçek arka uçla değiştirilebilir.
 class PusulaUygulamasi extends StatefulWidget {
-  const PusulaUygulamasi({super.key, this.profilKaydi = const YerelProfilKaydi()});
+  const PusulaUygulamasi({
+    super.key,
+    this.kimlik,
+    this.depolama = const YerelDepolama(),
+    this.profilKaydiUret,
+    this.fotografKaynagi = const ImagePickerFotografKaynagi(),
+    this.appleGoster = true,
+  });
 
-  final ProfilKaydi profilKaydi;
+  /// Boşsa cihazda çalışan örnek servis ([YerelKimlikServisi]).
+  final KimlikServisi? kimlik;
+  final AnahtarDeger depolama;
+  final ProfilKaydi Function(String hesapId)? profilKaydiUret;
+  final FotografKaynagi fotografKaynagi;
+  final bool appleGoster;
 
   @override
   State<PusulaUygulamasi> createState() => _PusulaUygulamasiState();
 }
 
 class _PusulaUygulamasiState extends State<PusulaUygulamasi> {
-  late final ProfilDeposu _profil = ProfilDeposu(widget.profilKaydi);
+  late final OturumDeposu _oturum = OturumDeposu(widget.kimlik ?? YerelKimlikServisi(depolama: widget.depolama));
 
   @override
   void initState() {
     super.initState();
-    _profil.yukle();
+    _oturum.yukle();
   }
 
   @override
   void dispose() {
-    _profil.dispose();
+    _oturum.dispose();
     super.dispose();
   }
 
@@ -39,27 +54,12 @@ class _PusulaUygulamasiState extends State<PusulaUygulamasi> {
         title: 'Kamu Pusulası',
         debugShowCheckedModeBanner: false,
         theme: pusulaTema(),
-        home: ListenableBuilder(
-          listenable: _profil,
-          builder: (context, _) {
-            if (!_profil.yuklendi) return const _Acilis();
-            if (_profil.profil == null) {
-              // Kayıt tamamlanınca depo değişir ve kabuk kendiliğinden açılır.
-              return IlkKurulumSayfasi(depo: _profil);
-            }
-            return PusulaKabugu(profilDeposu: _profil);
-          },
+        home: UygulamaAkisi(
+          oturum: _oturum,
+          depolama: widget.depolama,
+          profilKaydiUret: widget.profilKaydiUret ?? (id) => YerelProfilKaydi(hesapId: id),
+          fotografKaynagi: widget.fotografKaynagi,
+          appleGoster: widget.appleGoster,
         ),
-      );
-}
-
-/// Profil okunurken kısa açılış ekranı.
-class _Acilis extends StatelessWidget {
-  const _Acilis();
-
-  @override
-  Widget build(BuildContext context) => const Scaffold(
-        backgroundColor: PusulaRenk.lacivert,
-        body: Center(child: PusulaLogo(boyut: 112, koseOrani: 0.3)),
       );
 }

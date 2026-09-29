@@ -1,20 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../core/avatar.dart';
 import '../../../core/bilesenler.dart';
 import '../../../core/tema.dart';
 import '../../../core/yukselen.dart';
+import '../../hesap/data/oturum_deposu.dart';
+import '../../hesap/presentation/hesap_bolumu.dart';
+import '../data/fotograf_deposu.dart';
 import '../data/profil_deposu.dart';
 import '../domain/profil.dart';
+import 'fotograf_sayfasi.dart';
 import 'profil_alanlari.dart';
 import 'secim_sayfasi.dart';
 
 /// Profil: statü, görev bilgileri ve (memurlar için) becayiş/dilekçe bilgileri.
 /// İlk kurulum için bkz. [IlkKurulumSayfasi].
 class ProfilSayfasi extends StatefulWidget {
-  const ProfilSayfasi({super.key, required this.depo, this.onBitti});
+  const ProfilSayfasi({
+    super.key,
+    required this.depo,
+    this.onBitti,
+    this.fotograf,
+    this.fotografKaynagi = const ImagePickerFotografKaynagi(),
+    this.oturum,
+  });
 
   final ProfilDeposu depo;
+
+  /// Verilirse profilde fotoğraf değiştirilebilir.
+  final FotografDeposu? fotograf;
+  final FotografKaynagi fotografKaynagi;
+
+  /// Verilirse "Hesap ve güvenlik" bölümü (şifre, çıkış, hesap silme) görünür.
+  final OturumDeposu? oturum;
 
   /// Kaydedildikten sonra çağrılır; boşsa sayfa kapanır.
   final VoidCallback? onBitti;
@@ -53,7 +72,8 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
 
   Future<void> _sec(String baslik, List<String> secenekler, String secili, ValueChanged<String> yaz,
       {bool serbest = false}) async {
-    final s = await SecimSayfasi.goster(context, baslik: baslik, secenekler: secenekler, secili: secili, serbest: serbest);
+    final s =
+        await SecimSayfasi.goster(context, baslik: baslik, secenekler: secenekler, secili: secili, serbest: serbest);
     if (s != null) setState(() => yaz(s));
   }
 
@@ -117,6 +137,22 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                     const Yukselen(
                       child: GeriBaslik(ustYazi: 'Kamu Pusulası', baslik: 'Profilim', sag: SizedBox.shrink()),
                     ),
+                    if (widget.fotograf != null) ...[
+                      const SizedBox(height: 18),
+                      _FotografSatiri(
+                        depo: widget.fotograf!,
+                        ad: _ad.text,
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => FotografSayfasi(
+                              depo: widget.fotograf!,
+                              kaynak: widget.fotografKaynagi,
+                              ad: _ad.text,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 10),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,7 +193,8 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                         etiket: 'Kurum',
                         deger: _kurum,
                         ipucu: 'Kurumunu seç veya yaz',
-                        onTap: () => _sec('Kurum', ProfilSecenekleri.kurumlar, _kurum, (s) => _kurum = s, serbest: true),
+                        onTap: () =>
+                            _sec('Kurum', ProfilSecenekleri.kurumlar, _kurum, (s) => _kurum = s, serbest: true),
                       ),
                       if (_memur) ...[
                         const SizedBox(height: 12),
@@ -169,7 +206,12 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                         ),
                       ],
                       const SizedBox(height: 12),
-                      MetinAlani(etiket: 'Unvan', denetleyici: _unvan, ipucu: 'Ör. Hemşire', onDegis: () => setState(() {}), capitalization: TextCapitalization.words),
+                      MetinAlani(
+                          etiket: 'Unvan',
+                          denetleyici: _unvan,
+                          ipucu: 'Ör. Hemşire',
+                          onDegis: () => setState(() {}),
+                          capitalization: TextCapitalization.words),
                       const SizedBox(height: 12),
                       SecimAlani(
                         etiket: 'Çalıştığın il',
@@ -185,7 +227,8 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                       Text('Yalnızca becayiş dilekçeni doldurmak ve ilanını doğrulamak için kullanılır.',
                           style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500)),
                       const SizedBox(height: 10),
-                      MetinAlani(etiket: 'Sicil no', denetleyici: _sicil, onDegis: () => setState(() {}), sayisal: true),
+                      MetinAlani(
+                          etiket: 'Sicil no', denetleyici: _sicil, onDegis: () => setState(() {}), sayisal: true),
                       const SizedBox(height: 12),
                       MetinAlani(
                         etiket: 'Kurumsal e-posta',
@@ -196,13 +239,23 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                         hata: _epostaGecerli ? null : 'Geçerli bir e-posta adresi gir',
                       ),
                     ],
+                    if (widget.oturum != null) ...[
+                      const SizedBox(height: 26),
+                      HesapBolumu(
+                        oturum: widget.oturum!,
+                        veriSil: () async {
+                          await widget.depo.sil();
+                          await widget.fotograf?.kaldir();
+                        },
+                      ),
+                    ],
                     if (_mevcut != null) ...[
                       const SizedBox(height: 24),
                       Center(
                         child: TextButton.icon(
                           onPressed: _sil,
                           icon: const Icon(LucideIcons.trash2, size: 18, color: PusulaRenk.kirmizi),
-                          label: Text('Profilimi sil',
+                          label: Text('Profil bilgilerimi sil',
                               style: PusulaYazi.metin(14, renk: PusulaRenk.kirmizi, agirlik: FontWeight.w700)),
                         ),
                       ),
@@ -221,6 +274,52 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                 ),
               ),
             ],
+          ),
+        ),
+      );
+}
+
+/// Profil sayfasının üstündeki avatar ve "fotoğrafı değiştir" satırı.
+class _FotografSatiri extends StatelessWidget {
+  const _FotografSatiri({required this.depo, required this.ad, required this.onTap});
+
+  final FotografDeposu depo;
+  final String ad;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+        listenable: depo,
+        builder: (context, _) => Semantics(
+          button: true,
+          label: depo.foto == null ? 'Profil fotoğrafı ekle' : 'Profil fotoğrafını değiştir',
+          excludeSemantics: true,
+          onTap: onTap,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  ProfilAvatar(boyut: 72, foto: depo.foto, ad: ad, kamera: true),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(ad.trim().isEmpty ? 'Profilin' : ad.trim(),
+                            overflow: TextOverflow.ellipsis, style: PusulaYazi.baslik(20, aralik: -0.6)),
+                        const SizedBox(height: 2),
+                        Text(depo.foto == null ? 'Fotoğraf ekle' : 'Fotoğrafı değiştir',
+                            style: PusulaYazi.metin(13, renk: PusulaRenk.mavi, agirlik: FontWeight.w700)),
+                      ],
+                    ),
+                  ),
+                  const Icon(LucideIcons.chevronRight, size: 20, color: PusulaRenk.soluk),
+                ],
+              ),
+            ),
           ),
         ),
       );
