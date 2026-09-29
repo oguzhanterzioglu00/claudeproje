@@ -178,12 +178,13 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
     }
   }
 
-  /// Asistanın kullanıcıya uygun mevzuatı seçmesi için çalışan grubu; sözleşmeli ve diğer statülerde belirsizdir.
+  /// Asistanın kullanıcıya uygun mevzuatı seçmesi için çalışan grubu; diğer statülerde (akademik vb.) belirsizdir.
   static Kitle? _kitle(Statu s) => switch (s) {
-        Statu.memur657 => Kitle.memur,
-        Statu.isci => Kitle.isci,
-        _ => null,
-      };
+    Statu.memur657 => Kitle.memur,
+    Statu.isci => Kitle.isci,
+    Statu.sozlesmeli => Kitle.sozlesmeli,
+    _ => null,
+  };
 
   String _becayisAlt(Profil p) {
     if (p.becayisKapaliNedeni != null) return 'Yalnızca memurlar';

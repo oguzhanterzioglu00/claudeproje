@@ -26,6 +26,7 @@ void main() {
               startsWith('657 sayılı Devlet Memurları Kanunu, md. '),
               startsWith('5510 sayılı Kanun, '),
               startsWith('4857 sayılı İş Kanunu, '),
+              startsWith('Sözleşmeli Personel Çalıştırılmasına İlişkin Esaslar, md. '),
               startsWith('1475 sayılı İş Kanunu, md. 14'),
             ),
             reason: k.id,
@@ -96,6 +97,31 @@ void main() {
           contains('on gün'),
         ),
       );
+      expect(alinti('sozlesmeli_yillik_izin'), allOf(contains('yirmi gün'), contains('otuz gün')));
+      expect(cevap('sozlesmeli_yillik_izin'), allOf(contains('20 gün'), contains('30 gün')));
+      expect(
+        alinti('sozlesmeli_mazeret'),
+        allOf(
+          contains('yirmi dört hafta'),
+          contains('üç saat'),
+          contains('bir buçuk saat'),
+          contains('on gün'),
+          contains('yedi gün'),
+          contains('üç aya kadar'),
+        ),
+      );
+      expect(
+        cevap('sozlesmeli_mazeret'),
+        allOf(
+          contains('24 hafta'),
+          contains('3 saat'),
+          contains('1,5 saat'),
+          contains('10 gün'),
+          contains('7 gün'),
+          contains('üç aya kadar'),
+        ),
+      );
+
       expect(
         cevap('isci_mazeret'),
         allOf(
@@ -155,6 +181,12 @@ void main() {
         'İhbar süresi ne kadar?': 'isci_fesih',
         'İşten çıkarılırsam ihbar tazminatı': 'isci_fesih',
         'Kıdem tazminatı nasıl hesaplanır?': 'isci_kidem',
+        'Sözleşmeli personel yıllık izin kaç gün?': 'sozlesmeli_yillik_izin',
+        '4/B sözleşmeli olarak çalışıyorum, izin hakkım nedir? yıllık izin': 'sozlesmeli_yillik_izin',
+        'Sözleşmeli personel doğum izni kaç hafta?': 'sozlesmeli_mazeret',
+        'Sözleşmeli personel süt izni günde kaç saat': 'sozlesmeli_mazeret',
+        'Sözleşmeli personel hastalık izni nasıl verilir?': 'sozlesmeli_hastalik',
+        'Sözleşmeli personel çalışma saatleri nasıl?': 'sozlesmeli_calisma',
         'İşçi kıdem tazminatına ne zaman hak kazanır': 'isci_kidem',
       };
       beklenen.forEach((soru, id) => expect(konu(soru), id, reason: soru));
@@ -209,6 +241,27 @@ void main() {
       expect(e.adaylar.map((k) => k.id), unorderedEquals(['isci_yillik_izin', 'isci_mazeret']));
     });
 
+    test('sözleşmeli: statüyle ya da soruda "sözleşmeli" yazınca 4/B konuları; memur konusu gelmez', () {
+      expect(konuK('Yıllık izin kaç gün?', kitle: Kitle.sozlesmeli), 'sozlesmeli_yillik_izin');
+      expect(konuK('Doğum izni kaç hafta?', kitle: Kitle.sozlesmeli), 'sozlesmeli_mazeret');
+      expect(konuK('Sözleşmeli yıllık izin kaç gün?'), 'sozlesmeli_yillik_izin');
+      expect(
+        konuK('Sözleşmeli yıllık izin kaç gün?', kitle: Kitle.memur),
+        'sozlesmeli_yillik_izin',
+        reason: 'açık ifade önce gelir',
+      );
+      expect(konuK('Yıllık izin kaç gün?'), 'yillik_izin', reason: 'grup belirsizse memur konusu');
+    });
+
+    test('yalnızca "izin" yazan sözleşmeliye 4/B izin konuları önerilir', () {
+      final e = BilgiArama.esles('izin', kitle: Kitle.sozlesmeli);
+      expect(e.konu, isNull);
+      expect(
+        e.adaylar.map((k) => k.id),
+        unorderedEquals(['sozlesmeli_yillik_izin', 'sozlesmeli_mazeret', 'sozlesmeli_hastalik']),
+      );
+    });
+
     test('kendi grubunda karşılığı olmayan soru tüm konularda aranır', () {
       expect(konuK('Kıdem tazminatı nedir?', kitle: Kitle.memur), 'isci_kidem');
       expect(konuK('Becayiş şartları nedir?', kitle: Kitle.isci), 'becayis');
@@ -217,6 +270,17 @@ void main() {
     test('emeklilik (5510) her iki gruba da cevap verir', () {
       expect(konuK('Emeklilik yaşı kaç?', kitle: Kitle.isci), 'emeklilik');
       expect(konuK('Emeklilik yaşı kaç?', kitle: Kitle.memur), 'emeklilik');
+    });
+
+    test('konularIcin sözleşmeli: yalnızca 4/B konuları ve emeklilik', () {
+      final ids = YerelMevzuatAsistani.konularIcin(Kitle.sozlesmeli).map((k) => k.id).toSet();
+      expect(ids, {
+        'sozlesmeli_yillik_izin',
+        'sozlesmeli_mazeret',
+        'sozlesmeli_hastalik',
+        'sozlesmeli_calisma',
+        'emeklilik',
+      });
     });
 
     test('konularIcin: gruba uygun konular; grup yoksa hepsi', () {
@@ -265,6 +329,26 @@ void main() {
       expect(oneriler, contains('Kıdem tazminatı nasıl hesaplanır?'));
       expect(oneriler, isNot(contains('Becayiş şartları nedir?')));
     });
+
+    test(
+      'sözleşmeli kullanıcıya 4/B alıntısı ve sürüm notu; başka gruba ait konuda "senin için farklı olabilir" uyarısı',
+      () async {
+        final c = await asistan.sor('yıllık izin kaç gün', kitle: Kitle.sozlesmeli);
+        expect(c.kaynaklar.first.baslik, startsWith('Sözleşmeli Personel Çalıştırılmasına İlişkin Esaslar, md. 9'));
+        expect(c.surum, BilgiBankasi.surumSozlesmeli);
+        expect(c.uyari, isNot(contains('farklı olabilir')), reason: 'kendi grubuna ait konu');
+
+        final d = await asistan.sor('disiplin cezaları nelerdir', kitle: Kitle.sozlesmeli);
+        expect(d.kaynaklar.first.baslik, startsWith('657 sayılı Devlet Memurları Kanunu'));
+        expect(
+          d.uyari,
+          allOf(contains('memurlar (657 sayılı Kanun)'), contains('4/B sözleşmeli personel için farklı olabilir')),
+        );
+
+        final e = await asistan.sor('emeklilik yaşı', kitle: Kitle.sozlesmeli);
+        expect(e.uyari, isNot(contains('farklı olabilir')), reason: 'herkes konusu');
+      },
+    );
 
     test('Becayiş kaynağı sabiti bilgi bankasıyla aynı maddeyi gösterir', () {
       final k = BilgiBankasi.konular.firstWhere((k) => k.id == 'becayis');

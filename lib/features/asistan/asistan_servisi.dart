@@ -74,13 +74,16 @@ abstract final class BilgiArama {
     return toplam;
   }
 
-  /// Soruda açıkça geçen çalışan grubu ("işçi", "İş Kanunu" ya da "memur", "657"); ikisi de ya da hiçbiri
-  /// geçiyorsa null.
+  /// Soruda açıkça geçen çalışan grubu ("işçi"/"İş Kanunu", "memur"/"657", "sözleşmeli"/"4/B"); birden fazlası
+  /// ya da hiçbiri geçmiyorsa null.
   static Kitle? _sorudakiKitle(String soru) {
-    final isci = soru.contains('isci') || soru.contains('is kanunu') || soru.contains('4857') || soru.contains('1475');
-    final memur = soru.contains('memur') || soru.contains('657');
-    if (isci == memur) return null;
-    return isci ? Kitle.isci : Kitle.memur;
+    final bulunan = <Kitle>{
+      if (soru.contains('isci') || soru.contains('is kanunu') || soru.contains('4857') || soru.contains('1475'))
+        Kitle.isci,
+      if (soru.contains('memur') || soru.contains('657')) Kitle.memur,
+      if (soru.contains('sozlesmeli') || soru.contains('4/b')) Kitle.sozlesmeli,
+    };
+    return bulunan.length == 1 ? bulunan.first : null;
   }
 
   static bool _uygun(BilgiKonusu k, Kitle? hedef) => hedef == null || k.kitle == Kitle.herkes || k.kitle == hedef;
@@ -145,10 +148,17 @@ class YerelMevzuatAsistani implements MevzuatAsistani {
 
     if (e.konu != null) {
       final k = e.konu!;
+      // Kullanıcının grubuna ait olmayan bir konu bulunduysa (ör. sözleşmeli soran birine memur mevzuatı), bunu açıkça söyle.
+      final farkli = kitle != null && k.kitle != Kitle.herkes && k.kitle != kitle;
+      final uyari = [
+        if (farkli)
+          'Bu cevap ${k.kitle.etiket} için geçerli mevzuata dayanıyor; ${kitle.etiket} için farklı olabilir, kendi durumunu ayrıca kontrol et.',
+        if (k.uyari != null) k.uyari!,
+      ].join(' ');
       return AsistanCevabi(
         metin: k.cevap,
         kaynaklar: k.kaynaklar,
-        uyari: k.uyari,
+        uyari: uyari.isEmpty ? null : uyari,
         surum: k.kapsamDisi ? null : (k.surum ?? BilgiBankasi.surum),
       );
     }

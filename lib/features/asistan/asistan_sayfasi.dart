@@ -48,6 +48,11 @@ class _AsistanSayfasiState extends State<AsistanSayfasi> {
       'Şu an 4857 sayılı İş Kanunu ve 1475 sayılı Kanun\'un 14. maddesine dayanarak yıllık izin, doğum ve mazeret izni, '
       'çalışma süresi ve fazla mesai, ihbar süresi, kıdem tazminatı ve emeklilik (5510 sayılı Kanun) sorularını yanıtlıyorum. ';
 
+  static const _sozlesmeliKarsilama =
+      'Merhaba! Sorunu ilgili kanun maddesini bularak, alıntısıyla birlikte yanıtlarım. '
+      'Şu an Sözleşmeli Personel Çalıştırılmasına İlişkin Esaslar\'a dayanarak yıllık izin, doğum ve mazeret izni, '
+      'hastalık izni, çalışma saatleri ve emeklilik (5510 sayılı Kanun) sorularını yanıtlıyorum. ';
+
   static const _kapanis = 'Diğer kanunlar henüz yok; bilmediğim konuda tahmin yürütmem.';
 
   final _soru = TextEditingController();
@@ -57,7 +62,9 @@ class _AsistanSayfasiState extends State<AsistanSayfasi> {
       metin: switch (widget.kitle) {
         Kitle.isci => '$_isciKarsilama$_kapanis',
         Kitle.memur => '$_memurKarsilama$_kapanis',
-        _ => '$_memurKarsilama İşçiler için İş Kanunu (4857) konularını sormak istersen sorunda "işçi" yaz. $_kapanis',
+        Kitle.sozlesmeli => '$_sozlesmeliKarsilama$_kapanis',
+        _ =>
+          '$_memurKarsilama İşçi (İş Kanunu, 4857) ya da sözleşmeli personel (4/B) konularını sormak istersen sorunda "işçi" ya da "sözleşmeli" yaz. $_kapanis',
       },
     ),
   ];

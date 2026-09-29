@@ -217,10 +217,28 @@ void main() {
 
     testWidgets('grup bilinmiyorsa (ör. sözleşmeli) her iki grubun konuları ve "işçi" ipucu görünür', (tester) async {
       await acK(tester, null);
-      expect(find.textContaining('sorunda "işçi" yaz'), findsOneWidget);
+      expect(find.textContaining('sorunda "işçi" ya da "sözleşmeli" yaz'), findsOneWidget);
       expect(find.text('Becayiş'), findsOneWidget);
       await sonaKaydir(tester);
-      expect(find.text('Kıdem tazminatı'), findsOneWidget);
+      expect(find.text('Sözleşmeli çalışma saati'), findsOneWidget);
+    });
+
+    testWidgets('sözleşmeli: karşılama Esaslar\'ı anar, hızlı sorular 4/B konuları; yıllık izin 20/30 gün', (
+      tester,
+    ) async {
+      await acK(tester, Kitle.sozlesmeli);
+      expect(find.textContaining('Sözleşmeli Personel Çalıştırılmasına İlişkin Esaslar'), findsOneWidget);
+      expect(find.text('Sözleşmeli yıllık izin'), findsOneWidget);
+      await sonaKaydir(tester);
+      expect(find.text('Sözleşmeli çalışma saati'), findsOneWidget);
+      expect(find.text('Kıdem tazminatı'), findsNothing);
+      await basaKaydir(tester);
+      expect(find.text('Becayiş'), findsNothing);
+
+      await sor(tester, 'Yıllık izin kaç gün?');
+      expect(find.textContaining('Esaslar, md. 9'), findsWidgets);
+      expect(find.textContaining('30 gün'), findsWidgets);
+      expect(find.textContaining('8/5/2026 tarihli'), findsOneWidget);
     });
   });
 }

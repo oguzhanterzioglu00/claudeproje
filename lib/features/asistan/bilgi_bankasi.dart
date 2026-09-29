@@ -7,13 +7,21 @@ import 'asistan_servisi.dart';
 /// Konunun hangi çalışan grubuna yönelik olduğu; asistan kullanıcının grubuna göre konu önerir.
 enum Kitle {
   /// 657 sayılı Devlet Memurları Kanunu'na tabi memurlar.
-  memur,
+  memur('memurlar (657 sayılı Kanun)'),
 
   /// 4857 sayılı İş Kanunu'na tabi işçiler.
-  isci,
+  isci('işçiler (4857 sayılı İş Kanunu)'),
 
-  /// Her iki grubu da ilgilendiren konular (ör. 5510 sayılı Kanun).
-  herkes,
+  /// 657 sayılı Kanun md. 4/B kapsamındaki sözleşmeli personel (Sözleşmeli Personel Çalıştırılmasına İlişkin Esaslar).
+  sozlesmeli('4/B sözleşmeli personel'),
+
+  /// Her grubu da ilgilendiren konular (ör. 5510 sayılı Kanun).
+  herkes('tüm çalışanlar');
+
+  const Kitle(this.etiket);
+
+  /// Cevap uyarılarında kullanılan ad.
+  final String etiket;
 }
 
 /// Asistanın cevap verebildiği bir konu: özet cevap + kanun maddesinden alıntılar.
@@ -69,6 +77,10 @@ abstract final class BilgiBankasi {
   /// 4857 ve 1475 sayılı İş Kanunu konuları için sürüm notu.
   static const surumIsKanunu =
       'Kaynak: mevzuat.gov.tr 4857 sayılı İş Kanunu birleştirilmiş metni (22/4/2026 tarihli 7578 sayılı Kanun değişikliğine kadar işlenmiş) ve 1475 sayılı Kanun md. 14';
+
+  /// Sözleşmeli Personel Çalıştırılmasına İlişkin Esaslar konuları için sürüm notu.
+  static const surumSozlesmeli =
+      'Kaynak: mevzuat.gov.tr Sözleşmeli Personel Çalıştırılmasına İlişkin Esaslar (8/5/2026 tarihli ve 33247 sayılı Resmî Gazete\'de yayımlanan 11307 sayılı Cumhurbaşkanı Kararına kadar işlenmiş)';
 
   static const surum5510 =
       'Kaynak: mevzuat.gov.tr 5510 sayılı Kanun birleştirilmiş metni (24/7/2026 tarihli 7590 sayılı Kanun değişikliğine kadar işlenmiş)';
@@ -723,6 +735,159 @@ abstract final class BilgiBankasi {
           '4857 sayılı Kanun md. 120 ve geçici md. 6 uyarınca 1475 sayılı Kanun\'un yalnızca 14. maddesi yürürlüktedir. Tazminat tutarına dönemsel bir üst sınır uygulanabilir ve kamu işçilerinde toplu iş sözleşmesi hükümleri devreye girebilir; bunlar bu metinde yok. Kesin tutar için işyerinin personel birimine veya bir avukata danış.',
       kitle: Kitle.isci,
       surum: BilgiBankasi.surumIsKanunu,
+    ),
+    BilgiKonusu(
+      id: 'sozlesmeli_yillik_izin',
+      baslik: '4/B sözleşmeli personelin yıllık izni',
+      etiket: 'Sözleşmeli yıllık izin',
+      ornekSoru: 'Sözleşmeli personel yıllık izin kaç gün?',
+      anahtarlar: [
+        'sozlesmeli',
+        '4/b',
+        'esaslar',
+        'yillik izin',
+        'yillik',
+        'izin hakki',
+        'izin haklari',
+        'izin suresi',
+        'kac gun izin',
+        'kullanilmayan izin',
+        'izin',
+      ],
+      cevap:
+          '4/B sözleşmeli personele, kamu kurumlarında geçen hizmet süresi 1–10 yıl arasında ise 20 gün, 10 yıldan fazla ise 30 gün ücretli yıllık izin verilir. Sözleşme döneminde kullanılmayan izin, sözleşme devam ederse sonraki sözleşme döneminde kullanılabilir; ancak cari ve bir önceki sözleşme dönemi dışındaki dönemlere ait kullanılmayan izin hakları düşer.',
+      kaynaklar: [
+        MevzuatKaynagi(
+          baslik: 'Sözleşmeli Personel Çalıştırılmasına İlişkin Esaslar, md. 9 (Yıllık izin süreleri)',
+          alinti:
+              '217 sayılı Devlet Personel Başkanlığı Kuruluş ve Görevleri Hakkında Kanun Hükmünde Kararnamenin 2 nci maddesinde belirtilen kurumlarda geçen hizmet süresi, bir yıldan on yıla kadar olan personele yirmi gün, on yıldan fazla olanlara otuz gün ücretli yıllık izin verilir.',
+        ),
+        MevzuatKaynagi(
+          baslik: 'Sözleşmeli Personel Çalıştırılmasına İlişkin Esaslar, md. 9 (Kullanılmayan izin)',
+          alinti:
+              'Sözleşme döneminde kullanılmayan izinler, sözleşmenin devamı halinde müteakip sözleşme döneminde kullanılabilir. Cari sözleşme dönemi ile bir önceki sözleşme dönemi hariç, önceki sözleşme dönemlerine ait kullanılamayan izin hakları düşer.',
+        ),
+      ],
+      uyari:
+          'Bu süreler 4/B sözleşmelilere özgüdür; memur (657) ve işçi (4857) izin süreleri farklıdır. Norm kadro nedeniyle sözleşmeyle çalıştırılan MEB öğretmenleri yaz tatili ve dinlenme tatillerinde izinli sayılır ve ayrıca yıllık izin almazlar. Kurumun ek iç düzenlemelerine de bak.',
+      kitle: Kitle.sozlesmeli,
+      surum: BilgiBankasi.surumSozlesmeli,
+    ),
+    BilgiKonusu(
+      id: 'sozlesmeli_mazeret',
+      baslik: '4/B sözleşmeli personelin doğum, süt, mazeret ve refakat izinleri',
+      etiket: 'Sözleşmeli doğum izni',
+      ornekSoru: 'Sözleşmeli personel doğum izni kaç hafta?',
+      anahtarlar: [
+        'sozlesmeli',
+        '4/b',
+        'esaslar',
+        'dogum izni',
+        'dogum',
+        'dogur',
+        'analik',
+        'sut izni',
+        'emzirme',
+        'babalik',
+        'evlenme',
+        'olum izni',
+        'mazeret',
+        'refakat',
+        'izin',
+      ],
+      cevap:
+          'Sözleşmeli kadın personele doğumdan önce 8, doğumdan sonra 16 hafta olmak üzere toplam 24 hafta ücretli doğum izni verilir (çoğul gebelikte doğum öncesi süreye 2 hafta eklenir). Süt izni, doğum izninin bitiminden sonraki ilk altı ayda günde 3 saat, ikinci altı ayda günde 1,5 saattir. İsteği üzerine eşinin doğum yapması hâlinde 10 gün; kendisinin veya çocuğunun evlenmesi ya da eşinin, çocuğunun, kendisinin veya eşinin ana, baba ve kardeşinin ölümü hâlinde her olay için 7 gün ücretli mazeret izni verilir. Yakınının ağır kaza veya uzun süren hastalığında sağlık kurulu raporuyla üç aya kadar ücretli refakat izni verilebilir.',
+      kaynaklar: [
+        MevzuatKaynagi(
+          baslik: 'Sözleşmeli Personel Çalıştırılmasına İlişkin Esaslar, md. 9 (Doğum izni)',
+          alinti:
+              'Sözleşmeli kadın personele, doğumdan önce sekiz, doğumdan sonra on altı hafta olmak üzere toplam yirmi dört hafta süre ile ücretli doğum izni verilir. Çoğul gebelik halinde, doğum öncesi sekiz haftalık izin süresine iki hafta eklenir.',
+        ),
+        MevzuatKaynagi(
+          baslik: 'Sözleşmeli Personel Çalıştırılmasına İlişkin Esaslar, md. 9 (Süt izni)',
+          alinti:
+              'Sözleşmeli personele, çocuğunu emzirmesi için ücretli doğum izni süresinin bitim tarihinden itibaren ilk altı ayda günde üç saat, ikinci altı ayda günde bir buçuk saat süt izni verilir.',
+        ),
+        MevzuatKaynagi(
+          baslik: 'Sözleşmeli Personel Çalıştırılmasına İlişkin Esaslar, md. 9 (Mazeret izni)',
+          alinti:
+              'Sözleşmeli personele isteği üzerine; eşinin doğum yapması halinde on gün, kendisinin veya çocuğunun evlenmesi ya da eşinin, çocuğunun, kendisinin veya eşinin ana, baba ve kardeşinin ölümü halinde ve her olay için yedi gün ücretli mazeret izni verilir.',
+        ),
+        MevzuatKaynagi(
+          baslik: 'Sözleşmeli Personel Çalıştırılmasına İlişkin Esaslar, md. 9 (Refakat izni)',
+          alinti:
+              'Sözleşmeli personelin, bakmakla yükümlü olduğu veya sözleşmeli personel refakat etmediği takdirde hayatı tehlikeye girecek ana, baba, eş ve çocukları ile kardeşlerinden birinin ağır bir kaza geçirmesi veya tedavisi uzun süren bir hastalığının bulunması hâllerinde, bu hâllerin sağlık kurulu raporuyla belgelendirilmesi şartıyla, istekleri üzerine üç aya kadar ücretli izin verilir.',
+        ),
+      ],
+      uyari:
+          'Evlat edinme (8 hafta), koruyucu aile (10 gün) ve engelli/süreğen hastalıklı çocuk için (10 güne kadar) izinler de aynı maddede düzenlidir; ayrıntı için md. 9\'un tamamına bak.',
+      kitle: Kitle.sozlesmeli,
+      surum: BilgiBankasi.surumSozlesmeli,
+    ),
+    BilgiKonusu(
+      id: 'sozlesmeli_hastalik',
+      baslik: '4/B sözleşmeli personelin hastalık izni',
+      etiket: 'Sözleşmeli hastalık izni',
+      ornekSoru: 'Sözleşmeli personel hastalık izni nasıl verilir?',
+      anahtarlar: [
+        'sozlesmeli',
+        '4/b',
+        'esaslar',
+        'hastalik',
+        'rapor',
+        'raporlu',
+        'hasta izni',
+        'saglik izni',
+        'istirahat',
+        'izin',
+      ],
+      cevap:
+          'Resmî tabip raporuyla kanıtlanan hastalıklar için sözleşmeli personele ücretli hastalık izni verilebilir. Hastalık nedeniyle Sosyal Güvenlik Kurumunca ödenen geçici iş göremezlik ödeneği ilgilinin ücretinden düşülür. Kaç gün izin verileceğine ilişkin süre ibaresi Danıştay kararıyla iptal edildiğinden metinde süre yazmıyor; bu yüzden gün sayısını bu metinden söyleyemiyorum.',
+      kaynaklar: [
+        MevzuatKaynagi(
+          baslik: 'Sözleşmeli Personel Çalıştırılmasına İlişkin Esaslar, md. 10 (Hastalık izni)',
+          alinti:
+              'ücretli hastalık izni verilebilir. Hastalık sebebiyle, Sosyal Sigortalar Kurumunca ödenen geçici iş göremezlik tazminatı ilgilinin ücretinden düşülür.',
+        ),
+      ],
+      uyari: 'Rapor süresi ve ücret konusunda kesin bilgi için kurumunun personel birimine danış.',
+      kitle: Kitle.sozlesmeli,
+      surum: BilgiBankasi.surumSozlesmeli,
+    ),
+    BilgiKonusu(
+      id: 'sozlesmeli_calisma',
+      baslik: '4/B sözleşmeli personelin çalışma saatleri',
+      etiket: 'Sözleşmeli çalışma saati',
+      ornekSoru: 'Sözleşmeli personel çalışma saatleri nasıl?',
+      anahtarlar: [
+        'sozlesmeli',
+        '4/b',
+        'esaslar',
+        'calisma saat',
+        'calisma sure',
+        'haftalik calisma',
+        'mesai',
+        'fazla mesai',
+        'fazla calisma',
+        'nobet',
+      ],
+      cevap:
+          'Devlet memurları için belirlenen çalışma saat ve süreleri sözleşmeli personel için de uygulanır (sözleşmeli hekimlerde 2162 sayılı Kanun\'un 6 ve 7. maddeleri geçerlidir). Sözleşmeli personel o gün bitirilmesi gereken işlerin bitimine kadar çalışmak zorundadır; normal çalışma süresini aşan her sekiz saat için bir gün izin verilir (ilgili kanunlarda öngörülen hükümler saklı kalmak kaydıyla).',
+      kaynaklar: [
+        MevzuatKaynagi(
+          baslik: 'Sözleşmeli Personel Çalıştırılmasına İlişkin Esaslar, md. 13 (Çalışma saatleri)',
+          alinti: 'Devlet memurları için saptanan çalışma saat ve süreleri sözleşmeli personel için de uygulanır',
+        ),
+        MevzuatKaynagi(
+          baslik: 'Sözleşmeli Personel Çalıştırılmasına İlişkin Esaslar, md. 13 (Fazla çalışma)',
+          alinti:
+              'Bu Karar Esaslarına göre çalıştırılacak sözleşmeli personel o gün bitirilmesi gereken işlerin bitimine kadar çalışmak zorundadır. Normal çalışma sürelerini aşan bu süreler için ilgili kanunlarında öngörülen hükümler saklı kalmak kaydıyla her sekiz saati için bir gün hesabıyla izin verilir.',
+        ),
+      ],
+      uyari:
+          'Tam gün çalışmayı gerektirmeyen durumlarda Cumhurbaşkanlığının onayıyla farklı düzenleme yapılabilir; 24 saat kesintisiz hizmetlerde çalışma saatlerini kurum düzenler.',
+      kitle: Kitle.sozlesmeli,
+      surum: BilgiBankasi.surumSozlesmeli,
     ),
   ];
 }
