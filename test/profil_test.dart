@@ -146,4 +146,24 @@ void main() {
       expect(await kayit.yukle(), isNull);
     });
   });
+
+  group('kademe tarihi', () {
+    const taban = Profil(ad: 'A', statu: Statu.memur657);
+
+    test('JSON gidiş-dönüş; kopya ile temizlenir', () {
+      final p = taban.kopya(kademeTarihi: DateTime(2025, 3, 4));
+      expect(p.toJson()['kademeTarihi'], '2025-03-04');
+      expect(Profil.fromJson(p.toJson()).kademeTarihi, DateTime(2025, 3, 4));
+      expect(p.kopya(ad: 'B').kademeTarihi, DateTime(2025, 3, 4), reason: 'başka alan değişince korunur');
+      expect(p.kopya(kademeTarihiniTemizle: true).kademeTarihi, isNull);
+      expect(p == p.kopya(), isTrue);
+      expect(p == taban, isFalse);
+    });
+
+    test('bozuk ve olanaksız tarihler null olur, hata fırlatmaz', () {
+      for (final v in [null, 5, '', 'dün', '2025-13-01', '2025-02-31', '25-01-01', '1900-01-01', '2999-01-01', ['2025-01-01']]) {
+        expect(Profil.fromJson({'ad': 'A', 'statu': 'memur657', 'kademeTarihi': v}).kademeTarihi, isNull, reason: '$v');
+      }
+    });
+  });
 }

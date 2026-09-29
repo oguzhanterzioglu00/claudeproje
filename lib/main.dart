@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/depolama.dart';
 import 'core/tema.dart';
@@ -55,6 +56,10 @@ class _PusulaUygulamasiState extends State<PusulaUygulamasi> {
         title: 'Kamu Pusulası',
         debugShowCheckedModeBanner: false,
         theme: pusulaTema(),
+        // Tarih seçici, iptal/tamam düğmeleri ve klavye Türkçe olsun.
+        locale: const Locale('tr', 'TR'),
+        supportedLocales: const [Locale('tr', 'TR')],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         builder: (context, child) => TelefonCercevesi(child: child!),
         home: UygulamaAkisi(
           oturum: _oturum,

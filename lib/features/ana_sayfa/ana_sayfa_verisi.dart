@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/tema.dart';
+import '../maas/domain/gosterge_tablosu.dart';
 import '../maas/domain/memur_maas_hesaplayici.dart';
 import '../profil/domain/profil.dart';
 
@@ -70,6 +71,16 @@ class AnaSayfaVerisi {
     return (bitis.difference(gun).inDays, gun.difference(baslangic).inDays / toplam);
   }
 
+  /// Bir sonraki kademe ilerlemesine (657 md. 64: bulunulan kademede en az bir yıl) kalan gün ve
+  /// sürenin ne kadarının geçtiği. Kalan gün 0 ya da negatifse süre dolmuştur.
+  static (int kalanGun, double oran) kademeSayaci(DateTime kademeTarihi, DateTime bugun) {
+    final baslangic = DateTime(kademeTarihi.year, kademeTarihi.month, kademeTarihi.day);
+    final hedef = DateTime(baslangic.year + 1, baslangic.month, baslangic.day);
+    final gun = DateTime(bugun.year, bugun.month, bugun.day);
+    final toplam = hedef.difference(baslangic).inDays;
+    return (hedef.difference(gun).inDays, (gun.difference(baslangic).inDays / toplam).clamp(0.0, 1.0));
+  }
+
   /// Profilden ana sayfa özeti üretir. Uydurma rakam üretmez: maaş için profilde
   /// bordro girdisi yoksa açıklayıcı bir mesaj gösterilir.
   factory AnaSayfaVerisi.profilden(
@@ -90,6 +101,12 @@ class AnaSayfaVerisi {
     }
 
     final donem = p.statu == Statu.memur657 ? sonrakiDonem(bugun) : null;
+
+    // Son kademedeki memurun ilerleyebileceği kademe yoktur (md. 64); sayaç gösterilmez.
+    final sonKademe = p.maas != null && p.maas!.kademe >= GostergeTablosu.kademeSayisi(p.maas!.derece);
+    final kademe = p.statu == Statu.memur657 && p.kademeTarihi != null && !sonKademe
+        ? kademeSayaci(p.kademeTarihi!, bugun)
+        : null;
     return AnaSayfaVerisi(
       netMaas: net,
       maasMesaji: mesaj,
@@ -103,6 +120,14 @@ class AnaSayfaVerisi {
             oran: donem.$2,
             renk: PusulaRenk.amber,
             ikonRengi: PusulaRenk.lacivert,
+          ),
+        if (kademe != null)
+          YolHaritasiOgesi(
+            baslik: 'En erken kademe ilerlemesi',
+            deger: kademe.$1 > 0 ? '${kademe.$1} gün' : 'Şimdi',
+            oran: kademe.$2,
+            renk: PusulaRenk.mor,
+            ikonRengi: PusulaRenk.beyaz,
           ),
       ],
     );

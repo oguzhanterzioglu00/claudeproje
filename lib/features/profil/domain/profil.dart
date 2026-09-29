@@ -29,6 +29,7 @@ class Profil {
     this.sicilNo = '',
     this.kurumsalEposta = '',
     this.maas,
+    this.kademeTarihi,
   });
 
   final String ad;
@@ -56,6 +57,9 @@ class Profil {
   /// Bordrodan bilinen maaş girdileri; maaş hesabı ve ana sayfa bunu kullanır.
   final MaasGirdisi? maas;
 
+  /// Bulunduğu kademeye geldiği tarih (kademe ilerlemesi sayacı için; yalnızca memurlar).
+  final DateTime? kademeTarihi;
+
   /// Kurum adından eşleştirmede kullanılan kararlı kimlik.
   String get kurumKimligi => kurumKimligiUret(kurumAdi);
 
@@ -73,7 +77,8 @@ class Profil {
   String? get becayisKapaliNedeni {
     if (becayisYapabilir) return null;
     if (adayMemur) {
-      return 'Becayiş için memurluğunun asaleti onaylanmış olmalı. Adaylık süren bitince burası açılır.';
+      return 'Becayiş için memurluğunun asaleti onaylanmış olmalı: kanunun 73. maddesi aday memurları ayrıca anmıyor, '
+          'ancak yer değiştirme yönetmeliği ve kurum uygulaması aday memurlara becayişi kapatıyor. Adaylık süren bitince burası açılır.';
     }
     return 'Becayiş, 657 sayılı Kanun md. 73 uyarınca yalnızca devlet memurları arasında yapılır. '
         '${statu.etiket} olarak bu özelliği kullanamazsın; maaş, haklar, ilanlar ve haberler açık.';
@@ -90,6 +95,8 @@ class Profil {
     String? sicilNo,
     String? kurumsalEposta,
     MaasGirdisi? maas,
+    DateTime? kademeTarihi,
+    bool kademeTarihiniTemizle = false,
   }) =>
       Profil(
         ad: ad ?? this.ad,
@@ -102,6 +109,7 @@ class Profil {
         sicilNo: sicilNo ?? this.sicilNo,
         kurumsalEposta: kurumsalEposta ?? this.kurumsalEposta,
         maas: maas ?? this.maas,
+        kademeTarihi: kademeTarihiniTemizle ? null : (kademeTarihi ?? this.kademeTarihi),
       );
 
   Map<String, Object?> toJson() => {
@@ -115,7 +123,11 @@ class Profil {
         'sicilNo': sicilNo,
         'kurumsalEposta': kurumsalEposta,
         'maas': maas?.toJson(),
+        'kademeTarihi': kademeTarihi == null ? null : _gunMetni(kademeTarihi!),
       };
+
+  static String _gunMetni(DateTime t) =>
+      '${t.year.toString().padLeft(4, '0')}-${t.month.toString().padLeft(2, '0')}-${t.day.toString().padLeft(2, '0')}';
 
   /// Bozuk veya eski kayıtta (yanlış tipler dahil) güvenli varsayılanlara döner;
   /// asla hata fırlatmaz.
@@ -134,7 +146,19 @@ class Profil {
       sicilNo: metin('sicilNo'),
       kurumsalEposta: metin('kurumsalEposta'),
       maas: maas is Map<String, Object?> ? MaasGirdisi.fromJson(maas) : null,
+      kademeTarihi: _tarih(j['kademeTarihi']),
     );
+  }
+
+  /// "2025-03-14" biçimindeki metni tarihe çevirir; bozuk/olanaksız değerde null döner.
+  static DateTime? _tarih(Object? v) {
+    if (v is! String) return null;
+    final m = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$').firstMatch(v);
+    if (m == null) return null;
+    final y = int.parse(m.group(1)!), a = int.parse(m.group(2)!), g = int.parse(m.group(3)!);
+    final t = DateTime(y, a, g);
+    // 31 Şubat gibi taşan tarihleri reddet.
+    return t.year == y && t.month == a && t.day == g && y >= 1950 && y <= 2100 ? t : null;
   }
 
   @override
@@ -149,10 +173,11 @@ class Profil {
       other.il == il &&
       other.sicilNo == sicilNo &&
       other.kurumsalEposta == kurumsalEposta &&
-      other.maas == maas;
+      other.maas == maas &&
+      other.kademeTarihi == kademeTarihi;
 
   @override
-  int get hashCode => Object.hash(ad, statu, adayMemur, kurumAdi, sinif, unvan, il, sicilNo, kurumsalEposta, maas);
+  int get hashCode => Object.hash(ad, statu, adayMemur, kurumAdi, sinif, unvan, il, sicilNo, kurumsalEposta, maas, kademeTarihi);
 }
 
 /// "Sağlık Bakanlığı" → "saglik-bakanligi" (Türkçe harfler sadeleştirilir).

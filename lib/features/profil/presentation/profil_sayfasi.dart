@@ -24,6 +24,7 @@ class ProfilSayfasi extends StatefulWidget {
     this.fotograf,
     this.fotografKaynagi = const ImagePickerFotografKaynagi(),
     this.oturum,
+    this.tarihSec = _varsayilanTarihSec,
   });
 
   final ProfilDeposu depo;
@@ -34,6 +35,13 @@ class ProfilSayfasi extends StatefulWidget {
 
   /// Verilirse "Hesap ve güvenlik" bölümü (şifre, çıkış, hesap silme) görünür.
   final OturumDeposu? oturum;
+
+  /// Tarih seçici; testlerde değiştirilir. Vazgeçilirse null döner.
+  final Future<DateTime?> Function(BuildContext context, DateTime baslangic, DateTime ilk, DateTime son) tarihSec;
+
+  static Future<DateTime?> _varsayilanTarihSec(BuildContext context, DateTime baslangic, DateTime ilk, DateTime son) =>
+      showDatePicker(
+          context: context, initialDate: baslangic, firstDate: ilk, lastDate: son, helpText: 'Kademeye geliş tarihi');
 
   /// Kaydedildikten sonra çağrılır; boşsa sayfa kapanır.
   final VoidCallback? onBitti;
@@ -55,6 +63,7 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
   late String _kurum = _mevcut?.kurumAdi ?? '';
   late String _sinif = _mevcut?.sinif ?? '';
   late String _il = _mevcut?.il ?? '';
+  late DateTime? _kademeTarihi = _mevcut?.kademeTarihi;
   bool _kaydediliyor = false;
 
   bool get _memur => _statu == Statu.memur657;
@@ -77,6 +86,15 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
     if (s != null) setState(() => yaz(s));
   }
 
+  static String _tarihMetni(DateTime t) =>
+      '${t.day.toString().padLeft(2, '0')}.${t.month.toString().padLeft(2, '0')}.${t.year}';
+
+  Future<void> _kademeTarihiSec() async {
+    final bugun = DateTime.now();
+    final t = await widget.tarihSec(context, _kademeTarihi ?? bugun, DateTime(bugun.year - 45), bugun);
+    if (t != null && mounted) setState(() => _kademeTarihi = DateTime(t.year, t.month, t.day));
+  }
+
   Future<void> _kaydet() async {
     if (!_kaydedilebilir || _kaydediliyor) return;
     setState(() => _kaydediliyor = true);
@@ -91,6 +109,7 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
       sicilNo: _memur ? _sicil.text.trim() : '',
       kurumsalEposta: _eposta.text.trim(),
       maas: _mevcut?.maas,
+      kademeTarihi: _memur ? _kademeTarihi : null,
     );
     await widget.depo.kaydet(p);
     if (!mounted) return;
@@ -219,6 +238,35 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                         ipucu: 'İlini seç',
                         onTap: () => _sec('İl', ProfilSecenekleri.iller, _il, (s) => _il = s),
                       ),
+                      if (_memur) ...[
+                        const SizedBox(height: 12),
+                        SecimAlani(
+                          etiket: 'Kademeye geliş tarihi',
+                          deger: _kademeTarihi == null ? '' : _tarihMetni(_kademeTarihi!),
+                          ipucu: 'İsteğe bağlı — kademe sayacı için',
+                          onTap: _kademeTarihiSec,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6, left: 4),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Bordronda ya da özlük belgende yazar. Ana sayfada en erken kademe ilerlemesine kaç gün kaldığını gösterir (657 md. 64: kademede en az 1 yıl).',
+                                  style: PusulaYazi.metin(11, renk: PusulaRenk.soluk, agirlik: FontWeight.w500)
+                                      .copyWith(height: 1.4),
+                                ),
+                              ),
+                              if (_kademeTarihi != null)
+                                TextButton(
+                                  onPressed: () => setState(() => _kademeTarihi = null),
+                                  child: Text('Temizle',
+                                      style: PusulaYazi.metin(12, renk: PusulaRenk.kirmizi, agirlik: FontWeight.w700)),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                     if (_memur) ...[
                       const SizedBox(height: 20),

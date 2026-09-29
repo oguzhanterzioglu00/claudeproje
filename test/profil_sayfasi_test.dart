@@ -129,4 +129,61 @@ void main() {
     await tester.pumpAndSettle();
     expect(depo.profil, isNull);
   });
+
+  testWidgets('kademeye geliş tarihi seçilir, kaydedilir ve temizlenir (yalnızca memurlarda görünür)', (tester) async {
+    tester.view.physicalSize = const Size(390, 2600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final depo = ProfilDeposu(BellekProfilKaydi(const Profil(ad: 'Ayşe', statu: Statu.memur657)));
+    await depo.yukle();
+    DateTime? istenenIlk;
+    await tester.pumpWidget(MaterialApp(
+      theme: pusulaTema(),
+      home: ProfilSayfasi(
+        depo: depo,
+        tarihSec: (c, baslangic, ilk, son) async {
+          istenenIlk = ilk;
+          return DateTime(2025, 5, 6, 13, 45);
+        },
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.bySemanticsLabel(RegExp(r'^Kademeye geliş tarihi:')));
+    await tester.pumpAndSettle();
+    expect(find.text('06.05.2025'), findsOneWidget);
+    expect(istenenIlk!.year, DateTime.now().year - 45);
+
+    await tester.tap(find.text('Kaydet'));
+    await tester.pumpAndSettle();
+    expect(depo.profil!.kademeTarihi, DateTime(2025, 5, 6), reason: 'saat atılır');
+
+    await tester.pumpWidget(MaterialApp(theme: pusulaTema(), home: ProfilSayfasi(depo: depo)));
+    await tester.pumpAndSettle();
+    expect(find.text('06.05.2025'), findsOneWidget);
+    await tester.tap(find.text('Temizle'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kaydet'));
+    await tester.pumpAndSettle();
+    expect(depo.profil!.kademeTarihi, isNull);
+  });
+
+  testWidgets('memur olmayanda kademe alanı yok; statü değişince kademe tarihi silinir', (tester) async {
+    tester.view.physicalSize = const Size(390, 2600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final depo = ProfilDeposu(
+      BellekProfilKaydi(Profil(ad: 'Can', statu: Statu.memur657, kademeTarihi: DateTime(2025, 5, 6))),
+    );
+    await depo.yukle();
+    await tester.pumpWidget(MaterialApp(theme: pusulaTema(), home: ProfilSayfasi(depo: depo)));
+    await tester.pumpAndSettle();
+    expect(find.text('06.05.2025'), findsOneWidget);
+    await tester.tap(find.text('İşçi'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Kademeye geliş tarihi'), findsNothing);
+    await tester.tap(find.text('Kaydet'));
+    await tester.pumpAndSettle();
+    expect(depo.profil!.kademeTarihi, isNull);
+  });
 }
