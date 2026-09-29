@@ -24,6 +24,7 @@ class AnaSayfa extends StatelessWidget {
     this.bildirimAc,
     this.profilAc,
     this.gundem,
+    this.araclar,
     this.avatarFoto,
     this.avatarAd = '',
   });
@@ -40,6 +41,9 @@ class AnaSayfa extends StatelessWidget {
 
   /// Kısayolların altında gösterilen haber bölümü (isteğe bağlı).
   final Widget? gundem;
+
+  /// Kısayolların altında gösterilen araçlar bölümü (isteğe bağlı).
+  final Widget? araclar;
 
   /// Profil düğmesinde gösterilen fotoğraf ve ad (baş harfler için).
   final Uint8List? avatarFoto;
@@ -131,6 +135,7 @@ class AnaSayfa extends StatelessWidget {
                 ],
               ),
             ),
+            if (araclar != null) araclar!,
             if (gundem != null) gundem!,
           ],
         ),

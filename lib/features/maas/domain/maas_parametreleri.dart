@@ -50,6 +50,26 @@ class MaasParametreleri {
   final double asgariUcretSgkKesintisi;
   final double asgariUcretDamgaIstisnasi;
 
+  /// Aylık, taban aylık ve yan ödeme katsayıları [oran] kadar (ör. 0.20 = %20) artırılmış senaryo
+  /// parametreleri. Vergi dilimleri ve asgari ücret değişmez (gerçekte yılbaşında yeniden belirlenir).
+  MaasParametreleri zamliKatsayilarla(double oran) => MaasParametreleri(
+        donem: '$donem, %${(oran * 100).toStringAsFixed(oran * 100 % 1 == 0 ? 0 : 1)} zam senaryosu',
+        kaynak: kaynak,
+        aylikKatsayi: aylikKatsayi * (1 + oran),
+        tabanAylikKatsayi: tabanAylikKatsayi * (1 + oran),
+        yanOdemeKatsayi: yanOdemeKatsayi * (1 + oran),
+        tabanGosterge: tabanGosterge,
+        yillikKidemGostergesi: yillikKidemGostergesi,
+        enFazlaKidemYili: enFazlaKidemYili,
+        emeklilikPayi: emeklilikPayi,
+        gssPayi: gssPayi,
+        damgaOrani: damgaOrani,
+        gelirVergisiDilimleri: gelirVergisiDilimleri,
+        asgariUcretBrut: asgariUcretBrut,
+        asgariUcretSgkKesintisi: asgariUcretSgkKesintisi,
+        asgariUcretDamgaIstisnasi: asgariUcretDamgaIstisnasi,
+      );
+
   /// Temmuz–Aralık 2026 dönemi.
   ///
   /// Katsayılar: Hazine ve Maliye Bakanlığı mali haklar genelgesi (3 Temmuz 2026),

@@ -5,10 +5,11 @@ import '../../core/bilesenler.dart';
 import '../../core/tema.dart';
 import '../../core/yukselen.dart';
 import 'asistan_servisi.dart';
+import 'bilgi_bankasi.dart';
 
 /// "Hakkım ne?": soru sorulur, cevap ilgili mevzuat maddesiyle birlikte gelir.
 class AsistanSayfasi extends StatefulWidget {
-  const AsistanSayfasi({super.key, this.asistan = const SahteAsistan()});
+  const AsistanSayfasi({super.key, this.asistan = const YerelMevzuatAsistani()});
 
   final MevzuatAsistani asistan;
 
@@ -30,20 +31,17 @@ class _Mesaj {
 }
 
 class _AsistanSayfasiState extends State<AsistanSayfasi> {
-  static const _ornekSorular = [
-    ('Becayiş', 'Becayiş şartları nedir?'),
-    ('Rapor', 'Rapor kullanımı ile ilgili haklarım neler?'),
-    ('Tayin şartları', 'Tayin şartları nelerdir?'),
-    ('Emeklilik', 'Emeklilik için ne kadar süre gerekir?'),
-    ('Mazeret izni', 'Mazeret izni kaç gün?'),
-  ];
+  /// Hızlı soru düğmeleri: bilgi bankasındaki her konunun kısa adı ve örnek sorusu.
+  static final _ornekSorular = [for (final k in BilgiBankasi.konular) (k.etiket, k.ornekSoru)];
 
   final _soru = TextEditingController();
   final _kaydirma = ScrollController();
   final List<_Mesaj> _mesajlar = [
     _Mesaj.asistan(
-      metin: 'Merhaba! Sorunu ilgili mevzuat maddesini bularak, kaynağıyla birlikte yanıtlarım. '
-          'Şu an örnek sürümdeyim: yalnızca Becayiş sorusunu gerçek kanun metniyle yanıtlıyorum.',
+      metin: 'Merhaba! Sorunu ilgili kanun maddesini bularak, alıntısıyla birlikte yanıtlarım. '
+          'Şu an 657 sayılı Devlet Memurları Kanunu\'na dayanarak becayiş, yıllık izin, mazeret izni, '
+          'rapor/hastalık izni, aylıksız izin, kademe ve derece yükselmesi ile tayin sorularını yanıtlıyorum. '
+          'Emeklilik ve diğer kanunlar henüz yok; bilmediğim konuda tahmin yürütmem.',
     ),
   ];
   bool _bekliyor = false;
@@ -111,7 +109,7 @@ class _AsistanSayfasiState extends State<AsistanSayfasi> {
                 padding: const EdgeInsets.fromLTRB(18, 14, 18, 8),
                 itemCount: _mesajlar.length,
                 separatorBuilder: (context, index) => const SizedBox(height: 12),
-                itemBuilder: (context, i) => _MesajBalonu(mesaj: _mesajlar[i]),
+                itemBuilder: (context, i) => _MesajBalonu(mesaj: _mesajlar[i], onOneri: _gonder),
               ),
             ),
             SizedBox(
@@ -220,7 +218,7 @@ class _Ust extends StatelessWidget {
               ],
             ),
           ),
-          const OrnekRozeti(),
+          const Hap('BETA', zemin: PusulaRenk.cizgi, yazi: PusulaRenk.lacivert),
         ],
       );
 }
@@ -252,9 +250,10 @@ class _Uyari extends StatelessWidget {
 }
 
 class _MesajBalonu extends StatelessWidget {
-  const _MesajBalonu({required this.mesaj});
+  const _MesajBalonu({required this.mesaj, required this.onOneri});
 
   final _Mesaj mesaj;
+  final ValueChanged<String> onOneri;
 
   @override
   Widget build(BuildContext context) {
@@ -303,7 +302,7 @@ class _MesajBalonu extends StatelessWidget {
                   bottomRight: Radius.circular(22),
                 ),
               ),
-              child: mesaj.bekliyor ? const _Yaziyor() : _CevapIcerigi(mesaj: mesaj),
+              child: mesaj.bekliyor ? const _Yaziyor() : _CevapIcerigi(mesaj: mesaj, onOneri: onOneri),
             ),
           ),
         ),
@@ -336,9 +335,10 @@ class _Yaziyor extends StatelessWidget {
 }
 
 class _CevapIcerigi extends StatelessWidget {
-  const _CevapIcerigi({required this.mesaj});
+  const _CevapIcerigi({required this.mesaj, required this.onOneri});
 
   final _Mesaj mesaj;
+  final ValueChanged<String> onOneri;
 
   @override
   Widget build(BuildContext context) {
@@ -380,6 +380,56 @@ class _CevapIcerigi extends StatelessWidget {
               ),
             ),
           ],
+        if (c != null && c.uyari != null) ...[
+          const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(LucideIcons.info, size: 15, color: PusulaRenk.soluk),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(c.uyari!,
+                    style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500).copyWith(height: 1.4)),
+              ),
+            ],
+          ),
+        ],
+        if (c != null && c.surum != null) ...[
+          const SizedBox(height: 8),
+          Text(c.surum!, style: PusulaYazi.metin(11, renk: PusulaRenk.soluk, agirlik: FontWeight.w500)),
+        ],
+        if (c != null && c.oneriler.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final o in c.oneriler)
+                Semantics(
+                  container: true,
+                  button: true,
+                  label: o,
+                  excludeSemantics: true,
+                  onTap: () => onOneri(o),
+                  child: Material(
+                    color: PusulaRenk.zemin,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      side: const BorderSide(color: PusulaRenk.lacivert, width: 1.5),
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () => onOneri(o),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                        child: Text(o, style: PusulaYazi.metin(13, agirlik: FontWeight.w700)),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
       ],
     );
   }

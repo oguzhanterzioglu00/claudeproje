@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/bilesenler.dart';
+import '../../../core/sayi_adimi.dart';
 import '../../../core/metin.dart';
 import '../../../core/tema.dart';
 import '../../../core/ucgenler.dart';
@@ -122,7 +123,7 @@ class _MaasSayfasiState extends State<MaasSayfasi> {
             const SizedBox(height: 14),
             Yukselen(
               gecikme: const Duration(milliseconds: 200),
-              child: _Adim(
+              child: SayiAdimi(
                 etiket: 'Derece',
                 deger: '${_g.derece}',
                 eksiEtiketi: 'Dereceyi azalt',
@@ -153,7 +154,7 @@ class _MaasSayfasiState extends State<MaasSayfasi> {
             const SizedBox(height: 14),
             Yukselen(
               gecikme: const Duration(milliseconds: 320),
-              child: _Adim(
+              child: SayiAdimi(
                 etiket: 'Hizmet yılı',
                 alt: 'Kıdem aylığı en çok ${p.enFazlaKidemYili} yıl sayılır',
                 deger: '${_g.hizmetYili}',
@@ -437,79 +438,6 @@ class _KademeDugmesi extends StatelessWidget {
             child: SizedBox.square(
               dimension: 44,
               child: Center(child: Text('$n', style: PusulaYazi.baslik(14, aralik: 0, agirlik: FontWeight.w700))),
-            ),
-          ),
-        ),
-      );
-}
-
-class _Adim extends StatelessWidget {
-  const _Adim({
-    required this.etiket,
-    required this.deger,
-    required this.eksiEtiketi,
-    required this.artiEtiketi,
-    required this.onEksi,
-    required this.onArti,
-    this.alt,
-  });
-
-  final String etiket;
-  final String? alt;
-  final String deger;
-  final String eksiEtiketi;
-  final String artiEtiketi;
-  final VoidCallback? onEksi;
-  final VoidCallback? onArti;
-
-  @override
-  Widget build(BuildContext context) => PusulaKart(
-        radius: 24,
-        padding: const EdgeInsets.fromLTRB(16, 10, 10, 10),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(etiket, style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w700)),
-                  Text(deger, style: PusulaYazi.baslik(28, aralik: -1)),
-                  if (alt != null)
-                    Text(alt!, style: PusulaYazi.metin(11, renk: PusulaRenk.soluk, agirlik: FontWeight.w500)),
-                ],
-              ),
-            ),
-            _Yuvarlak(LucideIcons.minus, eksiEtiketi, onEksi),
-            const SizedBox(width: 8),
-            _Yuvarlak(LucideIcons.plus, artiEtiketi, onArti),
-          ],
-        ),
-      );
-}
-
-class _Yuvarlak extends StatelessWidget {
-  const _Yuvarlak(this.ikon, this.etiket, this.onTap);
-
-  final IconData ikon;
-  final String etiket;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-        button: true,
-        enabled: onTap != null,
-        label: etiket,
-        excludeSemantics: true,
-        onTap: onTap,
-        child: Material(
-          color: onTap == null ? PusulaRenk.cizgi : PusulaRenk.amber,
-          borderRadius: BorderRadius.circular(16),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: onTap,
-            child: SizedBox.square(
-              dimension: 48,
-              child: Icon(ikon, size: 22, color: onTap == null ? PusulaRenk.soluk : PusulaRenk.lacivert),
             ),
           ),
         ),

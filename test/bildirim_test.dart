@@ -76,7 +76,7 @@ void main() {
         bugun: DateTime(2026, 9, 29),
         haberOtomatik: false,
         baslangicSekmesi: sekme,
-        asistan: const SahteAsistan(sure: Duration(milliseconds: 10)),
+        asistan: const YerelMevzuatAsistani(sure: Duration(milliseconds: 10)),
         ilanKaynagi: OrnekIlanKaynagi(sure: const Duration(milliseconds: 10), bugun: DateTime(2026, 9, 29)),
         haberKaynagi: OrnekHaberKaynagi(sure: const Duration(milliseconds: 10), bugun: DateTime(2026, 9, 29)),
         becayisDeposuUret: BecayisOrnekVeri.depoProfilden,

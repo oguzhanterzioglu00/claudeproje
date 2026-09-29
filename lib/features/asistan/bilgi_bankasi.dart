@@ -1,0 +1,315 @@
+// Bu dosya tools tarafından üretilen kanun alıntılarını içerir; alıntılar resmî birleştirilmiş
+// metinden (mevzuat.gov.tr, 657 sayılı Devlet Memurları Kanunu) aynen alınmıştır.
+// Her alıntı ve özet, kanun metniyle karşılaştırılarak yazılmıştır; kanun değiştikçe güncellenmelidir.
+
+import 'asistan_servisi.dart';
+
+/// Asistanın cevap verebildiği bir konu: özet cevap + kanun maddesinden alıntılar.
+class BilgiKonusu {
+  const BilgiKonusu({
+    required this.id,
+    required this.baslik,
+    required this.etiket,
+    required this.ornekSoru,
+    required this.anahtarlar,
+    required this.cevap,
+    required this.kaynaklar,
+    this.uyari,
+    this.kapsamDisi = false,
+  });
+
+  final String id;
+  final String baslik;
+
+  /// Hızlı soru düğmesindeki kısa ad.
+  final String etiket;
+
+  /// Kullanıcıya önerilen örnek soru (hızlı soru düğmesi).
+  final String ornekSoru;
+
+  /// Eşleştirme için küçük harfli, Türkçe harfleri sadeleştirilmiş (ı→i, ş→s ...) anahtar kelimeler.
+  final List<String> anahtarlar;
+  final String cevap;
+  final List<MevzuatKaynagi> kaynaklar;
+
+  /// Cevabın altında gösterilen dikkat notu (kanunun dışında kalan konular).
+  final String? uyari;
+
+  /// Asistanın henüz cevaplayamadığı ama bilinen bir konu: dürüstçe "kapsam dışı" der.
+  final bool kapsamDisi;
+}
+
+/// Doğrulanmış mevzuat bilgi bankası.
+abstract final class BilgiBankasi {
+  /// Metnin alındığı sürüm; ekranda cevabın altında gösterilir.
+  static const surum =
+      'Kaynak: mevzuat.gov.tr birleştirilmiş metin (31/7/2026 tarihinde yürürlüğe giren 7590 sayılı Kanun değişikliğine kadar işlenmiş)';
+
+  static const konular = <BilgiKonusu>[
+    BilgiKonusu(
+      id: 'becayis',
+      baslik: 'Becayiş (karşılıklı yer değiştirme)',
+      etiket: 'Becayiş',
+      ornekSoru: 'Becayiş şartları nedir?',
+      anahtarlar: ['becayis', 'karsilikli yer', 'karsilikli tayin', 'yer degistirme karsilikli'],
+      cevap:
+          'Becayiş, aynı kurumda ve aynı sınıfta olup farklı yerlerde görev yapan iki memurun karşılıklı olarak yer değiştirmesidir. Talep, atamaya yetkili amirin uygun bulmasına bağlıdır; yani kurum reddedebilir.',
+      kaynaklar: [
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 73 (Karşılıklı yer değiştirme)',
+          alinti:
+              'Aynı Kurumun başka başka yerlerde bulunan aynı sınıftaki memurları, karşılıklı olarak yer değiştirme suretiyle atanmalarını isteyebilirler. Bu isteğin yerine getirilmesi atamaya yetkili amirlerince uygun bulunmasına bağlıdır.',
+        ),
+      ],
+    ),
+    BilgiKonusu(
+      id: 'yillik_izin',
+      baslik: 'Yıllık izin',
+      etiket: 'Yıllık izin',
+      ornekSoru: 'Yıllık izin kaç gün?',
+      anahtarlar: [
+        'izin',
+        'yillik izin',
+        'yillik',
+        'izin hakki',
+        'izin haklari',
+        'kullanilmayan izin',
+        'kac gun izin',
+        'izin suresi',
+        'izin kullan',
+        'izin devret',
+        'izin dusme'
+      ],
+      cevap:
+          'Devlet memurlarının yıllık izni, hizmeti 1 yıldan 10 yıla kadar (10 yıl dahil) olanlar için 20 gün, 10 yıldan fazla olanlar için 30 gündür. Zorunlu hallerde gidiş ve dönüş için en çok ikişer gün eklenebilir. Yıllık izin, amirin uygun bulacağı zamanlarda toptan ya da kısım kısım kullanılabilir; birbirini izleyen iki yılın izni bir arada verilebilir. Cari yıl ile bir önceki yıl dışında, önceki yıllara ait kullanılmayan izin hakları düşer. Öğretmenler yaz tatili ve dinlenme tatillerinde izinli sayıldığından ayrıca yıllık izin verilmez.',
+      kaynaklar: [
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 102 (Yıllık izin)',
+          alinti:
+              'Devlet memurlarının yıllık izin süresi, hizmeti 1 yıldan on yıla kadar (On yıl dahil) olanlar için yirmi gün, hizmeti on yıldan fazla olanlar için 30 gündür. Zorunlu hallerde bu sürelere gidiş ve dönüş için en çok ikişer gün eklenebilir.',
+        ),
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 103 (Yıllık izinlerin kullanılışı)',
+          alinti:
+              'Yıllık izinler, amirin uygun bulacağı zamanlarda, toptan veya ihtiyaca göre kısım kısım kullanılabilir. Birbirini izliyen iki yılın izni bir arada verilebilir. (Değişik cümle: 6/7/1995 – KHK-562/2 md.) Cari yıl ile bir önceki yıl hariç, önceki yıllara ait kullanılmayan izin hakları düşer.',
+        ),
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 103 (Öğretmenler)',
+          alinti:
+              'Öğretmenler yaz tatili ile dinlenme tatillerinde izinli sayılırlar. Bunlara, hastalık ve diğer mazeret izinleri dışında, ayrıca yıllık izin verilmez.',
+        ),
+      ],
+      uyari:
+          'Hangi sürelerin "hizmet yılı"na sayıldığı ve izin kullanım usulü kanunun dışındaki düzenlemelere ve kurum uygulamasına bağlıdır; kesin bilgi için kurumunun personel birimine danış.',
+    ),
+    BilgiKonusu(
+      id: 'mazeret_izni',
+      baslik: 'Mazeret izinleri (analık, babalık, evlilik, ölüm, süt izni)',
+      etiket: 'Mazeret izni',
+      ornekSoru: 'Mazeret izni kaç gün?',
+      anahtarlar: [
+        'izin',
+        'mazeret',
+        'babalik',
+        'analik',
+        'dogum izni',
+        'dogum',
+        'dogur',
+        'evlenme',
+        'evlilik',
+        'olum izni',
+        'olum',
+        'sut izni',
+        'emzirme',
+        'hamile',
+        'gebelik'
+      ],
+      cevap:
+          'Mazeret izinleri 104. maddede sayılır. Kadın memura doğumdan önce 8, doğumdan sonra 16 hafta olmak üzere toplam 24 hafta analık izni verilir; çoğul gebelikte doğum öncesi süreye 2 hafta eklenir (doğum sonrası süre, 1/5/2026\'da yürürlüğe giren 7578 sayılı Kanunla 8 haftadan 16 haftaya çıkarılmıştır). Eşi doğum yapan memura isteği üzerine 10 gün babalık izni verilir. Memurun veya çocuğunun evlenmesinde ya da eşinin, çocuğunun, kendisinin veya eşinin ana, baba ve kardeşinin ölümünde isteği üzerine 7 gün izin verilir. Bunların dışında mazeretler için amirin onayıyla bir yıl içinde 10 gün, zaruret hâlinde (öğretmenler hariç) 10 gün daha izin verilebilir; ikinci kez verilen izin yıllık izinden düşülür. Kadın memura doğum sonrası analık izninin bitiminden itibaren ilk altı ayda günde 3 saat, ikinci altı ayda günde 1,5 saat süt izni verilir.',
+      kaynaklar: [
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 104/A (Analık izni)',
+          alinti:
+              'A) Kadın memura; doğumdan önce sekiz, doğumdan sonra onaltı hafta olmak üzere toplam yirmidört hafta süreyle analık izni verilir.',
+        ),
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 104/B (Babalık, evlilik, ölüm)',
+          alinti:
+              'B) Memura, eşinin doğum yapması hâlinde, isteği üzerine on gün babalık izni; kendisinin veya çocuğunun evlenmesi ya da eşinin, çocuğunun, kendisinin veya eşinin ana, baba ve kardeşinin ölümü hâllerinde isteği üzerine yedi gün izin verilir.',
+        ),
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 104/C (Diğer mazeretler)',
+          alinti:
+              'C) (A) ve (B) fıkralarında belirtilen hâller dışında, merkezde atamaya yetkili amir, ilde vali, ilçede kaymakam ve yurt dışında diplomatik misyon şefi tarafından, birim amirinin muvafakati ile bir yıl içinde toptan veya bölümler hâlinde, mazeretleri sebebiyle memurlara on gün izin verilebilir. Zaruret hâlinde öğretmenler hariç olmak üzere, aynı usûlle on gün daha mazeret izni verilebilir. Bu takdirde, ikinci kez verilen bu izin, yıllık izinden düşülür.',
+        ),
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 104/D (Süt izni)',
+          alinti:
+              'D) Kadın memura, çocuğunu emzirmesi için doğum sonrası analık izni süresinin bitim tarihinden itibaren ilk altı ayda günde üç saat, ikinci altı ayda günde birbuçuk saat süt izni verilir. Süt izninin hangi saatler arasında ve günde kaç kez kullanılacağı hususunda, kadın memurun tercihi esastır.',
+        ),
+      ],
+      uyari:
+          'Evlat edinme, koruyucu aile, yarım çalışma ve engelli ya da süreğen hastalığı olan çocuk için ek haklar da 104. maddede düzenlenmiştir; kendi durumun için kurumunun personel birimine danış.',
+    ),
+    BilgiKonusu(
+      id: 'hastalik_izni',
+      baslik: 'Hastalık ve refakat izni (rapor)',
+      etiket: 'Rapor / hastalık',
+      ornekSoru: 'Rapor kullanımı ile ilgili haklarım neler?',
+      anahtarlar: [
+        'izin',
+        'rapor',
+        'hastalik',
+        'refakat',
+        'hasta izni',
+        'saglik izni',
+        'raporlu',
+        'istirahat',
+        'tedavi',
+        'kanser'
+      ],
+      cevap:
+          'Memura, aylık ve özlük hakları korunarak, rapordaki lüzum üzerine; kanser, verem, akıl hastalığı gibi uzun süreli tedavi gerektiren hastalıklarda 18 aya kadar, diğer hastalıklarda 12 aya kadar hastalık izni verilir. İzin sonunda hastalığın devam ettiği resmî sağlık kurulu raporuyla tespit edilirse izin aynı süreler kadar uzatılır; bu sürenin sonunda da iyileşemeyen memur hakkında emeklilik hükümleri uygulanır. Görevi sırasında veya görevinden dolayı kazaya ya da saldırıya uğrayan veya meslek hastalığına tutulan memur iyileşinceye kadar izinli sayılır. Bakmakla yükümlü olduğun ya da refakat etmezsen hayatı tehlikeye girecek ana, baba, eş, çocuk veya kardeşinden biri ağır bir kaza geçirir ya da tedavisi uzun süren bir hastalığa yakalanırsa, sağlık kurulu raporuyla belgelendirilmesi şartıyla 3 aya kadar refakat izni verilir; gerektiğinde bu süre bir katına kadar uzatılır.',
+      kaynaklar: [
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 105 (Hastalık izni)',
+          alinti:
+              'Memura, aylık ve özlük hakları korunarak, verilecek raporda gösterilecek lüzum üzerine, kanser, verem ve akıl hastalığı gibi uzun süreli bir tedaviye ihtiyaç gösteren hastalığı hâlinde onsekiz aya kadar, diğer hastalık hâllerinde ise oniki aya kadar izin verilir.',
+        ),
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 105 (Refakat izni)',
+          alinti:
+              'Ayrıca, memurun bakmakla yükümlü olduğu veya memur refakat etmediği takdirde hayatı tehlikeye girecek ana, baba, eş ve çocukları ile kardeşlerinden birinin ağır bir kaza geçirmesi veya tedavisi uzun süren bir hastalığının bulunması hâllerinde, bu hâllerin sağlık kurulu raporuyla belgelendirilmesi şartıyla, aylık ve özlük hakları korunarak, üç aya kadar izin verilir. Gerektiğinde bu süre bir katına kadar uzatılır.',
+        ),
+      ],
+      uyari: 'Raporların hangi hekimlerce ve hangi sürelerle verileceği kanunda değil, ilgili yönetmelikte belirlenir.',
+    ),
+    BilgiKonusu(
+      id: 'ayliksiz_izin',
+      baslik: 'Aylıksız izin',
+      etiket: 'Aylıksız izin',
+      ornekSoru: 'Aylıksız izin ne zaman verilir?',
+      anahtarlar: ['izin', 'ayliksiz', 'ucretsiz izin', 'ucretsiz'],
+      cevap:
+          'Aylıksız izin 108. maddede düzenlenir. Hastalık izninin bitiminden sonra sağlık kurulu raporuyla belgelendirilmesi şartıyla istek üzerine 18 aya kadar aylıksız izin verilebilir. Doğum yapan memura doğum sonrası analık izninin (ya da 104/F yarım çalışma izninin) bitiminden, eşi doğum yapan memura doğum tarihinden itibaren istekleri üzerine 24 aya kadar aylıksız izin verilir. Yıllık izinde esas alınan süreler itibarıyla 5 hizmet yılını tamamlamış memura, isteği hâlinde memuriyeti boyunca en fazla iki defada kullanılmak üzere toplam 1 yıla kadar aylıksız izin verilebilir. Aylıksız izin bitmeden mazeret ortadan kalkarsa 10 gün içinde göreve dönmek zorunludur; süre bitiminde ya da mazeretin kalkmasını izleyen 10 gün içinde göreve dönmeyen memuriyetten çekilmiş sayılır.',
+      kaynaklar: [
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 108/A (Hastalık sonrası)',
+          alinti:
+              'A) Memura, 105 inci maddenin son fıkrası uyarınca verilen iznin bitiminden itibaren, sağlık kurulu raporuyla belgelendirilmesi şartıyla, istekleri üzerine onsekiz aya kadar aylıksız izin verilebilir.',
+        ),
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 108/B (Doğum sonrası)',
+          alinti:
+              'B) Doğum yapan memura, 104 üncü madde uyarınca verilen doğum sonrası analık izni süresinin veya aynı maddenin (F) fıkrası uyarınca verilen izin süresinin bitiminden; eşi doğum yapan memura ise, doğum tarihinden itibaren istekleri üzerine yirmidört aya kadar aylıksız izin verilir.',
+        ),
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 108/E (Beş hizmet yılından sonra)',
+          alinti:
+              'E) Memura, yıllık izinde esas alınan süreler itibarıyla beş hizmet yılını tamamlamış olması ve isteği hâlinde memuriyeti boyunca ve en fazla iki defada kullanılmak üzere, toplam bir yıla kadar aylıksız izin verilebilir.',
+        ),
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 108/F (Göreve dönüş)',
+          alinti:
+              'F) Aylıksız izin süresinin bitiminden önce mazereti gerektiren sebebin ortadan kalkması hâlinde, on gün içinde göreve dönülmesi zorunludur. Aylıksız izin süresinin bitiminde veya mazeret sebebinin kalkmasını izleyen on gün içinde görevine dönmeyenler, memuriyetten çekilmiş sayılır.',
+        ),
+      ],
+      uyari: 'Yurt dışı görev, eş durumu ve muvazzaf askerlik gibi diğer aylıksız izin hâlleri de 108. maddededir.',
+    ),
+    BilgiKonusu(
+      id: 'kademe_derece',
+      baslik: 'Kademe ilerlemesi ve derece yükselmesi',
+      etiket: 'Kademe ve derece',
+      ornekSoru: 'Kademe ve derece yükselmesi şartları nedir?',
+      anahtarlar: [
+        'kademe',
+        'derece yukselme',
+        'derece yukselmesi',
+        'terfi',
+        'yukselme',
+        'ilerleme',
+        'kademe ilerleme'
+      ],
+      cevap:
+          'Kademe, derece içinde görevin önemi veya sorumluluğu artmadan memurun aylığındaki ilerlemedir. Kademe ilerlemesi için bulunduğun kademede en az bir yıl çalışmış olman ve derecende ilerleyebileceğin bir kademenin bulunması aranır; şartları taşıyanlar, hak kazandıkları tarihten geçerli olmak üzere başka bir işleme gerek kalmadan bir ileri kademeye ilerlemiş sayılır. Derece yükselmesi için üst derecelerde boş bir kadro bulunması, derecen içinde en az 3 yıl ve bu derecenin 3. kademesinde 1 yıl bulunmuş olman ve kadronun görevi için öngörülen nitelikleri taşıman gerekir; onay mercii atamaya yetkili amirdir.',
+      kaynaklar: [
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 64 (Kademe ilerlemesi)',
+          alinti:
+              'Kademe; derece içinde, görevin önemi veya sorumluluğu artmadan, memurun aylığındaki ilerlemedir. Memurun kademe ilerlemesinin yapılabilmesi için bulunduğu kademede en az bir yıl çalışmış olması ve bulunduğu derecede ilerleyebileceği bir kademenin bulunması şartları aranır.',
+        ),
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 64 (Hak kazanma)',
+          alinti:
+              'Bu maddede belirtilen şartları haiz her sınıf ve derecedeki memurlar, hak kazandıkları tarihten geçerli olmak üzere ve başkaca bir işleme gerek kalmaksızın bir ileri kademeye ilerlemiş sayılırlar.',
+        ),
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 68/A (Derece yükselmesi)',
+          alinti:
+              'A) Derece yükselmesi yapılabilmesi için: a) Üst derecelerden boş bir kadronun bulunması, b) Derecesi içinde en az 3 yıl ve bu derecenin 3 üncü kademesinde 1 yıl bulunmuş, c) Kadronun tahsis edildiği görev için öngörülen nitelikleri elde etmiş, […] olması şarttır.',
+        ),
+      ],
+      uyari:
+          'Derece yükselmesinde kadro ve öğrenim durumuna bağlı ek koşullar ile bazı sınıflar için özel hükümler vardır (md. 68/B, 67).',
+    ),
+    BilgiKonusu(
+      id: 'tayin',
+      baslik: 'Tayin (yer değiştirme) ve nakil',
+      etiket: 'Tayin',
+      ornekSoru: 'Tayin şartları nelerdir?',
+      anahtarlar: [
+        'tayin',
+        'nakil',
+        'naklen',
+        'yer degistirme',
+        'atama',
+        'es durumu',
+        'aile birligi',
+        'kurum ici',
+        'kurumlar arasi'
+      ],
+      cevap:
+          'Yer değiştirme suretiyle atamalar; hizmetin gereklerine ve iller arasındaki ekonomik, sosyal, kültürel ve ulaşım benzerliğine göre belirlenen bölgeler arasında adil ve dengeli bir sistem içinde yapılır (md. 72). Kurumlar, memurları kazanılmış hak aylık dereceleriyle kurum içindeki aynı ya da başka yerlerdeki kadrolara naklen atayabilir; memurlar istekleriyle kazanılmış hak derecelerinin en çok üç derece altındaki kadrolara atanabilir (md. 76). Memurların kurumlar arasında nakli, kurumların muvafakatiyle mümkündür (md. 74). Aynı kurumun aynı sınıftaki memurları karşılıklı yer değiştirmeyi (becayiş) isteyebilir (md. 73). Aile birliği için, memur olan eşin de isteği hâlinde atanabilmesi amacıyla kurumlar arasında koordinasyon sağlanır (md. 72). Hangi yerlere ne kadar hizmetle atanılabileceği gibi ayrıntılar yönetmelikle ve kurumun atama planıyla belirlenir.',
+      kaynaklar: [
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 72 (Yer değiştirme)',
+          alinti:
+              'Kurumlarda yer değiştirme suretiyle atanmalar; hizmetlerin gereklerine, özelliklerine, Türkiyenin ekonomik, sosyal, kültürel ve ulaşım şartları yönünden benzerlik ve yakınlık gösteren iller gruplandırılarak tespit edilen bölgeler arasında adil ve dengeli bir sistem içinde yapılır.',
+        ),
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 72 (Eş durumu)',
+          alinti:
+              'Yeniden veya yer değiştirme suretiyle yapılacak atamalarda; aile birimini muhafaza etmek bakımından kurumlar arasında gerekli koordinasyon sağlanarak memur olan diğer eşin de isteği halinde ataması, atamaya tabi tutulan memurun atandığı yere 74 ve 76 ncı maddelerde belirtilen esaslar çerçevesinde yapılır.',
+        ),
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 74 (Kurumlar arası nakil)',
+          alinti:
+              'Memurların bu Kanuna tabi kurumlar arasında, kurumların muvafakatı ile kazanılmış hak dereceleri üzerinden veya 68 inci maddedeki esaslar çerçevesinde derece yükselmesi suretiyle, bulundukları sınıftan veya öğrenim durumları itibariyle girebilecekleri sınıftan, bir kadroya nakilleri mümkündür.',
+        ),
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 76 (Kurum içi atama)',
+          alinti:
+              'Kurumlar, görev ve unvan eşitliği gözetmeden kazanılmış hak aylık dereceleriyle memurları bulundukları kadro derecelerine eşit veya 68 inci maddedeki esaslar çerçevesinde daha üst, kurum içinde aynı veya başka yerlerdeki diğer kadrolara naklen atayabilirler.',
+        ),
+        MevzuatKaynagi(
+          baslik: '657 sayılı Devlet Memurları Kanunu, md. 76 (İstek üzerine atama)',
+          alinti:
+              'Memurlar istekleri ile, kurumlarında kazanılmış hak derecelerinin en çok üç derece altında aynı veya başka yerlerdeki kadrolara atanabilirler.',
+        ),
+      ],
+      uyari:
+          'Tayin talebinin kabulü kurumun atama yönetmeliğine, boş kadroya ve puan/hizmet süresi gibi kurum kriterlerine bağlıdır; kendi durumun için kurumunun personel birimine danış.',
+    ),
+    BilgiKonusu(
+      id: 'emeklilik',
+      baslik: 'Emeklilik',
+      etiket: 'Emeklilik',
+      ornekSoru: 'Emeklilik için ne kadar süre gerekir?',
+      anahtarlar: ['emekli', 'emeklilik', 'emekli aylig', 'prim gun', 'yas sarti', 'sgk'],
+      cevap:
+          'Emeklilik (yaş, prim günü, hizmet süresi) 657 sayılı Kanunda değil, 5510 sayılı Sosyal Sigortalar ve Genel Sağlık Sigortası Kanunu\'nda düzenlenir. Bu kanunun metni asistana henüz eklenmedi; bu yüzden emeklilik sorularına bu sürümde cevap veremiyorum. Kesin bilgi için SGK\'nın kendi hizmetlerini (ör. e-Devlet\'teki hizmet dökümünü) kullanabilirsin.',
+      kaynaklar: [],
+      kapsamDisi: true,
+    ),
+  ];
+}

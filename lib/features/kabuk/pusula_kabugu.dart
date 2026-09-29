@@ -6,6 +6,10 @@ import '../../core/bilesenler.dart';
 import '../ana_sayfa/ana_sayfa.dart';
 import '../ana_sayfa/ana_sayfa_verisi.dart';
 import '../ana_sayfa/bildirimler.dart';
+import '../araclar/presentation/araclar_bolumu.dart';
+import '../araclar/presentation/derece_tablosu_sayfasi.dart';
+import '../araclar/presentation/izin_sayfasi.dart';
+import '../araclar/presentation/zam_sayfasi.dart';
 import '../asistan/asistan_servisi.dart';
 import '../asistan/asistan_sayfasi.dart';
 import '../becayis/data/becayis_deposu.dart';
@@ -32,7 +36,7 @@ class PusulaKabugu extends StatefulWidget {
     super.key,
     required this.profilDeposu,
     this.becayisDeposuUret = BecayisOrnekVeri.depoProfilden,
-    this.asistan = const SahteAsistan(),
+    this.asistan = const YerelMevzuatAsistani(),
     this.ilanKaynagi = const OrnekIlanKaynagi(),
     this.haberKaynagi = const OrnekHaberKaynagi(),
     this.haberOtomatik = true,
@@ -136,6 +140,18 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
   /// Zincirler ayrı sayıldığı için ana sayfada yalnızca ikili eşleşmeler görünür.
   int get _ikiliSayisi => _becayis.eslesmeler.where((e) => e.tip == EslesmeTipi.ikili).length;
 
+  static const _ornekMaas = MaasGirdisi(derece: 8, kademe: 3, hizmetYili: 10);
+
+  void _sayfaAc(Widget sayfa) => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => sayfa));
+
+  void _izinAc() => _sayfaAc(IzinSayfasi(baslangicHizmetYili: _profil.maas?.hizmetYili ?? 5));
+
+  void _zamAc() => _sayfaAc(ZamSayfasi(girdi: _profil.maas ?? _ornekMaas, profildenMi: _profil.maas != null));
+
+  void _tabloAc() => _sayfaAc(
+        DereceTablosuSayfasi(derece: _profil.maas?.derece ?? 8, kademe: _profil.maas?.kademe),
+      );
+
   List<Bildirim> _bildirimler(Profil p) =>
       bildirimleriUret(p, becayisYayinda: _becayis.yayinda, ikiliEslesme: _ikiliSayisi);
 
@@ -188,6 +204,9 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
                   profilAc: _profilAc,
                   avatarFoto: widget.fotograf?.foto,
                   avatarAd: p.ad,
+                  araclar: p.statu == Statu.memur657
+                      ? AraclarBolumu(izinAc: _izinAc, zamAc: _zamAc, tabloAc: _tabloAc)
+                      : null,
                   gundem: GundemBolumu(kaynak: widget.haberKaynagi, bugun: widget.bugun, otomatik: widget.haberOtomatik),
                 );
               },
