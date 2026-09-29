@@ -134,16 +134,16 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
   void _git(int i) => setState(() => _secili = i);
 
   void _profilAc() => Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => ProfilSayfasi(
-            depo: widget.profilDeposu,
-            fotograf: widget.fotograf,
-            fotografKaynagi: widget.fotografKaynagi,
-            oturum: widget.oturum,
-            hatirlatici: widget.hatirlatici,
-          ),
-        ),
-      );
+    MaterialPageRoute<void>(
+      builder: (_) => ProfilSayfasi(
+        depo: widget.profilDeposu,
+        fotograf: widget.fotograf,
+        fotografKaynagi: widget.fotografKaynagi,
+        oturum: widget.oturum,
+        hatirlatici: widget.hatirlatici,
+      ),
+    ),
+  );
 
   /// Zincirler ayrı sayıldığı için ana sayfada yalnızca ikili eşleşmeler görünür.
   int get _ikiliSayisi => _becayis.eslesmeler.where((e) => e.tip == EslesmeTipi.ikili).length;
@@ -156,9 +156,7 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
 
   void _zamAc() => _sayfaAc(ZamSayfasi(girdi: _profil.maas ?? _ornekMaas, profildenMi: _profil.maas != null));
 
-  void _tabloAc() => _sayfaAc(
-        DereceTablosuSayfasi(derece: _profil.maas?.derece ?? 8, kademe: _profil.maas?.kademe),
-      );
+  void _tabloAc() => _sayfaAc(DereceTablosuSayfasi(derece: _profil.maas?.derece ?? 8, kademe: _profil.maas?.kademe));
 
   List<Bildirim> _bildirimler(Profil p) =>
       bildirimleriUret(p, becayisYayinda: _becayis.yayinda, ikiliEslesme: _ikiliSayisi);
@@ -189,66 +187,71 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: IndexedStack(
-          index: _secili,
-          children: [
-            ListenableBuilder(
-              listenable:
-                  Listenable.merge([widget.profilDeposu, _becayis, if (widget.fotograf != null) widget.fotograf!]),
-              builder: (context, _) {
-                final p = _profil;
-                return AnaSayfa(
-                  veri: AnaSayfaVerisi.profilden(
-                    p,
-                    bugun: widget.bugun ?? DateTime.now(),
-                    becayisAlt: _becayisAlt(p),
-                    bildirimVar: _bildirimler(p).isNotEmpty,
-                  ),
-                  bugun: widget.bugun,
-                  bildirimAc: _bildirimleriAc,
-                  maasaGit: () => _git(PusulaKabugu.maas),
-                  asistanaGit: () => _git(PusulaKabugu.asistanSekmesi),
-                  becayisiAc: () => _git(PusulaKabugu.becayis),
-                  profilAc: _profilAc,
-                  avatarFoto: widget.fotograf?.foto,
-                  avatarAd: p.ad,
-                  araclar: p.statu == Statu.memur657
-                      ? AraclarBolumu(izinAc: _izinAc, zamAc: _zamAc, tabloAc: _tabloAc)
-                      : null,
-                  gundem:
-                      GundemBolumu(kaynak: widget.haberKaynagi, bugun: widget.bugun, otomatik: widget.haberOtomatik),
-                );
-              },
-            ),
-            ListenableBuilder(
-              listenable: widget.profilDeposu,
-              builder: (context, _) {
-                final p = _profil;
-                return MaasSayfasi(
-                  ay: widget.bugun?.month,
-                  baslangic: p.maas ?? const MaasGirdisi(derece: 8, kademe: 3, hizmetYili: 10),
-                  kayitliGirdi: p.maas,
-                  haberler: GundemBolumu(
-                    kaynak: widget.haberKaynagi,
-                    bugun: widget.bugun,
-                    baslik: 'Maaş ve mevzuat haberleri',
-                    turler: const {HaberTuru.maas, HaberTuru.mevzuat},
-                    otomatik: widget.haberOtomatik,
-                  ),
-                  kaydet: p.statu == Statu.memur657 ? (g) => widget.profilDeposu.kaydet(p.kopya(maas: g)) : null,
-                );
-              },
-            ),
-            AsistanSayfasi(asistan: widget.asistan),
-            ListenableBuilder(
-              listenable: widget.profilDeposu,
-              builder: (context, _) => BecayisSekmesi(profil: _profil, depo: _becayis, profilAc: _profilAc),
-            ),
-            IlanlarSayfasi(kaynak: widget.ilanKaynagi, bugun: widget.bugun),
-          ],
+    body: IndexedStack(
+      index: _secili,
+      children: [
+        ListenableBuilder(
+          listenable: Listenable.merge([widget.profilDeposu, _becayis, if (widget.fotograf != null) widget.fotograf!]),
+          builder: (context, _) {
+            final p = _profil;
+            return AnaSayfa(
+              veri: AnaSayfaVerisi.profilden(
+                p,
+                bugun: widget.bugun ?? DateTime.now(),
+                becayisAlt: _becayisAlt(p),
+                bildirimVar: _bildirimler(p).isNotEmpty,
+              ),
+              bugun: widget.bugun,
+              bildirimAc: _bildirimleriAc,
+              maasaGit: () => _git(PusulaKabugu.maas),
+              asistanaGit: () => _git(PusulaKabugu.asistanSekmesi),
+              becayisiAc: () => _git(PusulaKabugu.becayis),
+              profilAc: _profilAc,
+              avatarFoto: widget.fotograf?.foto,
+              avatarAd: p.ad,
+              araclar: p.statu == Statu.memur657
+                  ? AraclarBolumu(izinAc: _izinAc, zamAc: _zamAc, tabloAc: _tabloAc)
+                  : null,
+              gundem: GundemBolumu(kaynak: widget.haberKaynagi, bugun: widget.bugun, otomatik: widget.haberOtomatik),
+            );
+          },
         ),
-        bottomNavigationBar: MediaQuery.viewInsetsOf(context).bottom > 0
-            ? null
-            : PusulaAltCubuk(sekmeler: _sekmeler, secili: _secili, onSec: _git),
-      );
+        ListenableBuilder(
+          listenable: widget.profilDeposu,
+          builder: (context, _) {
+            final p = _profil;
+            return MaasSayfasi(
+              ay: widget.bugun?.month,
+              baslangic: p.maas ?? const MaasGirdisi(derece: 8, kademe: 3, hizmetYili: 10),
+              kayitliGirdi: p.maas,
+              baslangicGrup: switch (p.statu) {
+                Statu.sozlesmeli => 1,
+                Statu.isci => 2,
+                _ => 0,
+              },
+              kayitliBrut: p.brutUcret,
+              kaydetBrut: p.statu.brutUcretliMi ? (b) => widget.profilDeposu.kaydet(p.kopya(brutUcret: b)) : null,
+              haberler: GundemBolumu(
+                kaynak: widget.haberKaynagi,
+                bugun: widget.bugun,
+                baslik: 'Maaş ve mevzuat haberleri',
+                turler: const {HaberTuru.maas, HaberTuru.mevzuat},
+                otomatik: widget.haberOtomatik,
+              ),
+              kaydet: p.statu == Statu.memur657 ? (g) => widget.profilDeposu.kaydet(p.kopya(maas: g)) : null,
+            );
+          },
+        ),
+        AsistanSayfasi(asistan: widget.asistan),
+        ListenableBuilder(
+          listenable: widget.profilDeposu,
+          builder: (context, _) => BecayisSekmesi(profil: _profil, depo: _becayis, profilAc: _profilAc),
+        ),
+        IlanlarSayfasi(kaynak: widget.ilanKaynagi, bugun: widget.bugun),
+      ],
+    ),
+    bottomNavigationBar: MediaQuery.viewInsetsOf(context).bottom > 0
+        ? null
+        : PusulaAltCubuk(sekmeler: _sekmeler, secili: _secili, onSec: _git),
+  );
 }

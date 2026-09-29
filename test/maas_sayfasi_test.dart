@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pusula/core/metin.dart';
 import 'package:pusula/core/tema.dart';
 import 'package:pusula/features/maas/domain/memur_maas_hesaplayici.dart';
+import 'package:pusula/features/maas/domain/ucretli_maas_hesaplayici.dart';
 import 'package:pusula/features/maas/presentation/maas_sayfasi.dart';
 
 import 'yardimci/yazilar.dart';
@@ -16,15 +17,14 @@ void main() {
     tester.view.physicalSize = const Size(390, 2200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(MaterialApp(
-      theme: pusulaTema(),
-      home: Scaffold(
-        body: MaasSayfasi(
-          ay: 7,
-          baslangic: girdi ?? const MaasGirdisi(derece: 8, kademe: 3, hizmetYili: 10),
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: pusulaTema(),
+        home: Scaffold(
+          body: MaasSayfasi(ay: 7, baslangic: girdi ?? const MaasGirdisi(derece: 8, kademe: 3, hizmetYili: 10)),
         ),
       ),
-    ));
+    );
     await tester.pumpAndSettle(const Duration(seconds: 2));
   }
 
@@ -83,25 +83,83 @@ void main() {
     await tester.enterText(find.byType(TextField).at(2), '50');
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
-    const beklenen = MaasGirdisi(
-      derece: 8, kademe: 3, hizmetYili: 10, ekGosterge: 2200, ozelHizmetTazminatiOrani: 0.5,
-    );
+    const beklenen = MaasGirdisi(derece: 8, kademe: 3, hizmetYili: 10, ekGosterge: 2200, ozelHizmetTazminatiOrani: 0.5);
     expect(find.text(net(beklenen)), findsWidgets);
     expect(find.text('Ek gösterge aylığı'), findsOneWidget);
     expect(find.text('Özel hizmet tazminatı'), findsWidgets);
   });
 
-  testWidgets('sözleşmeli ve işçi için hesap yok, açıklama gösterilir', (tester) async {
-    await ac(tester);
-    await tester.tap(find.text('Sözleşmeli'));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('yalnızca 657 sayılı Kanun'), findsOneWidget);
-    expect(find.text('Döküm'), findsNothing);
-    expect(find.text('Tahmini net maaş'), findsNothing);
+  group('sözleşmeli ve işçi: brütten nete', () {
+    const u = UcretliMaasHesaplayici();
 
-    await tester.tap(find.text('Memur (657)'));
-    await tester.pumpAndSettle(const Duration(seconds: 2));
-    expect(find.text('Döküm'), findsOneWidget);
+    testWidgets('grup seçilince brüt ücret istenir; girilince motorun neti ve dökümü görünür', (tester) async {
+      await ac(tester);
+      await tester.tap(find.text('Sözleşmeli'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Bordronda yazan aylık brüt'), findsOneWidget);
+      expect(find.text('Derece'), findsNothing);
+      expect(find.text('Döküm'), findsNothing);
+
+      await tester.enterText(find.byType(TextField), '50000');
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+      final s = u.hesapla(50000, ay: 7);
+      expect(find.text(liraTam(s.net)), findsWidgets);
+      expect(find.text('Döküm'), findsOneWidget);
+      expect(find.text('SGK işçi payı (%14)'), findsOneWidget);
+      expect(find.text('İşsizlik sigortası (%1)'), findsOneWidget);
+      expect(find.text('Gelir vergisi'), findsOneWidget);
+
+      await tester.tap(find.text('Memur (657)'));
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+      expect(find.text('Taban aylık'), findsOneWidget);
+    });
+
+    testWidgets('asgari ücret brütünde net 28.075,50 ve gelir/damga vergisi satırı yok', (tester) async {
+      await ac(tester);
+      await tester.tap(find.text('İşçi'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '33030');
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+      expect(find.text(liraTam(28075.5)), findsWidgets);
+      expect(find.text('Gelir vergisi'), findsNothing);
+      expect(find.text('Damga vergisi'), findsNothing);
+    });
+
+    testWidgets('kaydet düğmesi brüt ücreti verir; kaydedilince "Profilinde kayıtlı" olur', (tester) async {
+      double? kaydedilen;
+      tester.view.physicalSize = const Size(390, 2200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: pusulaTema(),
+          home: Scaffold(body: MaasSayfasi(ay: 7, baslangicGrup: 2, kaydetBrut: (b) => kaydedilen = b)),
+        ),
+      );
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+      expect(find.text('Bilgilerimi profilime kaydet'), findsNothing, reason: 'brüt girilmeden düğme yok');
+      await tester.enterText(find.byType(TextField), '42000');
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+      await tester.tap(find.text('Bilgilerimi profilime kaydet'));
+      await tester.pumpAndSettle();
+      expect(kaydedilen, 42000);
+      expect(find.text('Profilinde kayıtlı'), findsOneWidget);
+    });
+
+    testWidgets('kayıtlı brüt ücretle açılır', (tester) async {
+      tester.view.physicalSize = const Size(390, 2200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: pusulaTema(),
+          home: Scaffold(body: MaasSayfasi(ay: 7, baslangicGrup: 1, kayitliBrut: 60000, kaydetBrut: (_) {})),
+        ),
+      );
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+      expect(find.text(liraTam(u.hesapla(60000, ay: 7).net)), findsWidgets);
+      expect(find.text('Profilinde kayıtlı'), findsOneWidget);
+    });
   });
 
   testWidgets('hizmet yılı azaltılıp artırılabilir ve sıfırın altına inmez', (tester) async {

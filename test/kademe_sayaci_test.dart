@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pusula/features/ana_sayfa/ana_sayfa_verisi.dart';
 import 'package:pusula/features/maas/domain/gosterge_tablosu.dart';
 import 'package:pusula/features/maas/domain/memur_maas_hesaplayici.dart';
+import 'package:pusula/features/maas/domain/ucretli_maas_hesaplayici.dart';
 import 'package:pusula/features/profil/domain/profil.dart';
 
 void main() {
@@ -63,6 +64,34 @@ void main() {
     test('bordro girdisi olmasa da tarih varsa sayaç gösterilir', () {
       final v = veri(Profil(ad: 'A', statu: Statu.memur657, kademeTarihi: tarih));
       expect(v.yolHaritasi.map((o) => o.baslik), contains('En erken kademe ilerlemesi'));
+    });
+  });
+
+  group('ana sayfa net maaş: sözleşmeli ve işçi', () {
+    AnaSayfaVerisi veri(Profil p) => AnaSayfaVerisi.profilden(p, bugun: bugun, becayisAlt: 'x');
+
+    test('brüt ücret girilmişse net maaş motorla aynı; yol haritasında memur dönemi yok', () {
+      final v = veri(const Profil(ad: 'A', statu: Statu.sozlesmeli, brutUcret: 50000));
+      expect(v.netMaas, const UcretliMaasHesaplayici().hesapla(50000, ay: 9).net.round());
+      expect(v.maasMesaji, isNull);
+      expect(v.yolHaritasi, isEmpty);
+    });
+
+    test('brüt ücret yoksa ya da sıfırsa açıklayıcı mesaj, uydurma tutar yok', () {
+      for (final p in [
+        const Profil(ad: 'A', statu: Statu.isci),
+        const Profil(ad: 'A', statu: Statu.isci, brutUcret: 0),
+      ]) {
+        final v = veri(p);
+        expect(v.netMaas, isNull);
+        expect(v.maasMesaji, contains('aylık brüt ücretini gir'));
+      }
+    });
+
+    test('akademik ve diğer statülerde hesap yok, dürüst mesaj var', () {
+      final v = veri(const Profil(ad: 'A', statu: Statu.akademik, brutUcret: 90000));
+      expect(v.netMaas, isNull);
+      expect(v.maasMesaji, contains('henüz yok'));
     });
   });
 }

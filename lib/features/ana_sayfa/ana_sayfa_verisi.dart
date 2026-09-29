@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/tema.dart';
 import '../maas/domain/gosterge_tablosu.dart';
+import '../maas/domain/ucretli_maas_hesaplayici.dart';
 import '../maas/domain/memur_maas_hesaplayici.dart';
 import '../profil/domain/profil.dart';
 
@@ -89,11 +90,18 @@ class AnaSayfaVerisi {
     required String becayisAlt,
     bool bildirimVar = false,
     MemurMaasHesaplayici hesaplayici = const MemurMaasHesaplayici(),
+    UcretliMaasHesaplayici ucretliHesaplayici = const UcretliMaasHesaplayici(),
   }) {
     int? net;
     String? mesaj;
-    if (p.statu != Statu.memur657) {
-      mesaj = 'Maaş hesabı şu an yalnızca 657 memurları için. ${p.statu.etiket} için yakında.';
+    if (p.statu.brutUcretliMi) {
+      if (p.brutUcret == null || p.brutUcret! <= 0) {
+        mesaj = 'Maaşını görmek için Maaş sekmesinden aylık brüt ücretini gir.';
+      } else {
+        net = ucretliHesaplayici.hesapla(p.brutUcret!, ay: bugun.month).net.round();
+      }
+    } else if (p.statu != Statu.memur657) {
+      mesaj = 'Maaş hesabı şu an 657 memurları, 4/B sözleşmeliler ve işçiler için. ${p.statu.etiket} için henüz yok.';
     } else if (p.maas == null) {
       mesaj = 'Maaşını görmek için derece, kademe ve hizmet yılını gir.';
     } else {

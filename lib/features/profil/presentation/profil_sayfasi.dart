@@ -116,6 +116,7 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
       kurumsalEposta: _eposta.text.trim(),
       maas: _mevcut?.maas,
       kademeTarihi: _memur ? _kademeTarihi : null,
+      brutUcret: _statu!.brutUcretliMi ? _mevcut?.brutUcret : null,
     );
     await widget.depo.kaydet(p);
     if (!mounted) return;

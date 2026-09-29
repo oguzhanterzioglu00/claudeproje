@@ -18,8 +18,13 @@ const _tam = Profil(
   sicilNo: '123456',
   kurumsalEposta: 'ayse@ornek.gov.tr',
   maas: MaasGirdisi(
-    derece: 8, kademe: 3, hizmetYili: 10,
-    ekGosterge: 2200, yanOdemePuani: 1000, ozelHizmetTazminatiOrani: 0.5, digerBrut: 1500,
+    derece: 8,
+    kademe: 3,
+    hizmetYili: 10,
+    ekGosterge: 2200,
+    yanOdemePuani: 1000,
+    ozelHizmetTazminatiOrani: 0.5,
+    digerBrut: 1500,
   ),
 );
 
@@ -41,6 +46,17 @@ void main() {
       expect(Profil.fromJson(j), _tam);
     });
 
+    test('brüt ücret gidiş-dönüşte korunur; bozuk değerde null, aşırı değerde sınırlanır', () {
+      final p = _tam.kopya(statu: Statu.sozlesmeli, brutUcret: 45000);
+      expect(Profil.fromJson(jsonDecode(jsonEncode(p.toJson())) as Map<String, Object?>).brutUcret, 45000);
+      expect(Profil.fromJson({'brutUcret': 'x'}).brutUcret, isNull);
+      expect(Profil.fromJson({'brutUcret': -5}).brutUcret, 0);
+      expect(Profil.fromJson({'brutUcret': 1e12}).brutUcret, 10000000);
+      expect(p.kopya(brutUcretiTemizle: true).brutUcret, isNull);
+      expect(Statu.sozlesmeli.brutUcretliMi && Statu.isci.brutUcretliMi, isTrue);
+      expect(Statu.memur657.brutUcretliMi || Statu.akademik.brutUcretliMi || Statu.diger.brutUcretliMi, isFalse);
+    });
+
     test('bozuk veya eksik kayıt güvenli varsayılanlara döner', () {
       final p = Profil.fromJson({'statu': 'yok-böyle-bir-statu', 'ad': 5, 'maas': 'saçma'});
       expect(p.statu, Statu.diger);
@@ -60,10 +76,12 @@ void main() {
 
     test('becayiş için eksik alanlar', () {
       expect(_tam.eksikBecayisAlanlari, isEmpty);
-      expect(
-        const Profil(ad: 'A', statu: Statu.memur657).eksikBecayisAlanlari,
-        ['Kurum', 'Hizmet sınıfı', 'Unvan', 'Çalıştığın il'],
-      );
+      expect(const Profil(ad: 'A', statu: Statu.memur657).eksikBecayisAlanlari, [
+        'Kurum',
+        'Hizmet sınıfı',
+        'Unvan',
+        'Çalıştığın il',
+      ]);
       expect(_tam.kopya(unvan: ' ').eksikBecayisAlanlari, ['Unvan']);
     });
 
@@ -77,8 +95,10 @@ void main() {
     test('kurum kimliği Türkçe harfleri sadeleştirir', () {
       expect(kurumKimligiUret('Sağlık Bakanlığı'), 'saglik-bakanligi');
       expect(kurumKimligiUret('İçişleri Bakanlığı'), 'icisleri-bakanligi');
-      expect(kurumKimligiUret('Çevre, Şehircilik ve İklim Değişikliği Bakanlığı'),
-          'cevre-sehircilik-ve-iklim-degisikligi-bakanligi');
+      expect(
+        kurumKimligiUret('Çevre, Şehircilik ve İklim Değişikliği Bakanlığı'),
+        'cevre-sehircilik-ve-iklim-degisikligi-bakanligi',
+      );
       expect(kurumKimligiUret('  Belediye  '), 'belediye');
       expect(kurumKimligiUret(''), '');
       // Aynı kurumun farklı yazımları aynı kimliğe düşmeli:
@@ -161,7 +181,18 @@ void main() {
     });
 
     test('bozuk ve olanaksız tarihler null olur, hata fırlatmaz', () {
-      for (final v in [null, 5, '', 'dün', '2025-13-01', '2025-02-31', '25-01-01', '1900-01-01', '2999-01-01', ['2025-01-01']]) {
+      for (final v in [
+        null,
+        5,
+        '',
+        'dün',
+        '2025-13-01',
+        '2025-02-31',
+        '25-01-01',
+        '1900-01-01',
+        '2999-01-01',
+        ['2025-01-01'],
+      ]) {
         expect(Profil.fromJson({'ad': 'A', 'statu': 'memur657', 'kademeTarihi': v}).kademeTarihi, isNull, reason: '$v');
       }
     });

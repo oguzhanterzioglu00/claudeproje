@@ -57,8 +57,26 @@ void main() {
       expect(basliklar(maassiz, yayinda: true), ['Maaşını hesapla']);
     });
 
+    test('sözleşmeli ve işçiye brüt ücret girmesi önerilir; girince öneri kalkar', () {
+      final ilk = bildirimleriUret(
+        const Profil(ad: 'A', statu: Statu.sozlesmeli),
+        becayisYayinda: false,
+        ikiliEslesme: 0,
+      );
+      expect(ilk.single.baslik, 'Maaşını hesapla');
+      expect(ilk.single.aciklama, contains('brüt ücretini'));
+      expect(
+        bildirimleriUret(
+          const Profil(ad: 'A', statu: Statu.isci, brutUcret: 40000),
+          becayisYayinda: false,
+          ikiliEslesme: 0,
+        ),
+        isEmpty,
+      );
+    });
+
     test('memur olmayan ve aday memura becayiş bildirimi gitmez', () {
-      expect(basliklar(const Profil(ad: 'A', statu: Statu.isci)), isEmpty);
+      expect(basliklar(const Profil(ad: 'A', statu: Statu.isci, brutUcret: 40000)), isEmpty);
       expect(basliklar(_tam.kopya(adayMemur: true), yayinda: true, eslesme: 3), isEmpty);
     });
   });
@@ -69,19 +87,21 @@ void main() {
     addTearDown(tester.view.reset);
     final depo = ProfilDeposu(BellekProfilKaydi(profil));
     await depo.yukle();
-    await tester.pumpWidget(MaterialApp(
-      theme: pusulaTema(),
-      home: PusulaKabugu(
-        profilDeposu: depo,
-        bugun: DateTime(2026, 9, 29),
-        haberOtomatik: false,
-        baslangicSekmesi: sekme,
-        asistan: const YerelMevzuatAsistani(sure: Duration(milliseconds: 10)),
-        ilanKaynagi: OrnekIlanKaynagi(sure: const Duration(milliseconds: 10), bugun: DateTime(2026, 9, 29)),
-        haberKaynagi: OrnekHaberKaynagi(sure: const Duration(milliseconds: 10), bugun: DateTime(2026, 9, 29)),
-        becayisDeposuUret: BecayisOrnekVeri.depoProfilden,
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: pusulaTema(),
+        home: PusulaKabugu(
+          profilDeposu: depo,
+          bugun: DateTime(2026, 9, 29),
+          haberOtomatik: false,
+          baslangicSekmesi: sekme,
+          asistan: const YerelMevzuatAsistani(sure: Duration(milliseconds: 10)),
+          ilanKaynagi: OrnekIlanKaynagi(sure: const Duration(milliseconds: 10), bugun: DateTime(2026, 9, 29)),
+          haberKaynagi: OrnekHaberKaynagi(sure: const Duration(milliseconds: 10), bugun: DateTime(2026, 9, 29)),
+          becayisDeposuUret: BecayisOrnekVeri.depoProfilden,
+        ),
       ),
-    ));
+    );
     await tester.pumpAndSettle(const Duration(seconds: 3));
   }
 
@@ -99,7 +119,7 @@ void main() {
   });
 
   testWidgets('bildirim yoksa boş durum gösterilir', (tester) async {
-    await ac(tester, const Profil(ad: 'Can', statu: Statu.isci));
+    await ac(tester, const Profil(ad: 'Can', statu: Statu.isci, brutUcret: 40000));
     await tester.tap(find.bySemanticsLabel(RegExp(r'^Bildirimler')));
     await tester.pumpAndSettle();
     expect(find.text('Yeni bildirim yok'), findsOneWidget);

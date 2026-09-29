@@ -71,14 +71,14 @@ void main() {
       expect(v.maasMesaji, contains('derece, kademe'));
     });
 
-    test('sözleşmeli için maaş yok ve yol haritası boş', () {
+    test('sözleşmeli için brüt ücret girilmemişse maaş yok ve yol haritası boş', () {
       final v = AnaSayfaVerisi.profilden(
         const Profil(ad: 'A', statu: Statu.sozlesmeli),
         bugun: DateTime(2026, 9, 29),
         becayisAlt: 'x',
       );
       expect(v.netMaas, isNull);
-      expect(v.maasMesaji, contains('4/B sözleşmeli personel'));
+      expect(v.maasMesaji, contains('aylık brüt ücretini gir'));
       expect(v.yolHaritasi, isEmpty);
     });
   });
@@ -87,18 +87,20 @@ void main() {
     testWidgets('örnek veri: rozet, zam ve yol haritası görünür', (tester) async {
       await boyutla(tester);
       var asistan = 0, becayis = 0, profil = 0;
-      await tester.pumpWidget(MaterialApp(
-        theme: pusulaTema(),
-        home: Scaffold(
-          body: AnaSayfa(
-            veri: AnaSayfaVerisi.ornekVeri,
-            bugun: DateTime(2026, 9, 29),
-            asistanaGit: () => asistan++,
-            becayisiAc: () => becayis++,
-            profilAc: () => profil++,
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: pusulaTema(),
+          home: Scaffold(
+            body: AnaSayfa(
+              veri: AnaSayfaVerisi.ornekVeri,
+              bugun: DateTime(2026, 9, 29),
+              asistanaGit: () => asistan++,
+              becayisiAc: () => becayis++,
+              profilAc: () => profil++,
+            ),
           ),
         ),
-      ));
+      );
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
       expect(find.text('Kamu Pusulası'), findsOneWidget);
@@ -117,14 +119,16 @@ void main() {
 
     testWidgets('net maaş yoksa açıklama kartı; yol haritası boşsa bölüm gizlenir', (tester) async {
       await boyutla(tester);
-      await tester.pumpWidget(MaterialApp(
-        theme: pusulaTema(),
-        home: const Scaffold(
-          body: AnaSayfa(
-            veri: AnaSayfaVerisi(maasMesaji: 'Maaşını görmek için derece, kademe ve hizmet yılını gir.'),
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: pusulaTema(),
+          home: const Scaffold(
+            body: AnaSayfa(
+              veri: AnaSayfaVerisi(maasMesaji: 'Maaşını görmek için derece, kademe ve hizmet yılını gir.'),
+            ),
           ),
         ),
-      ));
+      );
       await tester.pumpAndSettle(const Duration(seconds: 3));
       expect(find.textContaining('derece, kademe ve hizmet yılını gir'), findsOneWidget);
       expect(find.text('Yol haritan'), findsNothing);
@@ -138,18 +142,20 @@ void main() {
       await boyutla(tester);
       final depo = ProfilDeposu(BellekProfilKaydi(profil));
       await depo.yukle();
-      await tester.pumpWidget(MaterialApp(
-        theme: pusulaTema(),
-        home: PusulaKabugu(
-          profilDeposu: depo,
-          bugun: DateTime(2026, 9, 29),
-          haberOtomatik: false,
-          baslangicSekmesi: sekme,
-          asistan: const YerelMevzuatAsistani(sure: Duration(milliseconds: 10)),
-          ilanKaynagi: OrnekIlanKaynagi(sure: const Duration(milliseconds: 10), bugun: DateTime(2026, 9, 29)),
-          becayisDeposuUret: ornekBecayis ? (_) => BecayisOrnekVeri.depo() : BecayisOrnekVeri.depoProfilden,
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: pusulaTema(),
+          home: PusulaKabugu(
+            profilDeposu: depo,
+            bugun: DateTime(2026, 9, 29),
+            haberOtomatik: false,
+            baslangicSekmesi: sekme,
+            asistan: const YerelMevzuatAsistani(sure: Duration(milliseconds: 10)),
+            ilanKaynagi: OrnekIlanKaynagi(sure: const Duration(milliseconds: 10), bugun: DateTime(2026, 9, 29)),
+            becayisDeposuUret: ornekBecayis ? (_) => BecayisOrnekVeri.depo() : BecayisOrnekVeri.depoProfilden,
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle(const Duration(seconds: 3));
       return depo;
     }
@@ -202,7 +208,7 @@ void main() {
     testWidgets('sözleşmelide Becayiş kapalı ve ana sayfa "Yalnızca memurlar" der', (tester) async {
       await ac(tester, const Profil(ad: 'A', statu: Statu.sozlesmeli));
       expect(find.text('Yalnızca memurlar'), findsOneWidget);
-      expect(find.textContaining('Maaş hesabı şu an yalnızca 657 memurları için'), findsOneWidget);
+      expect(find.textContaining('Maaşını görmek için Maaş sekmesinden aylık brüt ücretini gir'), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('sekme-3')));
       await tester.pumpAndSettle();
       expect(find.text('Becayiş sende kapalı'), findsOneWidget);
@@ -214,8 +220,14 @@ void main() {
     });
 
     testWidgets('maaş sekmesinden kaydedilen girdi profile yazılır ve ana sayfaya yansır', (tester) async {
-      final depo = await ac(tester, _tamMemur.kopya(maas: null).let((p) => Profil(
-            ad: p.ad, statu: p.statu, kurumAdi: p.kurumAdi, sinif: p.sinif, unvan: p.unvan, il: p.il)));
+      final depo = await ac(
+        tester,
+        _tamMemur
+            .kopya(maas: null)
+            .let(
+              (p) => Profil(ad: p.ad, statu: p.statu, kurumAdi: p.kurumAdi, sinif: p.sinif, unvan: p.unvan, il: p.il),
+            ),
+      );
       expect(find.textContaining('derece, kademe ve hizmet yılını gir'), findsOneWidget);
 
       await tester.tap(find.byKey(const ValueKey('sekme-1')));

@@ -13,6 +13,9 @@ enum Statu {
   const Statu(this.etiket);
 
   final String etiket;
+
+  /// Maaşı brüt ücretten net'e hesaplanabilen statüler: 5510 md. 4/1-(a) kapsamındaki sözleşmeli ve işçi.
+  bool get brutUcretliMi => this == sozlesmeli || this == isci;
 }
 
 /// Kullanıcının profili. Tüm özellikler (maaş, becayiş, ilan uyumu) buradan beslenir.
@@ -30,6 +33,7 @@ class Profil {
     this.kurumsalEposta = '',
     this.maas,
     this.kademeTarihi,
+    this.brutUcret,
   });
 
   final String ad;
@@ -60,6 +64,9 @@ class Profil {
   /// Bulunduğu kademeye geldiği tarih (kademe ilerlemesi sayacı için; yalnızca memurlar).
   final DateTime? kademeTarihi;
 
+  /// Aylık brüt ücret (TL); yalnızca sözleşmeli ve işçi için (bordrodan).
+  final double? brutUcret;
+
   /// Kurum adından eşleştirmede kullanılan kararlı kimlik.
   String get kurumKimligi => kurumKimligiUret(kurumAdi);
 
@@ -67,11 +74,11 @@ class Profil {
 
   /// Becayiş ilanı için profilde eksik olan alanların adları.
   List<String> get eksikBecayisAlanlari => [
-        if (kurumAdi.trim().isEmpty) 'Kurum',
-        if (sinif.trim().isEmpty) 'Hizmet sınıfı',
-        if (unvan.trim().isEmpty) 'Unvan',
-        if (il.trim().isEmpty) 'Çalıştığın il',
-      ];
+    if (kurumAdi.trim().isEmpty) 'Kurum',
+    if (sinif.trim().isEmpty) 'Hizmet sınıfı',
+    if (unvan.trim().isEmpty) 'Unvan',
+    if (il.trim().isEmpty) 'Çalıştığın il',
+  ];
 
   /// Becayiş kapalıysa kullanıcıya gösterilecek neden.
   String? get becayisKapaliNedeni {
@@ -97,34 +104,37 @@ class Profil {
     MaasGirdisi? maas,
     DateTime? kademeTarihi,
     bool kademeTarihiniTemizle = false,
-  }) =>
-      Profil(
-        ad: ad ?? this.ad,
-        statu: statu ?? this.statu,
-        adayMemur: adayMemur ?? this.adayMemur,
-        kurumAdi: kurumAdi ?? this.kurumAdi,
-        sinif: sinif ?? this.sinif,
-        unvan: unvan ?? this.unvan,
-        il: il ?? this.il,
-        sicilNo: sicilNo ?? this.sicilNo,
-        kurumsalEposta: kurumsalEposta ?? this.kurumsalEposta,
-        maas: maas ?? this.maas,
-        kademeTarihi: kademeTarihiniTemizle ? null : (kademeTarihi ?? this.kademeTarihi),
-      );
+    double? brutUcret,
+    bool brutUcretiTemizle = false,
+  }) => Profil(
+    ad: ad ?? this.ad,
+    statu: statu ?? this.statu,
+    adayMemur: adayMemur ?? this.adayMemur,
+    kurumAdi: kurumAdi ?? this.kurumAdi,
+    sinif: sinif ?? this.sinif,
+    unvan: unvan ?? this.unvan,
+    il: il ?? this.il,
+    sicilNo: sicilNo ?? this.sicilNo,
+    kurumsalEposta: kurumsalEposta ?? this.kurumsalEposta,
+    maas: maas ?? this.maas,
+    kademeTarihi: kademeTarihiniTemizle ? null : (kademeTarihi ?? this.kademeTarihi),
+    brutUcret: brutUcretiTemizle ? null : (brutUcret ?? this.brutUcret),
+  );
 
   Map<String, Object?> toJson() => {
-        'ad': ad,
-        'statu': statu.name,
-        'adayMemur': adayMemur,
-        'kurumAdi': kurumAdi,
-        'sinif': sinif,
-        'unvan': unvan,
-        'il': il,
-        'sicilNo': sicilNo,
-        'kurumsalEposta': kurumsalEposta,
-        'maas': maas?.toJson(),
-        'kademeTarihi': kademeTarihi == null ? null : _gunMetni(kademeTarihi!),
-      };
+    'ad': ad,
+    'statu': statu.name,
+    'adayMemur': adayMemur,
+    'kurumAdi': kurumAdi,
+    'sinif': sinif,
+    'unvan': unvan,
+    'il': il,
+    'sicilNo': sicilNo,
+    'kurumsalEposta': kurumsalEposta,
+    'maas': maas?.toJson(),
+    'kademeTarihi': kademeTarihi == null ? null : _gunMetni(kademeTarihi!),
+    'brutUcret': brutUcret,
+  };
 
   static String _gunMetni(DateTime t) =>
       '${t.year.toString().padLeft(4, '0')}-${t.month.toString().padLeft(2, '0')}-${t.day.toString().padLeft(2, '0')}';
@@ -147,6 +157,7 @@ class Profil {
       kurumsalEposta: metin('kurumsalEposta'),
       maas: maas is Map<String, Object?> ? MaasGirdisi.fromJson(maas) : null,
       kademeTarihi: _tarih(j['kademeTarihi']),
+      brutUcret: j['brutUcret'] is num ? (j['brutUcret']! as num).toDouble().clamp(0.0, 10000000.0) : null,
     );
   }
 
@@ -174,10 +185,24 @@ class Profil {
       other.sicilNo == sicilNo &&
       other.kurumsalEposta == kurumsalEposta &&
       other.maas == maas &&
-      other.kademeTarihi == kademeTarihi;
+      other.kademeTarihi == kademeTarihi &&
+      other.brutUcret == brutUcret;
 
   @override
-  int get hashCode => Object.hash(ad, statu, adayMemur, kurumAdi, sinif, unvan, il, sicilNo, kurumsalEposta, maas, kademeTarihi);
+  int get hashCode => Object.hash(
+    ad,
+    statu,
+    adayMemur,
+    kurumAdi,
+    sinif,
+    unvan,
+    il,
+    sicilNo,
+    kurumsalEposta,
+    maas,
+    kademeTarihi,
+    brutUcret,
+  );
 }
 
 /// "Sağlık Bakanlığı" → "saglik-bakanligi" (Türkçe harfler sadeleştirilir).
@@ -188,10 +213,7 @@ String kurumKimligiUret(String ad) {
     final c = String.fromCharCode(r);
     b.write(harita[c] ?? c);
   }
-  return b
-      .toString()
-      .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
-      .replaceAll(RegExp(r'^-+|-+$'), '');
+  return b.toString().replaceAll(RegExp(r'[^a-z0-9]+'), '-').replaceAll(RegExp(r'^-+|-+$'), '');
 }
 
 /// Profil ekranındaki seçenekler.
@@ -242,15 +264,86 @@ abstract final class ProfilSecenekleri {
   ];
 
   static const iller = [
-    'Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı', 'Aksaray', 'Amasya', 'Ankara', 'Antalya',
-    'Ardahan', 'Artvin', 'Aydın', 'Balıkesir', 'Bartın', 'Batman', 'Bayburt', 'Bilecik',
-    'Bingöl', 'Bitlis', 'Bolu', 'Burdur', 'Bursa', 'Çanakkale', 'Çankırı', 'Çorum',
-    'Denizli', 'Diyarbakır', 'Düzce', 'Edirne', 'Elazığ', 'Erzincan', 'Erzurum', 'Eskişehir',
-    'Gaziantep', 'Giresun', 'Gümüşhane', 'Hakkari', 'Hatay', 'Iğdır', 'Isparta', 'İstanbul',
-    'İzmir', 'Kahramanmaraş', 'Karabük', 'Karaman', 'Kars', 'Kastamonu', 'Kayseri', 'Kırıkkale',
-    'Kırklareli', 'Kırşehir', 'Kilis', 'Kocaeli', 'Konya', 'Kütahya', 'Malatya', 'Manisa',
-    'Mardin', 'Mersin', 'Muğla', 'Muş', 'Nevşehir', 'Niğde', 'Ordu', 'Osmaniye',
-    'Rize', 'Sakarya', 'Samsun', 'Siirt', 'Sinop', 'Sivas', 'Şanlıurfa', 'Şırnak',
-    'Tekirdağ', 'Tokat', 'Trabzon', 'Tunceli', 'Uşak', 'Van', 'Yalova', 'Yozgat', 'Zonguldak',
+    'Adana',
+    'Adıyaman',
+    'Afyonkarahisar',
+    'Ağrı',
+    'Aksaray',
+    'Amasya',
+    'Ankara',
+    'Antalya',
+    'Ardahan',
+    'Artvin',
+    'Aydın',
+    'Balıkesir',
+    'Bartın',
+    'Batman',
+    'Bayburt',
+    'Bilecik',
+    'Bingöl',
+    'Bitlis',
+    'Bolu',
+    'Burdur',
+    'Bursa',
+    'Çanakkale',
+    'Çankırı',
+    'Çorum',
+    'Denizli',
+    'Diyarbakır',
+    'Düzce',
+    'Edirne',
+    'Elazığ',
+    'Erzincan',
+    'Erzurum',
+    'Eskişehir',
+    'Gaziantep',
+    'Giresun',
+    'Gümüşhane',
+    'Hakkari',
+    'Hatay',
+    'Iğdır',
+    'Isparta',
+    'İstanbul',
+    'İzmir',
+    'Kahramanmaraş',
+    'Karabük',
+    'Karaman',
+    'Kars',
+    'Kastamonu',
+    'Kayseri',
+    'Kırıkkale',
+    'Kırklareli',
+    'Kırşehir',
+    'Kilis',
+    'Kocaeli',
+    'Konya',
+    'Kütahya',
+    'Malatya',
+    'Manisa',
+    'Mardin',
+    'Mersin',
+    'Muğla',
+    'Muş',
+    'Nevşehir',
+    'Niğde',
+    'Ordu',
+    'Osmaniye',
+    'Rize',
+    'Sakarya',
+    'Samsun',
+    'Siirt',
+    'Sinop',
+    'Sivas',
+    'Şanlıurfa',
+    'Şırnak',
+    'Tekirdağ',
+    'Tokat',
+    'Trabzon',
+    'Tunceli',
+    'Uşak',
+    'Van',
+    'Yalova',
+    'Yozgat',
+    'Zonguldak',
   ];
 }

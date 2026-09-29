@@ -40,26 +40,25 @@ class MaasGirdisi {
     int? yanOdemePuani,
     double? ozelHizmetTazminatiOrani,
     double? digerBrut,
-  }) =>
-      MaasGirdisi(
-        derece: derece ?? this.derece,
-        kademe: kademe ?? this.kademe,
-        hizmetYili: hizmetYili ?? this.hizmetYili,
-        ekGosterge: ekGosterge ?? this.ekGosterge,
-        yanOdemePuani: yanOdemePuani ?? this.yanOdemePuani,
-        ozelHizmetTazminatiOrani: ozelHizmetTazminatiOrani ?? this.ozelHizmetTazminatiOrani,
-        digerBrut: digerBrut ?? this.digerBrut,
-      );
+  }) => MaasGirdisi(
+    derece: derece ?? this.derece,
+    kademe: kademe ?? this.kademe,
+    hizmetYili: hizmetYili ?? this.hizmetYili,
+    ekGosterge: ekGosterge ?? this.ekGosterge,
+    yanOdemePuani: yanOdemePuani ?? this.yanOdemePuani,
+    ozelHizmetTazminatiOrani: ozelHizmetTazminatiOrani ?? this.ozelHizmetTazminatiOrani,
+    digerBrut: digerBrut ?? this.digerBrut,
+  );
 
   Map<String, Object?> toJson() => {
-        'derece': derece,
-        'kademe': kademe,
-        'hizmetYili': hizmetYili,
-        'ekGosterge': ekGosterge,
-        'yanOdemePuani': yanOdemePuani,
-        'ozelHizmetTazminatiOrani': ozelHizmetTazminatiOrani,
-        'digerBrut': digerBrut,
-      };
+    'derece': derece,
+    'kademe': kademe,
+    'hizmetYili': hizmetYili,
+    'ekGosterge': ekGosterge,
+    'yanOdemePuani': yanOdemePuani,
+    'ozelHizmetTazminatiOrani': ozelHizmetTazminatiOrani,
+    'digerBrut': digerBrut,
+  };
 
   /// Bozuk kayıtta (yanlış tipler, aşırı değerler) geçersiz derece/kademe motoru
   /// düşürmesin diye değerler güvenli aralığa çekilir; asla hata fırlatmaz.
@@ -192,16 +191,7 @@ class MemurMaasHesaplayici {
     );
   }
 
-  /// Kümülatif matrah için toplam gelir vergisi (kademeli tarife).
-  double _tarife(double matrah) {
-    var vergi = 0.0;
-    var alt = 0.0;
-    for (final (ust, oran) in parametreler.gelirVergisiDilimleri) {
-      if (matrah > alt) vergi += ((matrah < ust ? matrah : ust) - alt) * oran;
-      alt = ust;
-    }
-    return vergi;
-  }
+  double _tarife(double matrah) => parametreler.gelirVergisiTarifesi(matrah);
 
   static double _sifirdanKucukseSifir(double x) => x < 0 ? 0 : x;
 }
