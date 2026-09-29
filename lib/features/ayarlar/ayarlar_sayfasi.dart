@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/bilesenler.dart';
 import '../../core/tema.dart';
 import '../../core/yukselen.dart';
+import '../hatirlatici/hatirlatici_deposu.dart';
 import '../hesap/domain/hesap.dart';
 import '../profil/domain/profil.dart';
 import 'kisisel_veri_dokumu.dart';
@@ -14,11 +15,14 @@ import 'yasal_sayfasi.dart';
 
 /// Ayarlar: hakkında, gizlilik ve yasal metinler, verilerimi kopyala, lisanslar.
 class AyarlarSayfasi extends StatelessWidget {
-  const AyarlarSayfasi({super.key, this.hesap, this.profil, this.fotografVar = false});
+  const AyarlarSayfasi({super.key, this.hesap, this.profil, this.fotografVar = false, this.hatirlatici});
 
   final Hesap? hesap;
   final Profil? profil;
   final bool fotografVar;
+
+  /// Verilir ve platform destekliyorsa "Hatırlatıcılar" bölümü görünür.
+  final HatirlaticiDeposu? hatirlatici;
 
   void _sayfaAc(BuildContext context, Widget sayfa) =>
       Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => sayfa));
@@ -46,6 +50,10 @@ class AyarlarSayfasi extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(18, 24, 18, 32),
             children: [
               const Yukselen(child: GeriBaslik(ustYazi: 'Kamu Pusulası', baslik: 'Ayarlar', sag: SizedBox.shrink())),
+              if (hatirlatici != null && hatirlatici!.destekleniyor) ...[
+                const SizedBox(height: 22),
+                _Hatirlaticilar(depo: hatirlatici!, profil: profil),
+              ],
               const SizedBox(height: 22),
               const _Baslik('Gizlilik ve yasal'),
               _Satir(
@@ -177,6 +185,78 @@ class _Satir extends StatelessWidget {
               ),
             ),
           ),
+        ),
+      );
+}
+
+/// Kademe ilerlemesi hatırlatıcısı anahtarı. Bildirimler yalnızca bu cihazda kurulur.
+class _Hatirlaticilar extends StatelessWidget {
+  const _Hatirlaticilar({required this.depo, required this.profil});
+
+  final HatirlaticiDeposu depo;
+  final Profil? profil;
+
+  bool get _kademeVar => profil?.statu == Statu.memur657 && profil?.kademeTarihi != null;
+
+  Future<void> _degistir(BuildContext context, bool ac) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final tamam = await depo.kademeAyarla(ac, profil);
+    if (tamam) return;
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          'Bildirim izni verilmedi. İstersen telefonun ayarlarından izin verebilirsin.',
+          style: PusulaYazi.metin(14, renk: PusulaRenk.beyaz, agirlik: FontWeight.w600),
+        ),
+        backgroundColor: PusulaRenk.lacivert,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+        listenable: depo,
+        builder: (context, _) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _Baslik('Hatırlatıcılar'),
+            PusulaKart(
+              radius: 22,
+              padding: const EdgeInsets.fromLTRB(16, 8, 10, 8),
+              child: Semantics(
+                container: true,
+                toggled: depo.kademeAcik,
+                label: 'Kademe hatırlatıcısı',
+                child: Row(
+                  children: [
+                    const Icon(LucideIcons.bellRing, size: 20, color: PusulaRenk.lacivert),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Kademe hatırlatıcısı', style: PusulaYazi.metin(15, agirlik: FontWeight.w700)),
+                          Text('1 hafta önce ve süre dolduğu gün',
+                              style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500)),
+                        ],
+                      ),
+                    ),
+                    Switch(
+                      value: depo.kademeAcik,
+                      activeThumbColor: PusulaRenk.lacivert,
+                      activeTrackColor: PusulaRenk.amber,
+                      onChanged: (v) => _degistir(context, v),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (depo.kademeAcik && !_kademeVar) ...[
+              const SizedBox(height: 8),
+              const _Bilgi('Bildirim kurulması için Profil sayfasından kademeye geliş tarihini girmelisin.'),
+            ],
+          ],
         ),
       );
 }

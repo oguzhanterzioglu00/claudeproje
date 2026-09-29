@@ -23,6 +23,7 @@ import '../ilanlar/ilan_kaynagi.dart';
 import '../ilanlar/ilanlar_sayfasi.dart';
 import '../maas/domain/memur_maas_hesaplayici.dart';
 import '../maas/presentation/maas_sayfasi.dart';
+import '../hatirlatici/hatirlatici_deposu.dart';
 import '../hesap/data/oturum_deposu.dart';
 import '../profil/data/fotograf_deposu.dart';
 import '../profil/data/profil_deposu.dart';
@@ -45,6 +46,7 @@ class PusulaKabugu extends StatefulWidget {
     this.fotograf,
     this.fotografKaynagi = const ImagePickerFotografKaynagi(),
     this.oturum,
+    this.hatirlatici,
   });
 
   final ProfilDeposu profilDeposu;
@@ -64,6 +66,9 @@ class PusulaKabugu extends StatefulWidget {
   final FotografDeposu? fotograf;
   final FotografKaynagi fotografKaynagi;
   final OturumDeposu? oturum;
+
+  /// Verilirse ayarlarda hatırlatıcı tercihleri görünür ve profile göre bildirimler kurulur.
+  final HatirlaticiDeposu? hatirlatici;
 
   /// Sekme sırası; kısayollar bu sabitlerle yönlendirir.
   static const anaSayfa = 0;
@@ -101,6 +106,7 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
     _becayis = widget.becayisDeposuUret(_profil);
     _anahtar = _becayisAnahtari(_profil);
     widget.profilDeposu.addListener(_profilDegisti);
+    widget.hatirlatici?.yukle().then((_) => widget.hatirlatici?.esitle(widget.profilDeposu.profil));
   }
 
   @override
@@ -113,6 +119,7 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
   void _profilDegisti() {
     final p = widget.profilDeposu.profil;
     if (p == null || !mounted) return;
+    widget.hatirlatici?.esitle(p);
     final yeni = _becayisAnahtari(p);
     if (yeni != _anahtar) {
       final eski = _becayis;
@@ -133,6 +140,7 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
             fotograf: widget.fotograf,
             fotografKaynagi: widget.fotografKaynagi,
             oturum: widget.oturum,
+            hatirlatici: widget.hatirlatici,
           ),
         ),
       );
@@ -207,7 +215,8 @@ class _PusulaKabuguState extends State<PusulaKabugu> {
                   araclar: p.statu == Statu.memur657
                       ? AraclarBolumu(izinAc: _izinAc, zamAc: _zamAc, tabloAc: _tabloAc)
                       : null,
-                  gundem: GundemBolumu(kaynak: widget.haberKaynagi, bugun: widget.bugun, otomatik: widget.haberOtomatik),
+                  gundem:
+                      GundemBolumu(kaynak: widget.haberKaynagi, bugun: widget.bugun, otomatik: widget.haberOtomatik),
                 );
               },
             ),

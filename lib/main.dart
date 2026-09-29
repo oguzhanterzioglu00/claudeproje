@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/depolama.dart';
 import 'core/tema.dart';
 import 'core/telefon_cercevesi.dart';
+import 'features/hatirlatici/hatirlatici_servisi.dart';
 import 'features/hesap/data/kimlik_servisi.dart';
 import 'features/hesap/data/oturum_deposu.dart';
 import 'features/hesap/data/yerel_kimlik_servisi.dart';
@@ -40,6 +41,7 @@ class PusulaUygulamasi extends StatefulWidget {
     this.profilKaydiUret,
     this.fotografKaynagi = const ImagePickerFotografKaynagi(),
     this.appleGoster = true,
+    this.hatirlatici,
   });
 
   /// Boşsa cihazda çalışan örnek servis ([YerelKimlikServisi]).
@@ -49,12 +51,17 @@ class PusulaUygulamasi extends StatefulWidget {
   final FotografKaynagi fotografKaynagi;
   final bool appleGoster;
 
+  /// Boşsa cihaz bildirimleriyle çalışan servis; testlerde sahtesi verilir.
+  final HatirlaticiServisi? hatirlatici;
+
   @override
   State<PusulaUygulamasi> createState() => _PusulaUygulamasiState();
 }
 
 class _PusulaUygulamasiState extends State<PusulaUygulamasi> {
   late final OturumDeposu _oturum = OturumDeposu(widget.kimlik ?? YerelKimlikServisi(depolama: widget.depolama));
+
+  late final HatirlaticiServisi _hatirlatici = widget.hatirlatici ?? YerelHatirlaticiServisi();
 
   @override
   void initState() {
@@ -84,6 +91,7 @@ class _PusulaUygulamasiState extends State<PusulaUygulamasi> {
           profilKaydiUret: widget.profilKaydiUret ?? (id) => YerelProfilKaydi(hesapId: id),
           fotografKaynagi: widget.fotografKaynagi,
           appleGoster: widget.appleGoster,
+          hatirlatici: _hatirlatici,
         ),
       );
 }

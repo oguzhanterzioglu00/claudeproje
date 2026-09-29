@@ -6,6 +6,7 @@ import '../../../core/bilesenler.dart';
 import '../../../core/tema.dart';
 import '../../../core/yukselen.dart';
 import '../../ayarlar/ayarlar_sayfasi.dart';
+import '../../hatirlatici/hatirlatici_deposu.dart';
 import '../../hesap/data/oturum_deposu.dart';
 import '../../hesap/presentation/hesap_bolumu.dart';
 import '../data/fotograf_deposu.dart';
@@ -25,6 +26,7 @@ class ProfilSayfasi extends StatefulWidget {
     this.fotograf,
     this.fotografKaynagi = const ImagePickerFotografKaynagi(),
     this.oturum,
+    this.hatirlatici,
     this.tarihSec = _varsayilanTarihSec,
   });
 
@@ -36,6 +38,9 @@ class ProfilSayfasi extends StatefulWidget {
 
   /// Verilirse "Hesap ve güvenlik" bölümü (şifre, çıkış, hesap silme) görünür.
   final OturumDeposu? oturum;
+
+  /// Verilirse Ayarlar'da hatırlatıcı tercihleri görünür; hesap silinince tercih de silinir.
+  final HatirlaticiDeposu? hatirlatici;
 
   /// Tarih seçici; testlerde değiştirilir. Vazgeçilirse null döner.
   final Future<DateTime?> Function(BuildContext context, DateTime baslangic, DateTime ilk, DateTime son) tarihSec;
@@ -296,6 +301,7 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                             hesap: widget.oturum?.hesap,
                             profil: widget.depo.profil,
                             fotografVar: widget.fotograf?.foto != null,
+                            hatirlatici: widget.hatirlatici,
                           ),
                         ),
                       ),
@@ -305,6 +311,7 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                       HesapBolumu(
                         oturum: widget.oturum!,
                         veriSil: () async {
+                          await widget.hatirlatici?.tercihiSil();
                           await widget.depo.sil();
                           await widget.fotograf?.kaldir();
                         },
@@ -417,8 +424,7 @@ class _AyarlarSatiri extends StatelessWidget {
                     const Icon(LucideIcons.settings, size: 20, color: PusulaRenk.lacivert),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text('Ayarlar ve yasal',
-                          style: PusulaYazi.metin(15, agirlik: FontWeight.w700)),
+                      child: Text('Ayarlar ve yasal', style: PusulaYazi.metin(15, agirlik: FontWeight.w700)),
                     ),
                     const Icon(LucideIcons.chevronRight, size: 18, color: PusulaRenk.soluk),
                   ],

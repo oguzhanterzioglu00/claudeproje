@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../core/depolama.dart';
 import '../../core/logo.dart';
 import '../../core/tema.dart';
+import '../hatirlatici/hatirlatici_deposu.dart';
+import '../hatirlatici/hatirlatici_servisi.dart';
 import '../hesap/data/oturum_deposu.dart';
 import '../hesap/domain/hesap.dart';
 import '../hesap/presentation/giris_sayfasi.dart';
@@ -17,17 +19,19 @@ import 'pusula_kabugu.dart';
 
 /// Bir hesaba ait cihaz içi kullanıcı verisi (profil ve fotoğraf).
 class _KullaniciVerisi {
-  _KullaniciVerisi(this.hesapId, this.profil, this.fotograf);
+  _KullaniciVerisi(this.hesapId, this.profil, this.fotograf, this.hatirlatici);
 
   final String hesapId;
   final ProfilDeposu profil;
   final FotografDeposu fotograf;
+  final HatirlaticiDeposu? hatirlatici;
 
   bool get yuklendi => profil.yuklendi && fotograf.yuklendi;
 
   void dispose() {
     profil.dispose();
     fotograf.dispose();
+    hatirlatici?.dispose();
   }
 }
 
@@ -43,6 +47,7 @@ class UygulamaAkisi extends StatefulWidget {
     required this.fotografKaynagi,
     this.appleGoster = true,
     this.kabukUret,
+    this.hatirlatici,
   });
 
   final OturumDeposu oturum;
@@ -52,6 +57,9 @@ class UygulamaAkisi extends StatefulWidget {
   final ProfilKaydi Function(String hesapId) profilKaydiUret;
   final FotografKaynagi fotografKaynagi;
   final bool appleGoster;
+
+  /// Verilirse kullanıcı hatırlatıcıları (kademe vb.) ayarlardan açabilir.
+  final HatirlaticiServisi? hatirlatici;
 
   /// Ana kabuğu üretir; testlerde örnek servislerle değiştirilebilir.
   final Widget Function(BuildContext context, ProfilDeposu profil, FotografDeposu fotograf)? kabukUret;
@@ -99,6 +107,8 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
   void _oturumDegisti() {
     final Hesap? hesap = widget.oturum.hesap;
     if (hesap?.id == _veri?.hesapId) return;
+    // Hesap değişince/çıkılınca eski hesabın bildirimleri bu cihazdan kaldırılır.
+    _veri?.hatirlatici?.hepsiniIptal();
     _veri?.dispose();
     _veri = null;
     _kurulumGoruldu = false;
@@ -108,6 +118,7 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
         hesap.id,
         ProfilDeposu(widget.profilKaydiUret(hesap.id)),
         FotografDeposu(widget.depolama, anahtar: 'profil_foto_v1_${hesap.id}'),
+        widget.hatirlatici == null ? null : HatirlaticiDeposu(widget.hatirlatici!, widget.depolama, hesapId: hesap.id),
       );
       _veri = v;
       v.profil.yukle();
@@ -165,6 +176,7 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
                   fotograf: veri.fotograf,
                   fotografKaynagi: widget.fotografKaynagi,
                   oturum: widget.oturum,
+                  hatirlatici: veri.hatirlatici,
                 );
         },
       );
