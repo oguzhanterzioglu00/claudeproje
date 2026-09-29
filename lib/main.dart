@@ -5,10 +5,13 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/depolama.dart';
 import 'core/tema.dart';
 import 'core/telefon_cercevesi.dart';
+import 'core/akis.dart';
+import 'features/haberler/haber_kaynagi.dart';
 import 'features/hatirlatici/hatirlatici_servisi.dart';
 import 'features/hesap/data/kimlik_servisi.dart';
 import 'features/hesap/data/oturum_deposu.dart';
 import 'features/hesap/data/yerel_kimlik_servisi.dart';
+import 'features/ilanlar/ilan_kaynagi.dart';
 import 'features/kabuk/uygulama_akisi.dart';
 import 'features/profil/data/fotograf_deposu.dart';
 import 'features/profil/data/profil_kaydi.dart';
@@ -42,6 +45,8 @@ class PusulaUygulamasi extends StatefulWidget {
     this.fotografKaynagi = const ImagePickerFotografKaynagi(),
     this.appleGoster = true,
     this.hatirlatici,
+    this.ilanKaynagi,
+    this.haberKaynagi,
   });
 
   /// Boşsa cihazda çalışan örnek servis ([YerelKimlikServisi]).
@@ -54,6 +59,10 @@ class PusulaUygulamasi extends StatefulWidget {
   /// Boşsa cihaz bildirimleriyle çalışan servis; testlerde sahtesi verilir.
   final HatirlaticiServisi? hatirlatici;
 
+  /// Boşsa gerçek akış (Kariyer Kapısı ilanları, Resmî Gazete haberleri); testlerde örnek/sahte kaynak verilir.
+  final IlanKaynagi? ilanKaynagi;
+  final HaberKaynagi? haberKaynagi;
+
   @override
   State<PusulaUygulamasi> createState() => _PusulaUygulamasiState();
 }
@@ -62,6 +71,9 @@ class _PusulaUygulamasiState extends State<PusulaUygulamasi> {
   late final OturumDeposu _oturum = OturumDeposu(widget.kimlik ?? YerelKimlikServisi(depolama: widget.depolama));
 
   late final HatirlaticiServisi _hatirlatici = widget.hatirlatici ?? YerelHatirlaticiServisi();
+  late final AkisIstemcisi _akis = AkisIstemcisi();
+  late final IlanKaynagi _ilanKaynagi = widget.ilanKaynagi ?? AkisIlanKaynagi(_akis);
+  late final HaberKaynagi _haberKaynagi = widget.haberKaynagi ?? AkisHaberKaynagi(_akis);
 
   @override
   void initState() {
@@ -77,21 +89,23 @@ class _PusulaUygulamasiState extends State<PusulaUygulamasi> {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: 'Kamu Pusulası',
-        debugShowCheckedModeBanner: false,
-        theme: pusulaTema(),
-        // Tarih seçici, iptal/tamam düğmeleri ve klavye Türkçe olsun.
-        locale: const Locale('tr', 'TR'),
-        supportedLocales: const [Locale('tr', 'TR')],
-        localizationsDelegates: GlobalMaterialLocalizations.delegates,
-        builder: (context, child) => TelefonCercevesi(child: child!),
-        home: UygulamaAkisi(
-          oturum: _oturum,
-          depolama: widget.depolama,
-          profilKaydiUret: widget.profilKaydiUret ?? (id) => YerelProfilKaydi(hesapId: id),
-          fotografKaynagi: widget.fotografKaynagi,
-          appleGoster: widget.appleGoster,
-          hatirlatici: _hatirlatici,
-        ),
-      );
+    title: 'Kamu Pusulası',
+    debugShowCheckedModeBanner: false,
+    theme: pusulaTema(),
+    // Tarih seçici, iptal/tamam düğmeleri ve klavye Türkçe olsun.
+    locale: const Locale('tr', 'TR'),
+    supportedLocales: const [Locale('tr', 'TR')],
+    localizationsDelegates: GlobalMaterialLocalizations.delegates,
+    builder: (context, child) => TelefonCercevesi(child: child!),
+    home: UygulamaAkisi(
+      oturum: _oturum,
+      depolama: widget.depolama,
+      profilKaydiUret: widget.profilKaydiUret ?? (id) => YerelProfilKaydi(hesapId: id),
+      fotografKaynagi: widget.fotografKaynagi,
+      appleGoster: widget.appleGoster,
+      hatirlatici: _hatirlatici,
+      ilanKaynagi: _ilanKaynagi,
+      haberKaynagi: _haberKaynagi,
+    ),
+  );
 }

@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../core/depolama.dart';
 import '../../core/logo.dart';
 import '../../core/tema.dart';
+import '../haberler/haber_kaynagi.dart';
 import '../hatirlatici/hatirlatici_deposu.dart';
+import '../ilanlar/ilan_kaynagi.dart';
 import '../hatirlatici/hatirlatici_servisi.dart';
 import '../hesap/data/oturum_deposu.dart';
 import '../hesap/domain/hesap.dart';
@@ -48,6 +50,8 @@ class UygulamaAkisi extends StatefulWidget {
     this.appleGoster = true,
     this.kabukUret,
     this.hatirlatici,
+    this.ilanKaynagi,
+    this.haberKaynagi,
   });
 
   final OturumDeposu oturum;
@@ -60,6 +64,10 @@ class UygulamaAkisi extends StatefulWidget {
 
   /// Verilirse kullanıcı hatırlatıcıları (kademe vb.) ayarlardan açabilir.
   final HatirlaticiServisi? hatirlatici;
+
+  /// Boşsa kabuğun varsayılan (örnek) kaynakları kullanılır; uygulamada gerçek akış kaynakları verilir.
+  final IlanKaynagi? ilanKaynagi;
+  final HaberKaynagi? haberKaynagi;
 
   /// Ana kabuğu üretir; testlerde örnek servislerle değiştirilebilir.
   final Widget Function(BuildContext context, ProfilDeposu profil, FotografDeposu fotograf)? kabukUret;
@@ -135,51 +143,53 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-        listenable: widget.oturum,
-        builder: (context, _) {
-          if (!widget.oturum.yuklendi || _tanitimGoruldu == null) return const AcilisEkrani();
+    listenable: widget.oturum,
+    builder: (context, _) {
+      if (!widget.oturum.yuklendi || _tanitimGoruldu == null) return const AcilisEkrani();
 
-          final hesap = widget.oturum.hesap;
-          if (hesap == null) {
-            return _tanitimGoruldu!
-                ? GirisSayfasi(oturum: widget.oturum, appleGoster: widget.appleGoster)
-                : KarsilamaSayfasi(onBasla: _tanitimBitti);
-          }
+      final hesap = widget.oturum.hesap;
+      if (hesap == null) {
+        return _tanitimGoruldu!
+            ? GirisSayfasi(oturum: widget.oturum, appleGoster: widget.appleGoster)
+            : KarsilamaSayfasi(onBasla: _tanitimBitti);
+      }
 
-          final veri = _veri;
-          if (veri == null || !veri.yuklendi) return const AcilisEkrani();
+      final veri = _veri;
+      if (veri == null || !veri.yuklendi) return const AcilisEkrani();
 
-          if (veri.profil.profil == null) {
-            _kurulumGoruldu = true;
-            return IlkKurulumSayfasi(
-              depo: veri.profil,
+      if (veri.profil.profil == null) {
+        _kurulumGoruldu = true;
+        return IlkKurulumSayfasi(
+          depo: veri.profil,
+          fotograf: veri.fotograf,
+          fotografKaynagi: widget.fotografKaynagi,
+          ilkAd: hesap.ad,
+        );
+      }
+
+      if (_kurulumGoruldu && !_hazirlandi) {
+        return HazirlaniyorSayfasi(
+          ad: veri.profil.profil!.ad,
+          memur: veri.profil.profil!.statu == Statu.memur657,
+          onBitti: () {
+            if (mounted) setState(() => _hazirlandi = true);
+          },
+        );
+      }
+
+      return widget.kabukUret != null
+          ? widget.kabukUret!(context, veri.profil, veri.fotograf)
+          : PusulaKabugu(
+              profilDeposu: veri.profil,
               fotograf: veri.fotograf,
               fotografKaynagi: widget.fotografKaynagi,
-              ilkAd: hesap.ad,
+              oturum: widget.oturum,
+              hatirlatici: veri.hatirlatici,
+              ilanKaynagi: widget.ilanKaynagi ?? const OrnekIlanKaynagi(),
+              haberKaynagi: widget.haberKaynagi ?? const OrnekHaberKaynagi(),
             );
-          }
-
-          if (_kurulumGoruldu && !_hazirlandi) {
-            return HazirlaniyorSayfasi(
-              ad: veri.profil.profil!.ad,
-              memur: veri.profil.profil!.statu == Statu.memur657,
-              onBitti: () {
-                if (mounted) setState(() => _hazirlandi = true);
-              },
-            );
-          }
-
-          return widget.kabukUret != null
-              ? widget.kabukUret!(context, veri.profil, veri.fotograf)
-              : PusulaKabugu(
-                  profilDeposu: veri.profil,
-                  fotograf: veri.fotograf,
-                  fotografKaynagi: widget.fotografKaynagi,
-                  oturum: widget.oturum,
-                  hatirlatici: veri.hatirlatici,
-                );
-        },
-      );
+    },
+  );
 }
 
 /// Veriler okunurken kısa açılış ekranı (ibresi yerine oturan logo).
@@ -188,7 +198,7 @@ class AcilisEkrani extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const Scaffold(
-        backgroundColor: PusulaRenk.lacivert,
-        body: Center(child: AnimasyonluPusulaLogo(boyut: 132, arkaplan: false)),
-      );
+    backgroundColor: PusulaRenk.lacivert,
+    body: Center(child: AnimasyonluPusulaLogo(boyut: 132, arkaplan: false)),
+  );
 }

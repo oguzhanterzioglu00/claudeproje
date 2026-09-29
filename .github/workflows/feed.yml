@@ -1,0 +1,63 @@
+name: Veri akışı (ilanlar ve Resmî Gazete)
+
+# Her 15 dakikada Kariyer Kapısı (kamu işe alım ilanları, resmî RSS) ve Resmî Gazete fihristini derler,
+# `ilanlar.json` ve `haberler.json` dosyalarını `feed-data` dalına yayımlar. Uygulama bu dosyaları okur:
+#   https://raw.githubusercontent.com/<kullanıcı>/<repo>/feed-data/ilanlar.json
+# Not: zamanlanmış çalışmalar yalnızca deponun varsayılan dalındaki dosyadan tetiklenir; GitHub, 60 gün
+# boyunca hiç etkinlik olmayan depolarda zamanlanmış çalışmaları durdurur (yeni bir push yeterlidir).
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+  push:
+    branches: ['claude/**']
+    paths: ['tool/feed_uret.py', 'tool/test_feed_uret.py', 'tool/testdata/**', '.github/workflows/feed.yml']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: veri-akisi
+  cancel-in-progress: false
+
+jobs:
+  feed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Testler
+        run: python -m unittest discover -s tool -p "test_*.py" -v
+
+      # Önceki çıktı alınır: bir kaynak geçici olarak ulaşılamazsa öteki dosya ve eski veri korunur.
+      - name: Önceki çıktıyı al
+        run: |
+          mkdir out
+          git clone --depth 1 --branch feed-data "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" out-onceki 2>/dev/null \
+            && cp out-onceki/*.json out/ 2>/dev/null || echo "Önceki çıktı yok (ilk çalıştırma)."
+
+      - name: Derle
+        run: python tool/feed_uret.py --cikti out
+
+      # Tek commit'lik dal: geçmiş birikmez, her seferinde üzerine yazılır.
+      - name: feed-data dalına yayınla
+        working-directory: out
+        run: |
+          git init -q -b feed-data
+          git config user.name "kamu-pusulasi-feed"
+          git config user.email "feed@users.noreply.github.com"
+          cp ../tool/feed_aciklama.md README.md
+          git add -A
+          git commit -q -m "Veri akışı: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push -q --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" feed-data
+
+      - name: Özet
+        run: |
+          echo "### Veri akışı yayımlandı" >> "$GITHUB_STEP_SUMMARY"
+          echo "ilanlar: https://raw.githubusercontent.com/${{ github.repository }}/feed-data/ilanlar.json" >> "$GITHUB_STEP_SUMMARY"
+          echo "haberler: https://raw.githubusercontent.com/${{ github.repository }}/feed-data/haberler.json" >> "$GITHUB_STEP_SUMMARY"

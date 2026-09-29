@@ -4,6 +4,8 @@ import 'package:pusula/core/depolama.dart';
 import 'package:pusula/features/hesap/data/yerel_kimlik_servisi.dart';
 import 'package:pusula/features/profil/data/profil_kaydi.dart';
 import 'package:pusula/features/profil/domain/profil.dart';
+import 'package:pusula/features/haberler/haber_kaynagi.dart';
+import 'package:pusula/features/ilanlar/ilan_kaynagi.dart';
 import 'package:pusula/main.dart';
 
 import 'yardimci/sahte_fotograf.dart';
@@ -33,13 +35,17 @@ void main() {
       final h = await kimlik.kayitOl(eposta: 'ayse@kurum.gov.tr', sifre: _sifre);
       if (profil != null) profiller[h.id] = BellekProfilKaydi(profil);
     }
-    await tester.pumpWidget(PusulaUygulamasi(
-      kimlik: kimlik,
-      depolama: depo,
-      profilKaydiUret: (id) => profiller.putIfAbsent(id, BellekProfilKaydi.new),
-      fotografKaynagi: SahteFotografKaynagi(sonuc: ornekPng),
-      appleGoster: apple,
-    ));
+    await tester.pumpWidget(
+      PusulaUygulamasi(
+        kimlik: kimlik,
+        depolama: depo,
+        profilKaydiUret: (id) => profiller.putIfAbsent(id, BellekProfilKaydi.new),
+        fotografKaynagi: SahteFotografKaynagi(sonuc: ornekPng),
+        appleGoster: apple,
+        ilanKaynagi: const OrnekIlanKaynagi(sure: Duration.zero),
+        haberKaynagi: const OrnekHaberKaynagi(sure: Duration.zero),
+      ),
+    );
     await tester.pumpAndSettle(const Duration(seconds: 3));
     return (depo: depo, profiller: profiller);
   }

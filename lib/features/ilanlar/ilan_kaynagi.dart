@@ -1,3 +1,4 @@
+import '../../core/akis.dart';
 import 'ilan_modeli.dart';
 
 /// İlan akışı. Gerçek sürümde arka uç, resmî kaynaklardan derlenen ilanları
@@ -99,5 +100,52 @@ class OrnekIlanKaynagi implements IlanKaynagi {
         kaynakGuncelleme: gun(-30),
       ),
     ];
+  }
+}
+
+/// Gerçek ilan akışı: `ilanlar.json` (Kariyer Kapısı resmî RSS'inden derlenir, bkz. `tool/feed_uret.py`).
+/// Yüklenemezse hata fırlatır; ekran "yüklenemedi / tekrar dene" durumunu gösterir. Örnek veriye düşülmez.
+class AkisIlanKaynagi implements IlanKaynagi {
+  AkisIlanKaynagi([AkisIstemcisi? istemci]) : _istemci = istemci ?? AkisIstemcisi();
+
+  final AkisIstemcisi _istemci;
+
+  @override
+  Future<List<KamuIlani>> getir() async => ilanlariCoz(await _istemci.oku('ilanlar.json'));
+
+  /// `ilanlar.json` içeriğini ilan listesine çevirir; kimliği, başlığı ya da tarihi bozuk kayıtlar atlanır.
+  static List<KamuIlani> ilanlariCoz(Map<String, Object?> json) {
+    final guncelleme = json.duvarTarihi('guncelleme') ?? DateTime.now();
+    final kaynak = json.metin('kaynak').isEmpty ? 'Kariyer Kapısı' : json.metin('kaynak');
+    final sonuc = <KamuIlani>[];
+    for (final o in json.liste('ilanlar')) {
+      final id = o.metin('id');
+      final baslik = o.metin('baslik');
+      final yayin = o.duvarTarihi('yayin');
+      if (id.isEmpty || baslik.isEmpty || yayin == null) continue;
+      final kurum = o.metin('kurum');
+      sonuc.add(
+        KamuIlani(
+          id: id,
+          baslik: kurum.isNotEmpty && baslik.startsWith('$kurum - ') ? baslik.substring(kurum.length + 3) : baslik,
+          kurum: kurum,
+          konum: '',
+          tur: switch (o.metin('tur')) {
+            'memur' => IlanTuru.memur,
+            'isci' => IlanTuru.isci,
+            'sozlesmeli' => IlanTuru.sozlesmeli,
+            _ => IlanTuru.diger,
+          },
+          yayinTarihi: yayin,
+          sonBasvuru: o.duvarTarihi('sonBasvuru'),
+          kaynakAdi: kaynak,
+          kaynakGuncelleme: guncelleme,
+          baglanti: o.adres('baglanti'),
+          kategori: o.metin('kategori'),
+        ),
+      );
+    }
+    sonuc.sort((a, b) => b.yayinTarihi.compareTo(a.yayinTarihi));
+    return sonuc;
   }
 }
