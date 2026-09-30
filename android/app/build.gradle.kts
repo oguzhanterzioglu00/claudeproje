@@ -58,8 +58,6 @@ android {
         release {
             val magazaImzasiVar = imzaDegeri("storeFile", "ANDROID_KEYSTORE_FILE") != null
             signingConfig = signingConfigs.getByName(if (magazaImzasiVar) "magaza" else "debug")
-            // Küçültme kapalı: Flutter eklentileri (workmanager, bildirimler) yansıma kullanır.
-            isMinifyEnabled = false
         }
     }
 }
