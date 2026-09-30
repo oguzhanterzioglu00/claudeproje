@@ -19,24 +19,29 @@ class Bildirim {
 
 /// Bildirimleri profilden ve becayiş durumundan üretir. Uydurma içerik yoktur:
 /// her bildirim gerçekten eksik bir bilgiye ya da bulunmuş bir eşleşmeye dayanır.
-List<Bildirim> bildirimleriUret(Profil p, {required bool becayisYayinda, required int ikiliEslesme}) {
-  final becayisAcik = p.becayisYapabilir;
+List<Bildirim> bildirimleriUret(
+  Profil p, {
+  required bool becayisYayinda,
+  required int ikiliEslesme,
+  bool becayisAcik = true,
+}) {
+  final becayisIcin = becayisAcik && p.becayisYapabilir;
   return [
-    if (becayisAcik && p.eksikBecayisAlanlari.isNotEmpty)
+    if (becayisIcin && p.eksikBecayisAlanlari.isNotEmpty)
       Bildirim(
         baslik: 'Becayiş için profilini tamamla',
         aciklama: 'Eksik: ${p.eksikBecayisAlanlari.join(', ')}',
         hedef: BildirimHedefi.profil,
         ikon: LucideIcons.userRoundCog,
       ),
-    if (becayisAcik && p.eksikBecayisAlanlari.isEmpty && !becayisYayinda)
+    if (becayisIcin && p.eksikBecayisAlanlari.isEmpty && !becayisYayinda)
       const Bildirim(
         baslik: 'Becayiş ilanı ver',
         aciklama: 'İlan vermek ücretsiz; eşleşmeleri senin için ararız.',
         hedef: BildirimHedefi.becayis,
         ikon: LucideIcons.arrowRightLeft,
       ),
-    if (becayisAcik && becayisYayinda && ikiliEslesme > 0)
+    if (becayisIcin && becayisYayinda && ikiliEslesme > 0)
       Bildirim(
         baslik: '$ikiliEslesme yeni becayiş eşleşmesi',
         aciklama: 'Eşleşmelere bak ve ilgilendiğini bildir.',

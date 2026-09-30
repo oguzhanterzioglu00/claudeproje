@@ -23,6 +23,8 @@ void main() {
     bool hesapVar = false,
     Profil? profil,
     bool apple = true,
+    bool sosyal = true,
+    bool becayis = true,
   }) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
@@ -42,6 +44,8 @@ void main() {
         profilKaydiUret: (id) => profiller.putIfAbsent(id, BellekProfilKaydi.new),
         fotografKaynagi: SahteFotografKaynagi(sonuc: ornekPng),
         appleGoster: apple,
+        sosyalGiris: sosyal,
+        becayisAcik: becayis,
         ilanKaynagi: const OrnekIlanKaynagi(sure: Duration.zero),
         haberKaynagi: const OrnekHaberKaynagi(sure: Duration.zero),
       ),
@@ -114,6 +118,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Hazırlıyoruz, Ayşe'), findsNothing);
     expect(find.text('Kamu Pusulası'), findsOneWidget);
+  });
+
+  testWidgets('mağaza sürümü varsayılanı: Google/Apple düğmesi ve "veya" ayracı yok, e-posta girişi var', (
+    tester,
+  ) async {
+    await tester.pumpWidget(PusulaUygulamasi(depolama: BellekDepolama({'tanitim_goruldu_v1': '1'})));
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+    expect(find.text('Hesap oluştur'), findsOneWidget);
+    expect(find.text('Google ile devam et'), findsNothing);
+    expect(find.text('Apple ile devam et'), findsNothing);
+    expect(find.text('veya'), findsNothing);
+    expect(find.textContaining('resmî bir kurum uygulaması değildir'), findsOneWidget);
   });
 
   testWidgets('Apple düğmesi kapatılabilir', (tester) async {

@@ -63,6 +63,8 @@ abstract final class YasalMetinler {
         'Verilerin saklandığı yer ve aktarım',
         'Bu sürümde profil, hesap ve fotoğraf bilgileriniz yalnızca cihazınızda saklanır; sunucuya gönderilmez, yurt '
             'dışına aktarılmaz ve üçüncü kişilerle paylaşılmaz. Kademe hatırlatıcıları da yalnızca cihazınızda kurulur. '
+            'İlan ve haber akışı, herkese açık bir GitHub deposundan (raw.githubusercontent.com) indirilir; bu isteğe '
+            'kişisel bilginiz eklenmez, ancak her internet isteğinde olduğu gibi IP adresiniz GitHub tarafından görülür. '
             'Sunucu tabanlı özellikler (hesap eşitleme, becayiş eşleştirme, ödeme doğrulama) eklendiğinde bu metin '
             'güncellenecek ve önceden uygulama içinde duyurulacaktır; verileriniz ancak burada belirtilen amaçlarla, hukuka uygun '
             'sebeplerle ve gerektiğinde açık rızanızla aktarılacaktır. Kanunen yetkili kurum ve kuruluşlara yasal '
@@ -96,6 +98,11 @@ abstract final class YasalMetinler {
     guncelleme: 'Yürürlük tarihi: 29 Eylül 2026',
     bolumler: [
       YasalBolum(
+        'Bağımsız uygulama',
+        'Kamu Pusulası bağımsız bir uygulamadır; hiçbir kamu kurumunun, sendikanın ya da resmî kuruluşun uygulaması '
+            'değildir ve onlarla bağlantılı değildir. Kurumların adları yalnızca bilgilendirme amacıyla anılır.',
+      ),
+      YasalBolum(
         'Hizmetin tanımı',
         'Kamu Pusulası, kamu çalışanlarına maaş ve izin hesaplama araçları, mevzuat bilgisi, becayiş eşleştirme, ilan ve haber '
             'derleme hizmeti sunar. Hizmeti sunan: $sirketBilgisi Destek: destek@ayasyazilim.com.tr.',
@@ -109,7 +116,7 @@ abstract final class YasalMetinler {
       YasalBolum(
         'Becayiş ve ödeme',
         'Becayiş eşleşmesi, kurumun atamaya yetkili amirinin uygun bulmasına bağlıdır (657 sayılı Kanun md. 73); '
-            'uygulama eşleşme ve iletişim kolaylığı sağlar, atamayı garanti etmez. Ücretli özellikler sunulduğunda mağaza '
+            'becayiş eşleştirmesi açıldığında uygulama eşleşme ve iletişim kolaylığı sağlar, atamayı garanti etmez. Ücretli özellikler sunulduğunda mağaza '
             '(App Store / Google Play) üzerinden satın alınır; ücret satın alma öncesinde mağazada gösterilir. Ödeme, iade ve '
             'iptal işlemleri mağazanın kurallarına ve 6502 sayılı Tüketicinin Korunması Hakkında Kanun\'a tabidir.',
       ),

@@ -47,6 +47,8 @@ class PusulaUygulamasi extends StatefulWidget {
     this.profilKaydiUret,
     this.fotografKaynagi = const ImagePickerFotografKaynagi(),
     this.appleGoster = true,
+    this.sosyalGiris = false,
+    this.becayisAcik = false,
     this.hatirlatici,
     this.ilanKaynagi,
     this.haberKaynagi,
@@ -59,6 +61,12 @@ class PusulaUygulamasi extends StatefulWidget {
   final ProfilKaydi Function(String hesapId)? profilKaydiUret;
   final FotografKaynagi fotografKaynagi;
   final bool appleGoster;
+
+  /// Google/Apple girişi henüz gerçek olmadığı için mağaza sürümünde kapalıdır.
+  final bool sosyalGiris;
+
+  /// Becayiş eşleştirme arka uç ve ödeme bağlanana kadar kapalıdır (sekmede "Yakında" görünür).
+  final bool becayisAcik;
 
   /// Boşsa cihaz bildirimleriyle çalışan servis; testlerde sahtesi verilir.
   final HatirlaticiServisi? hatirlatici;
@@ -110,6 +118,8 @@ class _PusulaUygulamasiState extends State<PusulaUygulamasi> {
       profilKaydiUret: widget.profilKaydiUret ?? (id) => YerelProfilKaydi(hesapId: id),
       fotografKaynagi: widget.fotografKaynagi,
       appleGoster: widget.appleGoster,
+      sosyalGiris: widget.sosyalGiris,
+      becayisAcik: widget.becayisAcik,
       hatirlatici: _hatirlatici,
       ilanKaynagi: _ilanKaynagi,
       haberKaynagi: _haberKaynagi,

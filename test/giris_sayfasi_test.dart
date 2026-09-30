@@ -19,7 +19,12 @@ void main() {
     addTearDown(tester.view.reset);
     final oturum = OturumDeposu(YerelKimlikServisi(depolama: BellekDepolama(), tur: 8));
     await oturum.yukle();
-    await tester.pumpWidget(MaterialApp(theme: pusulaTema(), home: GirisSayfasi(oturum: oturum, appleGoster: apple)));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: pusulaTema(),
+        home: GirisSayfasi(oturum: oturum, appleGoster: apple),
+      ),
+    );
     await tester.pumpAndSettle();
     return oturum;
   }
@@ -185,7 +190,7 @@ void main() {
     await tester.tap(find.text('Kullanım Koşulları'));
     await tester.pumpAndSettle();
     expect(find.textContaining('TASLAK'), findsNothing);
-    expect(find.textContaining('1. Hizmetin tanımı'), findsOneWidget);
+    expect(find.textContaining('1. Bağımsız uygulama'), findsOneWidget);
     await tester.tap(find.byIcon(LucideIcons.arrowLeft));
     await tester.pumpAndSettle();
 

@@ -1,8 +1,19 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
+
+// Mağaza imzası: android/key.properties (yerel) ya da CI'da ortam değişkenleri. İkisi de yoksa release
+// derlemesi debug anahtarıyla imzalanır (yalnızca deneme APK'sı içindir, mağazaya yüklenemez).
+val anahtarAyarlari = Properties().apply {
+    val dosya = rootProject.file("key.properties")
+    if (dosya.exists()) dosya.inputStream().use { load(it) }
+}
+
+fun imzaDegeri(ad: String, ortam: String): String? = anahtarAyarlari.getProperty(ad) ?: System.getenv(ortam)
 
 android {
     namespace = "tr.com.ayasyazilim.pusula"
@@ -31,11 +42,24 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("magaza") {
+            val depo = imzaDegeri("storeFile", "ANDROID_KEYSTORE_FILE")
+            if (depo != null) {
+                storeFile = file(depo)
+                storePassword = imzaDegeri("storePassword", "ANDROID_KEYSTORE_PASSWORD")
+                keyAlias = imzaDegeri("keyAlias", "ANDROID_KEY_ALIAS")
+                keyPassword = imzaDegeri("keyPassword", "ANDROID_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            val magazaImzasiVar = imzaDegeri("storeFile", "ANDROID_KEYSTORE_FILE") != null
+            signingConfig = signingConfigs.getByName(if (magazaImzasiVar) "magaza" else "debug")
+            // Küçültme kapalı: Flutter eklentileri (workmanager, bildirimler) yansıma kullanır.
+            isMinifyEnabled = false
         }
     }
 }

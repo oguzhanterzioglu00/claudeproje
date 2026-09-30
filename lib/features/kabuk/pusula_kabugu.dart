@@ -57,6 +57,7 @@ class PusulaKabugu extends StatefulWidget {
     this.ilanTakibi,
     this.kayitliIlanlar,
     this.haberTakibi,
+    this.becayisAcik = true,
   });
 
   final ProfilDeposu profilDeposu;
@@ -89,6 +90,9 @@ class PusulaKabugu extends StatefulWidget {
 
   /// Verilirse Resmî Gazete bildirimi (ayarlarda açılır) çalışır.
   final YeniHaberTakibi? haberTakibi;
+
+  /// Kapalıyken Becayiş sekmesi "Yakında" gösterir; örnek kişiler ve sahte ödeme hiç görünmez.
+  final bool becayisAcik;
 
   /// Sekme sırası; kısayollar bu sabitlerle yönlendirir.
   static const anaSayfa = 0;
@@ -211,8 +215,12 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
 
   void _tabloAc() => _sayfaAc(DereceTablosuSayfasi(derece: _profil.maas?.derece ?? 8, kademe: _profil.maas?.kademe));
 
-  List<Bildirim> _bildirimler(Profil p) =>
-      bildirimleriUret(p, becayisYayinda: _becayis.yayinda, ikiliEslesme: _ikiliSayisi);
+  List<Bildirim> _bildirimler(Profil p) => bildirimleriUret(
+    p,
+    becayisAcik: widget.becayisAcik,
+    becayisYayinda: _becayis.yayinda,
+    ikiliEslesme: _ikiliSayisi,
+  );
 
   Future<void> _bildirimleriAc() async {
     final secilen = await AltSayfa.goster<Bildirim>(
@@ -239,6 +247,7 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
   };
 
   String _becayisAlt(Profil p) {
+    if (!widget.becayisAcik) return 'Yakında';
     if (p.becayisKapaliNedeni != null) return 'Yalnızca memurlar';
     if (p.eksikBecayisAlanlari.isNotEmpty) return 'Profilini tamamla';
     if (!_becayis.yayinda) return 'İlan ver';
@@ -317,7 +326,9 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
         ),
         ListenableBuilder(
           listenable: widget.profilDeposu,
-          builder: (context, _) => BecayisSekmesi(profil: _profil, depo: _becayis, profilAc: _profilAc),
+          builder: (context, _) => widget.becayisAcik
+              ? BecayisSekmesi(profil: _profil, depo: _becayis, profilAc: _profilAc)
+              : const BecayisYakindaSayfasi(),
         ),
         IlanlarSayfasi(kaynak: widget.ilanKaynagi, bugun: widget.bugun, kayitlar: widget.kayitliIlanlar),
       ],

@@ -138,7 +138,13 @@ void main() {
   });
 
   group('kabuk', () {
-    Future<ProfilDeposu> ac(WidgetTester tester, Profil profil, {int sekme = 0, bool ornekBecayis = false}) async {
+    Future<ProfilDeposu> ac(
+      WidgetTester tester,
+      Profil profil, {
+      int sekme = 0,
+      bool ornekBecayis = false,
+      bool becayisAcik = true,
+    }) async {
       await boyutla(tester);
       final depo = ProfilDeposu(BellekProfilKaydi(profil));
       await depo.yukle();
@@ -152,6 +158,7 @@ void main() {
             baslangicSekmesi: sekme,
             asistan: const YerelMevzuatAsistani(sure: Duration(milliseconds: 10)),
             ilanKaynagi: OrnekIlanKaynagi(sure: const Duration(milliseconds: 10), bugun: DateTime(2026, 9, 29)),
+            becayisAcik: becayisAcik,
             becayisDeposuUret: ornekBecayis ? (_) => BecayisOrnekVeri.depo() : BecayisOrnekVeri.depoProfilden,
           ),
         ),
@@ -194,6 +201,20 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 2));
       expect(find.text('Henüz ilanın yok'), findsOneWidget);
       expect(find.textContaining('Hemşire · Sağlık Bakanlığı · İzmir'), findsOneWidget);
+    });
+
+    testWidgets('becayiş kapalıyken (mağaza sürümü) sekme "Yakında" der; örnek kişi, ilan ver ve ödeme yok', (
+      tester,
+    ) async {
+      await ac(tester, _tamMemur, becayisAcik: false);
+      expect(find.text('Yakında'), findsOneWidget); // ana sayfa kısayolu
+      expect(find.text('İlan ver'), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('sekme-3')));
+      await tester.pumpAndSettle();
+      expect(find.text('Becayiş yakında'), findsOneWidget);
+      expect(find.textContaining('657 sayılı Kanun md. 73'), findsOneWidget);
+      expect(find.text('Henüz ilanın yok'), findsNothing);
+      expect(find.textContaining('M. Demir'), findsNothing);
     });
 
     testWidgets('becayiş için profil eksikse Becayiş sekmesi profil ister', (tester) async {

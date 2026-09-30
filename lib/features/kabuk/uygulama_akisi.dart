@@ -66,6 +66,8 @@ class UygulamaAkisi extends StatefulWidget {
     required this.profilKaydiUret,
     required this.fotografKaynagi,
     this.appleGoster = true,
+    this.sosyalGiris = true,
+    this.becayisAcik = true,
     this.kabukUret,
     this.hatirlatici,
     this.ilanKaynagi,
@@ -80,6 +82,12 @@ class UygulamaAkisi extends StatefulWidget {
   final ProfilKaydi Function(String hesapId) profilKaydiUret;
   final FotografKaynagi fotografKaynagi;
   final bool appleGoster;
+
+  /// Google/Apple giriş düğmeleri (gerçek giriş bağlanana kadar mağaza sürümünde kapalı).
+  final bool sosyalGiris;
+
+  /// Becayiş eşleştirme (arka uç ve ödeme bağlanana kadar mağaza sürümünde kapalı; "Yakında" gösterilir).
+  final bool becayisAcik;
 
   /// Verilirse kullanıcı hatırlatıcıları (kademe vb.) ayarlardan açabilir.
   final HatirlaticiServisi? hatirlatici;
@@ -194,8 +202,8 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
       final hesap = widget.oturum.hesap;
       if (hesap == null) {
         return _tanitimGoruldu!
-            ? GirisSayfasi(oturum: widget.oturum, appleGoster: widget.appleGoster)
-            : KarsilamaSayfasi(onBasla: _tanitimBitti);
+            ? GirisSayfasi(oturum: widget.oturum, appleGoster: widget.appleGoster, sosyalGiris: widget.sosyalGiris)
+            : KarsilamaSayfasi(onBasla: _tanitimBitti, becayisAcik: widget.becayisAcik);
       }
 
       final veri = _veri;
@@ -232,7 +240,7 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
               ilanTakibi: veri.ilanTakibi,
               kayitliIlanlar: veri.kayitliIlanlar,
               haberTakibi: veri.haberTakibi,
-
+              becayisAcik: widget.becayisAcik,
               ilanKaynagi: widget.ilanKaynagi ?? const OrnekIlanKaynagi(),
               haberKaynagi: widget.haberKaynagi ?? const OrnekHaberKaynagi(),
             );

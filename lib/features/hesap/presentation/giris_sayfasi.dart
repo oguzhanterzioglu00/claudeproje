@@ -19,12 +19,15 @@ import 'hesap_parcalari.dart';
 /// Bu sürümde hesaplar yalnızca cihazda tutulur ve Google/Apple girişi örnektir
 /// (bkz. `YerelKimlikServisi`); ekranda "ÖRNEK" rozeti bunu belirtir.
 class GirisSayfasi extends StatefulWidget {
-  const GirisSayfasi({super.key, required this.oturum, this.appleGoster = true});
+  const GirisSayfasi({super.key, required this.oturum, this.appleGoster = true, this.sosyalGiris = true});
 
   final OturumDeposu oturum;
 
   /// Apple ile giriş düğmesi (yalnızca Apple platformlarında ya da web'de gerekli olabilir).
   final bool appleGoster;
+
+  /// Google/Apple düğmeleri. Gerçek giriş bağlanana kadar mağaza sürümünde kapalıdır (yalnızca örnek hesap açar).
+  final bool sosyalGiris;
 
   @override
   State<GirisSayfasi> createState() => _GirisSayfasiState();
@@ -51,9 +54,9 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
   }
 
   void _kipDegistir(bool kayit) => setState(() {
-        _kayit = kayit;
-        _hata = null;
-      });
+    _kayit = kayit;
+    _hata = null;
+  });
 
   Future<void> _gonder() async {
     if (!_gonderilebilir) return;
@@ -70,10 +73,7 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
   }
 
   Future<void> _saglayici(GirisSaglayici s) async {
-    final devam = await AltSayfa.goster<bool>(
-      context,
-      builder: (c) => _OrnekGirisOnayi(saglayici: s),
-    );
+    final devam = await AltSayfa.goster<bool>(context, builder: (c) => _OrnekGirisOnayi(saglayici: s));
     if (devam != true || !mounted) return;
     setState(() => _hata = null);
     try {
@@ -83,14 +83,13 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
     }
   }
 
-  void _yasalAc(YasalMetin metin) => Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => YasalSayfasi(metin: metin)),
-      );
+  void _yasalAc(YasalMetin metin) =>
+      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => YasalSayfasi(metin: metin)));
 
   Future<void> _sifremiUnuttum() => AltSayfa.goster<void>(
-        context,
-        builder: (c) => _SifreSifirlama(oturum: widget.oturum, baslangic: _eposta.text.trim()),
-      );
+    context,
+    builder: (c) => _SifreSifirlama(oturum: widget.oturum, baslangic: _eposta.text.trim()),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -116,8 +115,10 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
                           children: [
                             Text('Kamu Pusulası', style: PusulaYazi.baslik(24, renk: PusulaRenk.beyaz, aralik: -1)),
                             const SizedBox(height: 2),
-                            Text('Kamu çalışanlarının rehberi',
-                                style: PusulaYazi.metin(13, renk: const Color(0xFFC9D2EC), agirlik: FontWeight.w500)),
+                            Text(
+                              'Kamu çalışanlarının rehberi',
+                              style: PusulaYazi.metin(13, renk: const Color(0xFFC9D2EC), agirlik: FontWeight.w500),
+                            ),
                           ],
                         ),
                       ),
@@ -137,7 +138,9 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
                   child: ListView(
                     padding: EdgeInsets.fromLTRB(22, 22, 22, 22 + MediaQuery.viewPaddingOf(context).bottom),
                     children: [
-                      Yukselen(child: _KipSecici(kayit: _kayit, onDegis: _kipDegistir)),
+                      Yukselen(
+                        child: _KipSecici(kayit: _kayit, onDegis: _kipDegistir),
+                      ),
                       const SizedBox(height: 20),
                       Yukselen(
                         gecikme: const Duration(milliseconds: 80),
@@ -169,8 +172,11 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
                                 onTap: () => setState(() => _sifreGizli = !_sifreGizli),
                                 child: IconButton(
                                   onPressed: () => setState(() => _sifreGizli = !_sifreGizli),
-                                  icon: Icon(_sifreGizli ? LucideIcons.eye : LucideIcons.eyeOff,
-                                      size: 20, color: PusulaRenk.lacivert),
+                                  icon: Icon(
+                                    _sifreGizli ? LucideIcons.eye : LucideIcons.eyeOff,
+                                    size: 20,
+                                    color: PusulaRenk.lacivert,
+                                  ),
                                 ),
                               ),
                             ),
@@ -182,17 +188,16 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
                                 alignment: Alignment.centerRight,
                                 child: TextButton(
                                   onPressed: _sifremiUnuttum,
-                                  child: Text('Şifremi unuttum',
-                                      style: PusulaYazi.metin(13, renk: PusulaRenk.mavi, agirlik: FontWeight.w700)),
+                                  child: Text(
+                                    'Şifremi unuttum',
+                                    style: PusulaYazi.metin(13, renk: PusulaRenk.mavi, agirlik: FontWeight.w700),
+                                  ),
                                 ),
                               ),
                           ],
                         ),
                       ),
-                      if (_hata != null) ...[
-                        const SizedBox(height: 10),
-                        HataKutusu(mesaj: _hata!),
-                      ],
+                      if (_hata != null) ...[const SizedBox(height: 10), HataKutusu(mesaj: _hata!)],
                       const SizedBox(height: 16),
                       Yukselen(
                         gecikme: const Duration(milliseconds: 140),
@@ -204,48 +209,55 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
                           onPressed: _gonderilebilir ? _gonder : null,
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      Yukselen(
-                        gecikme: const Duration(milliseconds: 200),
-                        child: Row(
-                          children: [
-                            const Expanded(child: Divider(color: PusulaRenk.cizgi, thickness: 1.5)),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
-                              child: Text('veya',
-                                  style: PusulaYazi.metin(13, renk: PusulaRenk.soluk, agirlik: FontWeight.w600)),
-                            ),
-                            const Expanded(child: Divider(color: PusulaRenk.cizgi, thickness: 1.5)),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Yukselen(
-                        gecikme: const Duration(milliseconds: 260),
-                        child: _HizliGirisDugmesi(
-                          metin: 'Google ile devam et',
-                          ikon: const GoogleGIkonu(boyut: 22),
-                          onPressed: widget.oturum.mesgul ? null : () => _saglayici(GirisSaglayici.google),
-                        ),
-                      ),
-                      if (widget.appleGoster) ...[
-                        const SizedBox(height: 12),
+                      if (widget.sosyalGiris) ...[
+                        const SizedBox(height: 20),
                         Yukselen(
-                          gecikme: const Duration(milliseconds: 320),
-                          child: _HizliGirisDugmesi(
-                            metin: 'Apple ile devam et',
-                            ikon: const Icon(LucideIcons.apple, size: 22, color: PusulaRenk.lacivert),
-                            onPressed: widget.oturum.mesgul ? null : () => _saglayici(GirisSaglayici.apple),
+                          gecikme: const Duration(milliseconds: 200),
+                          child: Row(
+                            children: [
+                              const Expanded(child: Divider(color: PusulaRenk.cizgi, thickness: 1.5)),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                child: Text(
+                                  'veya',
+                                  style: PusulaYazi.metin(13, renk: PusulaRenk.soluk, agirlik: FontWeight.w600),
+                                ),
+                              ),
+                              const Expanded(child: Divider(color: PusulaRenk.cizgi, thickness: 1.5)),
+                            ],
                           ),
                         ),
+                        const SizedBox(height: 16),
+                        Yukselen(
+                          gecikme: const Duration(milliseconds: 260),
+                          child: _HizliGirisDugmesi(
+                            metin: 'Google ile devam et',
+                            ikon: const GoogleGIkonu(boyut: 22),
+                            onPressed: widget.oturum.mesgul ? null : () => _saglayici(GirisSaglayici.google),
+                          ),
+                        ),
+                        if (widget.appleGoster) ...[
+                          const SizedBox(height: 12),
+                          Yukselen(
+                            gecikme: const Duration(milliseconds: 320),
+                            child: _HizliGirisDugmesi(
+                              metin: 'Apple ile devam et',
+                              ikon: const Icon(LucideIcons.apple, size: 22, color: PusulaRenk.lacivert),
+                              onPressed: widget.oturum.mesgul ? null : () => _saglayici(GirisSaglayici.apple),
+                            ),
+                          ),
+                        ],
                       ],
                       const SizedBox(height: 22),
                       Text(
                         'Devam ederek aşağıdaki metinleri kabul etmiş olursun. '
-                        'Bu sürümde hesabın yalnızca bu cihazda tutulur.',
+                        'Bu sürümde hesabın yalnızca bu cihazda tutulur. Kamu Pusulası resmî bir kurum uygulaması değildir.',
                         textAlign: TextAlign.center,
-                        style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500)
-                            .copyWith(height: 1.45),
+                        style: PusulaYazi.metin(
+                          12,
+                          renk: PusulaRenk.soluk,
+                          agirlik: FontWeight.w500,
+                        ).copyWith(height: 1.45),
                       ),
                       const SizedBox(height: 6),
                       Wrap(
@@ -253,13 +265,17 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
                         children: [
                           TextButton(
                             onPressed: () => _yasalAc(YasalMetinler.kosullar),
-                            child: Text('Kullanım Koşulları',
-                                style: PusulaYazi.metin(13, renk: PusulaRenk.mavi, agirlik: FontWeight.w700)),
+                            child: Text(
+                              'Kullanım Koşulları',
+                              style: PusulaYazi.metin(13, renk: PusulaRenk.mavi, agirlik: FontWeight.w700),
+                            ),
                           ),
                           TextButton(
                             onPressed: () => _yasalAc(YasalMetinler.aydinlatma),
-                            child: Text('Aydınlatma Metni',
-                                style: PusulaYazi.metin(13, renk: PusulaRenk.mavi, agirlik: FontWeight.w700)),
+                            child: Text(
+                              'Aydınlatma Metni',
+                              style: PusulaYazi.metin(13, renk: PusulaRenk.mavi, agirlik: FontWeight.w700),
+                            ),
                           ),
                         ],
                       ),
@@ -283,19 +299,23 @@ class _KipSecici extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: PusulaRenk.beyaz,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: PusulaRenk.lacivert, width: 1.5),
+    padding: const EdgeInsets.all(4),
+    decoration: BoxDecoration(
+      color: PusulaRenk.beyaz,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(color: PusulaRenk.lacivert, width: 1.5),
+    ),
+    child: Row(
+      children: [
+        Expanded(
+          child: _Sekme(etiket: 'Giriş yap', secili: !kayit, onTap: () => onDegis(false)),
         ),
-        child: Row(
-          children: [
-            Expanded(child: _Sekme(etiket: 'Giriş yap', secili: !kayit, onTap: () => onDegis(false))),
-            Expanded(child: _Sekme(etiket: 'Hesap oluştur', secili: kayit, onTap: () => onDegis(true))),
-          ],
+        Expanded(
+          child: _Sekme(etiket: 'Hesap oluştur', secili: kayit, onTap: () => onDegis(true)),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _Sekme extends StatelessWidget {
@@ -307,27 +327,30 @@ class _Sekme extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        button: true,
-        selected: secili,
-        child: Material(
-          color: secili ? PusulaRenk.lacivert : Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(14),
-            onTap: onTap,
-            child: SizedBox(
-              height: 44,
-              child: Center(
-                child: Text(
-                  etiket,
-                  style: PusulaYazi.metin(14,
-                      renk: secili ? PusulaRenk.beyaz : PusulaRenk.lacivert, agirlik: FontWeight.w700),
-                ),
+    button: true,
+    selected: secili,
+    child: Material(
+      color: secili ? PusulaRenk.lacivert : Colors.transparent,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: SizedBox(
+          height: 44,
+          child: Center(
+            child: Text(
+              etiket,
+              style: PusulaYazi.metin(
+                14,
+                renk: secili ? PusulaRenk.beyaz : PusulaRenk.lacivert,
+                agirlik: FontWeight.w700,
               ),
             ),
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _HizliGirisDugmesi extends StatelessWidget {
@@ -339,34 +362,34 @@ class _HizliGirisDugmesi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        button: true,
-        enabled: onPressed != null,
-        label: metin,
-        excludeSemantics: true,
+    button: true,
+    enabled: onPressed != null,
+    label: metin,
+    excludeSemantics: true,
+    onTap: onPressed,
+    child: Material(
+      color: PusulaRenk.beyaz,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(22),
+        side: const BorderSide(color: PusulaRenk.lacivert, width: 1.5),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
         onTap: onPressed,
-        child: Material(
-          color: PusulaRenk.beyaz,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(22),
-            side: const BorderSide(color: PusulaRenk.lacivert, width: 1.5),
-          ),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(22),
-            onTap: onPressed,
-            child: SizedBox(
-              height: 56,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ikon,
-                  const SizedBox(width: 12),
-                  Text(metin, style: PusulaYazi.metin(15, agirlik: FontWeight.w700)),
-                ],
-              ),
-            ),
+        child: SizedBox(
+          height: 56,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ikon,
+              const SizedBox(width: 12),
+              Text(metin, style: PusulaYazi.metin(15, agirlik: FontWeight.w700)),
+            ],
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 /// Google/Apple örnek girişinin ne olduğunu açıklar; kullanıcı onaylamadan giriş yapılmaz.
@@ -377,25 +400,28 @@ class _OrnekGirisOnayi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text('${saglayici.etiket} ile devam et', style: PusulaYazi.baslik(22, aralik: -0.9)),
-          const SizedBox(height: 10),
-          Text(
-            'Bu örnek sürümde gerçek ${saglayici.etiket} girişi henüz bağlı değil. '
-            'Devam edersen bu cihazda örnek bir ${saglayici.etiket} hesabıyla oturum açılır; '
-            'hiçbir bilgin ${saglayici.etiket}\'a ya da bir sunucuya gitmez.',
-            style: PusulaYazi.metin(14, renk: PusulaRenk.soluk, agirlik: FontWeight.w500).copyWith(height: 1.45),
-          ),
-          const SizedBox(height: 18),
-          BirincilDugme(yukseklik: 56, metin: 'Örnek hesapla devam et', onPressed: () => Navigator.pop(context, true)),
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('Vazgeç', style: PusulaYazi.metin(14, renk: PusulaRenk.soluk, agirlik: FontWeight.w700)),
-          ),
-        ],
-      );
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Text('${saglayici.etiket} ile devam et', style: PusulaYazi.baslik(22, aralik: -0.9)),
+      const SizedBox(height: 10),
+      Text(
+        'Bu örnek sürümde gerçek ${saglayici.etiket} girişi henüz bağlı değil. '
+        'Devam edersen bu cihazda örnek bir ${saglayici.etiket} hesabıyla oturum açılır; '
+        'hiçbir bilgin ${saglayici.etiket}\'a ya da bir sunucuya gitmez.',
+        style: PusulaYazi.metin(14, renk: PusulaRenk.soluk, agirlik: FontWeight.w500).copyWith(height: 1.45),
+      ),
+      const SizedBox(height: 18),
+      BirincilDugme(yukseklik: 56, metin: 'Örnek hesapla devam et', onPressed: () => Navigator.pop(context, true)),
+      TextButton(
+        onPressed: () => Navigator.pop(context, false),
+        child: Text(
+          'Vazgeç',
+          style: PusulaYazi.metin(14, renk: PusulaRenk.soluk, agirlik: FontWeight.w700),
+        ),
+      ),
+    ],
+  );
 }
 
 class _SifreSifirlama extends StatefulWidget {
@@ -431,42 +457,38 @@ class _SifreSifirlamaState extends State<_SifreSifirlama> {
 
   @override
   Widget build(BuildContext context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text('Şifreni sıfırla', style: PusulaYazi.baslik(22, aralik: -0.9)),
-          const SizedBox(height: 8),
-          if (_gonderildi) ...[
-            Text(
-              'Bu e-posta ile kayıtlı bir hesap varsa şifre sıfırlama bağlantısı gönderilir. '
-              'Örnek sürümde e-posta gönderilmez; gerçek sürümde bağlantı gelen kutuna düşecek.',
-              style: PusulaYazi.metin(14, renk: PusulaRenk.soluk, agirlik: FontWeight.w500).copyWith(height: 1.45),
-            ),
-            const SizedBox(height: 16),
-            BirincilDugme(yukseklik: 54, metin: 'Tamam', onPressed: () => Navigator.pop(context)),
-          ] else ...[
-            Text('Hesabının e-posta adresini yaz; sıfırlama bağlantısını oraya gönderelim.',
-                style: PusulaYazi.metin(14, renk: PusulaRenk.soluk, agirlik: FontWeight.w500).copyWith(height: 1.45)),
-            const SizedBox(height: 14),
-            MetinAlani(
-              etiket: 'E-posta',
-              denetleyici: _eposta,
-              onDegis: () => setState(() {}),
-              eposta: true,
-              hata: _hata,
-            ),
-            const SizedBox(height: 16),
-            ListenableBuilder(
-              listenable: widget.oturum,
-              builder: (context, _) => BirincilDugme(
-                yukseklik: 54,
-                metin: 'Bağlantı gönder',
-                yukleniyor: widget.oturum.mesgul,
-                yukleniyorMetni: 'Gönderiliyor',
-                onPressed: HesapKurali.epostaGecerli(_eposta.text) ? _gonder : null,
-              ),
-            ),
-          ],
-        ],
-      );
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Text('Şifreni sıfırla', style: PusulaYazi.baslik(22, aralik: -0.9)),
+      const SizedBox(height: 8),
+      if (_gonderildi) ...[
+        Text(
+          'Bu e-posta ile kayıtlı bir hesap varsa şifre sıfırlama bağlantısı gönderilir. '
+          'Örnek sürümde e-posta gönderilmez; gerçek sürümde bağlantı gelen kutuna düşecek.',
+          style: PusulaYazi.metin(14, renk: PusulaRenk.soluk, agirlik: FontWeight.w500).copyWith(height: 1.45),
+        ),
+        const SizedBox(height: 16),
+        BirincilDugme(yukseklik: 54, metin: 'Tamam', onPressed: () => Navigator.pop(context)),
+      ] else ...[
+        Text(
+          'Hesabının e-posta adresini yaz; sıfırlama bağlantısını oraya gönderelim.',
+          style: PusulaYazi.metin(14, renk: PusulaRenk.soluk, agirlik: FontWeight.w500).copyWith(height: 1.45),
+        ),
+        const SizedBox(height: 14),
+        MetinAlani(etiket: 'E-posta', denetleyici: _eposta, onDegis: () => setState(() {}), eposta: true, hata: _hata),
+        const SizedBox(height: 16),
+        ListenableBuilder(
+          listenable: widget.oturum,
+          builder: (context, _) => BirincilDugme(
+            yukseklik: 54,
+            metin: 'Bağlantı gönder',
+            yukleniyor: widget.oturum.mesgul,
+            yukleniyorMetni: 'Gönderiliyor',
+            onPressed: HesapKurali.epostaGecerli(_eposta.text) ? _gonder : null,
+          ),
+        ),
+      ],
+    ],
+  );
 }

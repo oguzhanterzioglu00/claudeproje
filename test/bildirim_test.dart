@@ -28,6 +28,11 @@ void main() {
   setUpAll(pusulaYazilariniYukle);
 
   group('bildirimleriUret', () {
+    test('becayiş kapalıyken becayiş bildirimi üretilmez', () {
+      final b = bildirimleriUret(_tam, becayisYayinda: false, ikiliEslesme: 0, becayisAcik: false);
+      expect(b.where((x) => x.baslik.contains('Becayiş')), isEmpty);
+    });
+
     List<String> basliklar(Profil p, {bool yayinda = false, int eslesme = 0}) =>
         bildirimleriUret(p, becayisYayinda: yayinda, ikiliEslesme: eslesme).map((b) => b.baslik).toList();
 

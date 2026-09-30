@@ -2,8 +2,8 @@ name: Android APK
 
 # Her push'ta analiz + test çalışır ve telefona kurulabilir bir APK üretir.
 # APK: Actions sekmesi → ilgili çalışma → Artifacts → kamu-pusulasi-apk.
-# Bu APK deneme içindir (debug anahtarıyla imzalı); mağaza yayını için kendi
-# anahtar deponla imzalayan ayrı bir iş akışı gerekir.
+# Bu APK deneme içindir (debug anahtarıyla imzalı); mağaza yayını için release.yml
+# (imzalı AAB) kullanılır.
 on:
   push:
     branches: [main, 'claude/**']

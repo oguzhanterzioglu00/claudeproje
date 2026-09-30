@@ -121,6 +121,8 @@ class AyarlarSayfasi extends StatelessWidget {
               applicationVersion: UygulamaBilgisi.surumMetni,
             ),
           ),
+          const SizedBox(height: 8),
+          const _Bilgi(UygulamaBilgisi.bagimsizlikNotu),
           const SizedBox(height: 14),
           Center(
             child: Column(
