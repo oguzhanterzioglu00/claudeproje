@@ -32,9 +32,10 @@ Yerelde imzalamak istersen `android/key.properties` (git'e girmez): `storeFile`,
   İlan ve haber akışı GitHub'dan indirilir (IP adresi GitHub tarafından görülür); kendi sunucumuz yok.
   Analitik, reklam, çökme raporu SDK'sı **yok**.
 - **Hesap silme:** Uygulama içinde Profil → "Hesabımı ve verilerimi sil". Hesaplar yalnızca cihazdadır; Play'in
-  istediği "web'den silme" adresi için `ayasyazilim.com.tr` altında bir sayfa (ya da destek e-postası) göster.
-- **Gizlilik politikası URL'si (zorunlu):** Aydınlatma Metni'nin (`lib/features/ayarlar/yasal_metinler.dart`) web
-  hâlini `ayasyazilim.com.tr` altında yayınla ve adresi her iki mağazaya gir. **Bu adres olmadan yayın yapılamaz.**
+  istediği "web'den silme" adresi: `.../hesap-silme.html` (yukarıda).
+- **Gizlilik politikası URL'si (zorunlu):** Web iş akışı, uygulamadaki yasal metinlerden otomatik sayfa üretir:
+  `https://oguzhanterzioglu00.github.io/claudeproje/gizlilik.html` (gizlilik), `.../kosullar.html` (koşullar),
+  `.../hesap-silme.html` (hesap silme). İstersen aynı metni `ayasyazilim.com.tr` altına da koyup o adresi girebilirsin.
 - **Hedef kitle:** 18+ (kamu çalışanları); çocuklara yönelik değil.
 - **İçerik derecelendirme:** Şiddet, kumar vb. yok; kullanıcı içeriği paylaşımı yok (becayiş kapalı).
 - **Devlet/kamu uygulaması beyanı:** Uygulama bağımsızdır, resmî kurum uygulaması **değildir**. Başvuru metninde ve

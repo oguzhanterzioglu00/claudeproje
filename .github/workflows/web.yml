@@ -42,6 +42,10 @@ jobs:
       - name: Web derlemesi
         run: flutter build web --release --no-web-resources-cdn --base-href "/${{ github.event.repository.name }}/"
 
+      # Mağazaların istediği herkese açık sayfalar (gizlilik, koşullar, hesap silme); metinler uygulamadan üretilir.
+      - name: Yasal sayfalar
+        run: dart run tool/yasal_html_uret.dart build/web
+
       - name: GitHub Pages'e yayınla (gh-pages dalı)
         uses: peaceiris/actions-gh-pages@v4
         with:
