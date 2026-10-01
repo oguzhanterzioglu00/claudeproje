@@ -59,8 +59,9 @@ Yerel iOS girişi için **`.p8` anahtarı gerekmez**:
 1. developer.apple.com → Identifiers → `tr.com.ayasyazilim.pusula` App ID → **Sign In with Apple** yeteneğini açın.
 2. Supabase → Authentication → Sign In / Providers → **Apple** → Enable, **Client IDs** alanına bundle kimliğini yazın:
    `tr.com.ayasyazilim.pusula` → Save. (Secret alanı yerel iOS girişinde boş kalabilir.)
-3. Mac'te Xcode → Runner → **Signing & Capabilities → + Capability → Sign in with Apple** (entitlements dosyasını ve proje
-   ayarını Xcode kendisi ekler).
+3. Xcode'daki "Sign in with Apple" yeteneği depoya **elle eklendi**: `ios/Runner/Runner.entitlements` ve proje
+   ayarındaki `CODE_SIGN_ENTITLEMENTS` (Mac olmadan Codemagic ile derlemek için). Info.plist'e de uygulamaya dönüş
+   şeması (`tr.com.ayasyazilim.pusula`) eklendi; e-posta köprü sayfası iPhone'da uygulamayı bununla açar.
 4. Düğme yalnızca iPhone/iPad'de görünür; Android'de çıkmaz.
 
 **Mağaza uyarısı (App Store 5.1.1(v)):** Apple ile açılan hesap silinirken Apple'ın jetonunun da iptal edilmesi
