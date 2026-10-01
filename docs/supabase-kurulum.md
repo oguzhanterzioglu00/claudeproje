@@ -49,6 +49,20 @@ seçicisi kullanılır (altta açılan pencere, "Kamu Pusulası" adıyla). Gerek
    (CI'da `GOOGLE_WEB_CLIENT_ID` sırrı). Kimlik gizli değildir; *client secret* uygulamaya hiç konmaz.
 3. Verilmezse ya da yerel giriş desteklenmiyorsa Google girişi tarayıcıdan yapılır (yedek yol).
 
+### 5c. Apple ile giriş (yalnızca iOS)
+Yerel iOS girişi için **`.p8` anahtarı gerekmez**:
+1. developer.apple.com → Identifiers → `tr.com.ayasyazilim.pusula` App ID → **Sign In with Apple** yeteneğini açın.
+2. Supabase → Authentication → Sign In / Providers → **Apple** → Enable, **Client IDs** alanına bundle kimliğini yazın:
+   `tr.com.ayasyazilim.pusula` → Save. (Secret alanı yerel iOS girişinde boş kalabilir.)
+3. Mac'te Xcode → Runner → **Signing & Capabilities → + Capability → Sign in with Apple** (entitlements dosyasını ve proje
+   ayarını Xcode kendisi ekler).
+4. Düğme yalnızca iPhone/iPad'de görünür; Android'de çıkmaz.
+
+**Mağaza uyarısı (App Store 5.1.1(v)):** Apple ile açılan hesap silinirken Apple'ın jetonunun da iptal edilmesi
+gerekir. Bu, Apple'a `authorizationCode` ile istek atıp **client secret (`.p8`)** kullanan bir sunucu işlevi
+(Supabase Edge Function) ister ve henüz yazılmadı; iOS mağaza gönderiminden önce yapılmalıdır.
+**Bu kod iOS cihazda hiç denenmedi** (yalnızca sahte istemciyle test edildi).
+
 ## 6. E-posta gönderimi (önemli)
 Supabase'in yerleşik e-posta servisi saatte yalnızca **birkaç** e-posta gönderir (doğrulama ve şifre sıfırlama
 e-postaları dahil). Gerçek kullanıcılar için **Project Settings → Authentication → SMTP Settings**'ten ücretsiz bir

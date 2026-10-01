@@ -1,5 +1,10 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 import 'package:url_launcher/url_launcher.dart' show LaunchMode;
 
@@ -130,6 +135,48 @@ class SupabaseKimlikIstemcisi implements KimlikIstemcisi {
       }
       throw IstemciHatasi(kod: 'google_hatasi', mesaj: '${e.code.name}: ${e.description}');
     }
+  }
+
+  /// Apple kimlik jetonu yeniden oynatılmasın diye her girişte rastgele bir nonce üretilir: Apple'a özeti,
+  /// Supabase'e ham hâli verilir ve Supabase ikisini eşleştirir.
+  static String _nonceUret() {
+    final r = Random.secure();
+    return base64Url.encode(List<int>.generate(32, (_) => r.nextInt(256)));
+  }
+
+  @override
+  Future<IstemciKullanicisi?> appleYerelGiris() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) return null;
+    if (!await SignInWithApple.isAvailable()) return null;
+    final ham = _nonceUret();
+    final ozet = sha256.convert(utf8.encode(ham)).toString();
+    final AuthorizationCredentialAppleID kimlik;
+    try {
+      kimlik = await SignInWithApple.getAppleIDCredential(
+        scopes: [AppleIDAuthorizationScopes.email, AppleIDAuthorizationScopes.fullName],
+        nonce: ozet,
+      );
+    } on SignInWithAppleAuthorizationException catch (e) {
+      if (e.code == AuthorizationErrorCode.canceled) throw const IstemciHatasi(kod: 'iptal');
+      throw IstemciHatasi(kod: 'apple_hatasi', mesaj: '${e.code.name}: ${e.message}');
+    }
+    final idToken = kimlik.identityToken;
+    if (idToken == null) throw const IstemciHatasi(kod: 'apple_hatasi');
+    final k = await _sar(() async {
+      final r = await _client.auth.signInWithIdToken(provider: sb.OAuthProvider.apple, idToken: idToken, nonce: ham);
+      final kullanici = _kullanici(r.user);
+      if (kullanici == null) throw const IstemciHatasi(kod: 'apple_hatasi');
+      return kullanici;
+    });
+    // Apple adı yalnızca İLK girişte verir; o an kaydedilmezse bir daha alınamaz.
+    final ad = [kimlik.givenName, kimlik.familyName].whereType<String>().where((x) => x.isNotEmpty).join(' ');
+    if (ad.isNotEmpty && k.ad.isEmpty) {
+      try {
+        await _client.auth.updateUser(sb.UserAttributes(data: {'full_name': ad}));
+        return IstemciKullanicisi(id: k.id, eposta: k.eposta, ad: ad, saglayici: k.saglayici);
+      } catch (_) {}
+    }
+    return k;
   }
 
   @override

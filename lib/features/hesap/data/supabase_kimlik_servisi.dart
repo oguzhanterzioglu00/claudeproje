@@ -11,7 +11,7 @@ class IstemciKullanicisi {
   final String eposta;
   final String ad;
 
-  /// "email" ya da "google".
+  /// "email", "google" ya da "apple".
   final String saglayici;
 }
 
@@ -57,6 +57,9 @@ abstract interface class KimlikIstemcisi {
   /// "Kamu Pusulası" görünür). Bu platformda desteklenmiyorsa null döner; o zaman tarayıcı girişi kullanılır.
   /// [sunucuIstemciKimligi] Google Cloud'daki **Web** istemcisinin kimliğidir.
   Future<IstemciKullanicisi?> googleYerelGiris(String sunucuIstemciKimligi);
+
+  /// Apple ile yerel giriş (yalnızca iOS/iPadOS). Desteklenmeyen platformda null döner.
+  Future<IstemciKullanicisi?> appleYerelGiris();
 
   Future<void> sifreSifirlamaIste(String eposta, {required String yonlendirme});
   Future<void> sifreGuncelle(String yeniSifre);
@@ -111,7 +114,11 @@ class SupabaseKimlikServisi implements KimlikServisi {
 
   static Hesap _hesap(IstemciKullanicisi k) => Hesap(
     id: k.id,
-    saglayici: k.saglayici == 'google' ? GirisSaglayici.google : GirisSaglayici.eposta,
+    saglayici: switch (k.saglayici) {
+      'google' => GirisSaglayici.google,
+      'apple' => GirisSaglayici.apple,
+      _ => GirisSaglayici.eposta,
+    },
     eposta: k.eposta,
     ad: k.ad,
   );
@@ -144,6 +151,7 @@ class SupabaseKimlikServisi implements KimlikServisi {
       'same_password' => 'Yeni şifre eskisiyle aynı olamaz.',
       'iptal' => 'Giriş iptal edildi.',
       'google_hatasi' => 'Google ile giriş yapılamadı. Tekrar dene.',
+      'apple_hatasi' => 'Apple ile giriş yapılamadı. Tekrar dene.',
       _ => 'İşlem tamamlanamadı. Tekrar dene.',
     };
   }
@@ -161,6 +169,11 @@ class SupabaseKimlikServisi implements KimlikServisi {
 
   @override
   Future<Hesap> saglayiciIleGiris(GirisSaglayici saglayici) async {
+    if (saglayici == GirisSaglayici.apple) {
+      final k = await _hataCevir(_istemci.appleYerelGiris);
+      if (k == null) throw const KimlikHatasi("Apple ile giriş yalnızca iPhone ve iPad'de kullanılabilir.");
+      return _hesap(k);
+    }
     if (saglayici != GirisSaglayici.google) {
       throw KimlikHatasi('${saglayici.etiket} ile giriş şu an desteklenmiyor.');
     }

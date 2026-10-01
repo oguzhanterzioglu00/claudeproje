@@ -69,6 +69,16 @@ class _Sahte implements KimlikIstemcisi {
     return yerelKullanici;
   }
 
+  IstemciKullanicisi? appleKullanici;
+  IstemciHatasi? appleHata;
+
+  @override
+  Future<IstemciKullanicisi?> appleYerelGiris() async {
+    cagrilar.add('apple');
+    if (appleHata != null) throw appleHata!;
+    return appleKullanici;
+  }
+
   @override
   Future<void> sifreSifirlamaIste(String eposta, {required String yonlendirme}) async {
     cagrilar.add('sifirla:$eposta');
@@ -209,10 +219,32 @@ void main() {
       expect(istemci.cagrilar, ['sil']);
     });
 
-    test('Apple şu an desteklenmiyor', () async {
+    test('Apple: iOS dışında (istemci null döner) açıklayıcı mesaj verir', () async {
       await expectLater(
         servis.saglayiciIleGiris(GirisSaglayici.apple),
-        throwsA(isA<KimlikHatasi>().having((k) => k.mesaj, 'mesaj', contains('desteklenmiyor'))),
+        throwsA(isA<KimlikHatasi>().having((k) => k.mesaj, 'mesaj', contains('iPhone ve iPad'))),
+      );
+    });
+
+    test('Apple: yerel giriş hesabı Apple sağlayıcısıyla döner (tarayıcıya gidilmez)', () async {
+      istemci.appleKullanici = const IstemciKullanicisi(id: 'a1', eposta: 'x@privaterelay.appleid.com', ad: 'Ayşe Yılmaz', saglayici: 'apple');
+      final h = await servis.saglayiciIleGiris(GirisSaglayici.apple);
+      expect(h.id, 'a1');
+      expect(h.saglayici, GirisSaglayici.apple);
+      expect(h.ad, 'Ayşe Yılmaz');
+      expect(istemci.cagrilar, ['apple']);
+    });
+
+    test('Apple: vazgeçme ve hata mesajları', () async {
+      istemci.appleHata = const IstemciHatasi(kod: 'iptal');
+      await expectLater(
+        servis.saglayiciIleGiris(GirisSaglayici.apple),
+        throwsA(isA<KimlikHatasi>().having((k) => k.mesaj, 'mesaj', 'Giriş iptal edildi.')),
+      );
+      istemci.appleHata = const IstemciHatasi(kod: 'apple_hatasi');
+      await expectLater(
+        servis.saglayiciIleGiris(GirisSaglayici.apple),
+        throwsA(isA<KimlikHatasi>().having((k) => k.mesaj, 'mesaj', contains('Apple ile giriş yapılamadı'))),
       );
     });
 
@@ -385,6 +417,20 @@ void main() {
       expect(find.text('Apple ile devam et'), findsNothing);
       expect(find.textContaining('güvenli sunucuda'), findsOneWidget);
       expect(find.textContaining('Bu sürümde hesabın'), findsNothing);
+      depo.dispose();
+    });
+
+    testWidgets('iOS: Apple düğmesi görünür ve yerel Apple girişini başlatır', (t) async {
+      istemci.appleKullanici = const IstemciKullanicisi(id: 'a1', eposta: 'a@x.com', saglayici: 'apple');
+      final depo = OturumDeposu(servis);
+      await depo.yukle();
+      await t.pumpWidget(MaterialApp(home: GirisSayfasi(oturum: depo, sosyalGiris: true, appleGoster: true)));
+      await t.pumpAndSettle();
+      expect(find.text('Apple ile devam et'), findsOneWidget);
+      await t.tap(find.text('Apple ile devam et'));
+      await t.pumpAndSettle();
+      expect(istemci.cagrilar, contains('apple'));
+      expect(depo.hesap?.saglayici, GirisSaglayici.apple);
       depo.dispose();
     });
 

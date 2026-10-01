@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart' show LicenseEntryWithLineBreaks, LicenseRegistry;
+import 'package:flutter/foundation.dart'
+    show LicenseEntryWithLineBreaks, LicenseRegistry, TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -34,7 +35,8 @@ Future<void> main() async {
       googleSunucuIstemcisi: SunucuAyari.googleWebIstemcisi,
     );
   }
-  runApp(PusulaUygulamasi(kimlik: kimlik));
+  // Apple ile giriş yalnızca iPhone/iPad'de yerel olarak çalışır (Android'de düğme gösterilmez).
+  runApp(PusulaUygulamasi(kimlik: kimlik, appleGoster: !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS));
 }
 
 /// Uygulamaya gömülü yazı tiplerinin (SIL Open Font License 1.1) lisans sayfasında görünmesi için.
