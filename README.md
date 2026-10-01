@@ -22,6 +22,23 @@ Tasarım: "Memur Uygulaması İlk Tasarım" (Claude Artifact). Renkler Ayas Soft
 - `lib/features/hesap/` — giriş/kayıt, Google ve Apple ile giriş (örnek), şifre değiştirme, hesap silme
 - `lib/features/profil/` — tanıtım, 4 adımlı ilk kurulum, profil fotoğrafı, statü (cihazda saklanır)
 - `lib/features/ana_sayfa/` — profil odaklı ana sayfa ve Gündem bölümü
+- `lib/core/hareket.dart` — ortak hareket sistemi: katmanlı SVG illüstrasyon (`HareketliGorsel`: süzülme, nefes alma,
+  giriş animasyonu, kaydırma paralaksı), dokununca yaylanan `Basilabilir`, sayarak değişen `SayiSayaci`. Sistem
+  "hareketi azalt" açıkken hepsi durağandır; süs hareketi `PusulaHareket.susHareketi` ile kapatılır (testler kapatır)
+- `lib/core/bos_durum.dart`, `lib/core/iskelet.dart` — çizimli boş/hata kartları ve yükleme iskeleti (parıltılı)
+- `assets/gorsel/` — özgün SVG illüstrasyonlar (`haber/`, `bos/`, `arac/`); her biri aynı `viewBox`ta üç katmandır
+  (`<ad>_zemin|orta|on.svg`). Telif sorunu yoktur: hepsi bu depoda çizilmiştir
+- `lib/features/ilanlar/ilan_alarmi.dart`, `ilan_alarm_sayfasi.dart` — ilan alarmı: kelime/il/tür koşulları, uyan yeni
+  ilanda bildirim (arka plan işi alarmları depolamadan okur)
+- `lib/features/yedek/` — yedekleme: profil, kayıtlı ilanlar ve alarmlar tek koda (`KPYEDEK1.…`) çevrilir, başka
+  telefonda yapıştırılarak yüklenir (sağlama toplamlı; fotoğraf ve şifre yedeğe girmez)
+- `lib/features/dilekce/` — dilekçe şablonları (izin, atama, nakil...); profilden dolar; atıf yapılan maddeler
+  bilgi bankasındaki doğrulanmış 657 sayılı Kanun maddeleridir
+- `lib/features/asistan/mevzuat_arama.dart` — doğrulanmış kanun alıntılarında tam metin arama
+- `lib/features/hesap/data/supabase_*` — gerçek hesaplar (Supabase Auth): e-posta/şifre, Google ile giriş (tarayıcı + derin
+  bağlantı `tr.com.ayasyazilim.pusula://giris-geri-donus`), e-posta doğrulama, şifre sıfırlama, hesap silme. Arka uç
+  adresi/anahtarı derlemede `--dart-define` ile verilir (`lib/core/sunucu_ayari.dart`); verilmezse cihaz içi örnek hesap.
+  Kurulum rehberi: `docs/supabase-kurulum.md`, SQL: `docs/supabase/kurulum.sql`
 - `lib/features/maas/` — memur maaş motoru ve ekranı
 - `lib/features/becayis/` — Becayiş modülü (`domain/` eşleştirme motoru)
 - `lib/features/asistan/`, `ilanlar/`, `haberler/` — Hakkım ne? (doğrulanmış mevzuat), kamu ilanları (Kariyer Kapısı), Gündem (Resmî Gazete); veri akışı `tool/feed_uret.py` + `.github/workflows/feed.yml` ile 15 dakikada bir derlenir (`docs/asistan-ve-haber-spec.md` §2.1)
@@ -65,6 +82,6 @@ gerçek cihaz davranışı için APK kullan.
 - Paket kimliği (`tr.com.ayasyazilim.pusula`) onaylanmalı; mağazada kalıcıdır.
 - Becayiş mevzuat teyidi ve hukuk/KVKK görüşü: `docs/becayis-spec.md` §1.1 ve §8.
 - Maaş motorundaki vergi/SGK/asgari ücret parametreleri ikincil kaynaklıdır; resmî kaynakla doğrulanmalı (`docs/maas-spec.md`).
-- Ödeme ve doğrulama servisleri şimdilik örnektir. İlan (Kariyer Kapısı RSS) ve haber (Resmî Gazete) akışı gerçektir ama arka uçsuz (GitHub Actions + `feed-data` dalı) çalışır; ilanlarda son başvuru tarihi yoktur, uygulama kapalıyken anlık bildirim için sunucu tarafı push gerekir (`docs/asistan-ve-haber-spec.md` §2.1).
-- Hesaplar cihazda tutulur; **Google ve Apple ile giriş gerçek değildir** (örnek hesap açar). Gerçek kimlik sağlayıcı, sağlayıcıların resmî düğme varlıkları ve Kullanım Koşulları/Aydınlatma metinleri hazırlanmadan yayınlanmamalı (`docs/hesap-spec.md`).
+- Hesaplar `docs/supabase-kurulum.md` adımlarıyla gerçek (Supabase) olur; anahtar verilmezse örnektir. Ödeme ve doğrulama servisleri şimdilik örnektir. İlan (Kariyer Kapısı RSS) ve haber (Resmî Gazete) akışı gerçektir ama arka uçsuz (GitHub Actions + `feed-data` dalı) çalışır; ilanlarda son başvuru tarihi yoktur, uygulama kapalıyken anlık bildirim için sunucu tarafı push gerekir (`docs/asistan-ve-haber-spec.md` §2.1).
+- Profil bilgileri cihazda tutulur. Hesap (e-posta, Google) Supabase ile gerçektir; **Apple ile giriş henüz yok** (iOS aşamasında eklenecek). Gerçek kimlik sağlayıcı, sağlayıcıların resmî düğme varlıkları ve Kullanım Koşulları/Aydınlatma metinleri hazırlanmadan yayınlanmamalı (`docs/hesap-spec.md`).
 - Android ve iOS klasörleri repoda; gerçek cihaz/emülatörde `flutter run` ve mağaza imzalama (Android anahtar deposu, iOS sertifikaları) henüz denenmedi. Web klasörü eklenmedi; kod tabanı ayrı bir kopyada `flutter build web --release` ile başarıyla derlendi.

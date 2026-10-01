@@ -3,22 +3,45 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/baglanti.dart';
 import '../../core/bilesenler.dart';
+import '../../core/bos_durum.dart';
+import '../../core/hareket.dart';
+import '../../core/iskelet.dart';
 import '../../core/depolama.dart';
 import '../../core/metin.dart';
 import '../../core/tema.dart';
 import '../../core/yukselen.dart';
+import '../profil/domain/profil.dart';
+import 'ilan_alarm_sayfasi.dart';
+import 'ilan_alarmi.dart';
 import 'ilan_kaynagi.dart';
 import 'ilan_modeli.dart';
 import 'kayitli_ilanlar.dart';
+import 'yeni_ilan_takibi.dart';
 
 /// Otomatik derlenen kamu ilanları: arama, tür süzgeci, kaydetme ve kaynak bilgisi.
 class IlanlarSayfasi extends StatefulWidget {
-  const IlanlarSayfasi({super.key, this.kaynak = const OrnekIlanKaynagi(), this.bugun, this.kaynagiAc, this.kayitlar});
+  const IlanlarSayfasi({
+    super.key,
+    this.kaynak = const OrnekIlanKaynagi(),
+    this.bugun,
+    this.kaynagiAc,
+    this.kayitlar,
+    this.alarmlar,
+    this.takip,
+    this.statu,
+  });
 
   final IlanKaynagi kaynak;
 
   /// Kaydedilen ilanlar (cihazda kalıcı). Verilmezse ekran ömrü boyunca bellekte tutulur.
   final KayitliIlanlar? kayitlar;
+
+  /// İlan alarmları (cihazda kalıcı). Verilmezse ekran ömrü boyunca bellekte tutulur.
+  final IlanAlarmlari? alarmlar;
+
+  /// Bildirim tercihi ve izin; alarm kurulurken kullanılır. Null ise alarm yalnızca listede işaretlenir.
+  final YeniIlanTakibi? takip;
+  final Statu? statu;
 
   /// Testlerde sabit tarih vermek için; boşsa bugün.
   final DateTime? bugun;
@@ -58,10 +81,14 @@ class _IlanlarSayfasiState extends State<IlanlarSayfasi> {
   _Suzgec _suzgec = _Suzgec.tumu;
   late final KayitliIlanlar _kayitlar = widget.kayitlar ?? KayitliIlanlar(BellekDepolama(), hesapId: 'yerel');
 
+  late final IlanAlarmlari _alarmlar = widget.alarmlar ?? IlanAlarmlari(BellekDepolama(), hesapId: 'yerel');
+  List<KamuIlani> _sonIlanlar = const [];
+
   @override
   void initState() {
     super.initState();
     _kayitlar.addListener(_kayitDegisti);
+    _alarmlar.addListener(_kayitDegisti);
   }
 
   void _kayitDegisti() {
@@ -76,6 +103,7 @@ class _IlanlarSayfasiState extends State<IlanlarSayfasi> {
   @override
   void dispose() {
     _kayitlar.removeListener(_kayitDegisti);
+    _alarmlar.removeListener(_kayitDegisti);
     _ara.dispose();
     super.dispose();
   }
@@ -106,6 +134,18 @@ class _IlanlarSayfasiState extends State<IlanlarSayfasi> {
     }).toList();
   }
 
+  Future<void> _alarmSayfasi({String onceden = ''}) => AltSayfa.goster<void>(
+    context,
+    builder: (c) => IlanAlarmSayfasi(
+      alarmlar: _alarmlar,
+      ilanlar: _sonIlanlar,
+      bugun: _bugun,
+      takip: widget.takip,
+      statu: widget.statu,
+      onceden: onceden,
+    ),
+  );
+
   Future<void> _ayrinti(KamuIlani i) => AltSayfa.goster<void>(
     context,
     builder: (c) => _Ayrinti(ilan: i, bugun: _bugun, kaynagiAc: widget.kaynagiAc),
@@ -116,6 +156,7 @@ class _IlanlarSayfasiState extends State<IlanlarSayfasi> {
     child: FutureBuilder<List<KamuIlani>>(
       future: _ilanlar,
       builder: (context, snap) {
+        if (snap.hasData) _sonIlanlar = snap.data!;
         final yukleniyor = !_kayitliSuzgeci && snap.connectionState != ConnectionState.done;
         final hata = !_kayitliSuzgeci && snap.hasError;
         final liste = _kayitliSuzgeci
@@ -156,7 +197,8 @@ class _IlanlarSayfasiState extends State<IlanlarSayfasi> {
                         ],
                       ),
                     ),
-                    if (_ornek) const OrnekRozeti(),
+                    if (_ornek) ...[const OrnekRozeti(), const SizedBox(width: 8)],
+                    _AlarmDugmesi(sayi: _alarmlar.liste.length, onTap: _alarmSayfasi),
                   ],
                 ),
               ),
@@ -187,6 +229,13 @@ class _IlanlarSayfasiState extends State<IlanlarSayfasi> {
                   ),
                 ),
               ),
+              if (_ara.text.trim().length >= 2) ...[
+                const SizedBox(height: 10),
+                _AramaAlarmi(
+                  metin: _ara.text.trim(),
+                  onTap: () => _alarmSayfasi(onceden: _ara.text.trim()),
+                ),
+              ],
               const SizedBox(height: 14),
               Yukselen(
                 gecikme: const Duration(milliseconds: 160),
@@ -233,21 +282,18 @@ class _IlanlarSayfasiState extends State<IlanlarSayfasi> {
               ),
               const SizedBox(height: 14),
               if (yukleniyor)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 40),
-                  child: Center(child: CircularProgressIndicator(color: PusulaRenk.lacivert)),
-                )
+                const IskeletListe()
               else if (hata)
-                _Mesaj(
-                  ikon: LucideIcons.wifiOff,
+                BosDurum(
+                  gorsel: BosGorselTuru.baglanti,
                   baslik: 'İlanlar yüklenemedi',
                   alt: 'Bağlantını kontrol edip tekrar dene.',
                   dugme: 'Tekrar dene',
                   onDugme: _yenile,
                 )
               else if (liste.isEmpty)
-                _Mesaj(
-                  ikon: _kayitliSuzgeci ? LucideIcons.bookmark : LucideIcons.search,
+                BosDurum(
+                  gorsel: _kayitliSuzgeci && _ara.text.trim().isEmpty ? BosGorselTuru.kayit : BosGorselTuru.arama,
                   baslik: _kayitliSuzgeci && _ara.text.trim().isEmpty ? 'Kayıtlı ilanın yok' : 'Uygun ilan bulunamadı',
                   alt: _kayitliSuzgeci && _ara.text.trim().isEmpty
                       ? 'Bir ilanın yanındaki işarete dokunarak kaydedebilirsin.'
@@ -261,6 +307,7 @@ class _IlanlarSayfasiState extends State<IlanlarSayfasi> {
                       ilan: liste[k],
                       bugun: _bugun,
                       kayitli: _kayitlar.icerir(liste[k].id),
+                      alarmli: _alarmlar.uyan(liste[k]) != null,
                       onKaydet: () => _kayitlar.degistir(liste[k]),
                       onAc: () => _ayrinti(liste[k]),
                     ),
@@ -323,11 +370,15 @@ class _IlanKarti extends StatelessWidget {
     required this.kayitli,
     required this.onKaydet,
     required this.onAc,
+    this.alarmli = false,
   });
 
   final KamuIlani ilan;
   final DateTime bugun;
   final bool kayitli;
+
+  /// İlan kullanıcının bir alarmına uyuyor.
+  final bool alarmli;
   final VoidCallback onKaydet;
   final VoidCallback onAc;
 
@@ -406,10 +457,18 @@ class _IlanKarti extends StatelessWidget {
                     onTap: onKaydet,
                     child: SizedBox.square(
                       dimension: 44,
-                      child: Icon(
-                        kayitli ? LucideIcons.bookmarkCheck : LucideIcons.bookmark,
-                        size: 20,
-                        color: PusulaRenk.lacivert,
+                      // Kaydedince ikon yaylanarak büyüyüp yerine oturur (hareketi azalt açıksa anında değişir).
+                      child: AnimatedSwitcher(
+                        duration: hareketsiz ? Duration.zero : const Duration(milliseconds: 380),
+                        switchInCurve: Curves.elasticOut,
+                        switchOutCurve: Curves.easeIn,
+                        transitionBuilder: (c, a) => ScaleTransition(scale: a, child: c),
+                        child: Icon(
+                          kayitli ? LucideIcons.bookmarkCheck : LucideIcons.bookmark,
+                          key: ValueKey(kayitli),
+                          size: 20,
+                          color: PusulaRenk.lacivert,
+                        ),
                       ),
                     ),
                   ),
@@ -417,6 +476,13 @@ class _IlanKarti extends StatelessWidget {
               ),
             ],
           ),
+          if (alarmli) ...[
+            const SizedBox(height: 10),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Hap('Alarmına uyuyor', zemin: PusulaRenk.amber, yazi: PusulaRenk.lacivert, ikon: LucideIcons.bellRing),
+            ),
+          ],
           const SizedBox(height: 12),
           if (kalan == null)
             Row(
@@ -488,48 +554,6 @@ class _IlanKarti extends StatelessWidget {
       ),
     );
   }
-}
-
-class _Mesaj extends StatelessWidget {
-  const _Mesaj({required this.ikon, required this.baslik, required this.alt, this.dugme, this.onDugme});
-
-  final IconData ikon;
-  final String baslik;
-  final String alt;
-  final String? dugme;
-  final VoidCallback? onDugme;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
-    decoration: BoxDecoration(
-      color: PusulaRenk.beyaz,
-      borderRadius: BorderRadius.circular(26),
-      border: Border.all(color: PusulaRenk.lacivert, width: 1.5),
-    ),
-    child: Column(
-      children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(color: PusulaRenk.cizgi, borderRadius: BorderRadius.circular(16)),
-          child: Icon(ikon, size: 24, color: PusulaRenk.lacivert),
-        ),
-        const SizedBox(height: 8),
-        Text(baslik, style: PusulaYazi.metin(16, agirlik: FontWeight.w700)),
-        const SizedBox(height: 4),
-        Text(
-          alt,
-          textAlign: TextAlign.center,
-          style: PusulaYazi.metin(13, renk: PusulaRenk.soluk, agirlik: FontWeight.w500),
-        ),
-        if (dugme != null) ...[
-          const SizedBox(height: 14),
-          BirincilDugme(metin: dugme!, onPressed: onDugme, yukseklik: 48),
-        ],
-      ],
-    ),
-  );
 }
 
 class _Ayrinti extends StatelessWidget {
@@ -630,6 +654,103 @@ class _Satir extends StatelessWidget {
           ),
         ),
       ],
+    ),
+  );
+}
+
+/// Başlıktaki zil düğmesi: alarm sayfasını açar, kurulu alarm sayısını rozetle gösterir.
+class _AlarmDugmesi extends StatelessWidget {
+  const _AlarmDugmesi({required this.sayi, required this.onTap});
+
+  final int sayi;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: sayi == 0 ? 'İlan alarmları' : 'İlan alarmları, $sayi alarm kurulu',
+    excludeSemantics: true,
+    onTap: onTap,
+    child: Basilabilir(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Material(
+            color: sayi > 0 ? PusulaRenk.amber : PusulaRenk.beyaz,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: PusulaRenk.lacivert, width: 1.5),
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: onTap,
+              child: SizedBox.square(
+                dimension: 46,
+                child: Icon(sayi > 0 ? LucideIcons.bellRing : LucideIcons.bellPlus, size: 22, color: PusulaRenk.lacivert),
+              ),
+            ),
+          ),
+          if (sayi > 0)
+            Positioned(
+              right: -4,
+              top: -4,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                decoration: BoxDecoration(
+                  color: PusulaRenk.lacivert,
+                  borderRadius: BorderRadius.circular(9),
+                  border: Border.all(color: PusulaRenk.zemin, width: 1.5),
+                ),
+                child: Text('$sayi', style: PusulaYazi.metin(11, renk: PusulaRenk.beyaz, agirlik: FontWeight.w800)),
+              ),
+            ),
+        ],
+      ),
+    ),
+  );
+}
+
+/// Arama kutusuna yazılan metni tek dokunuşla alarma çeviren öneri.
+class _AramaAlarmi extends StatelessWidget {
+  const _AramaAlarmi({required this.metin, required this.onTap});
+
+  final String metin;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Yukselen(
+    child: Align(
+      alignment: Alignment.centerLeft,
+      child: Basilabilir(
+        child: Material(
+          color: PusulaRenk.amber,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: const BorderSide(color: PusulaRenk.lacivert, width: 1.5),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(LucideIcons.bellPlus, size: 16, color: PusulaRenk.lacivert),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      '"$metin" için alarm kur',
+                      overflow: TextOverflow.ellipsis,
+                      style: PusulaYazi.metin(13, agirlik: FontWeight.w800),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     ),
   );
 }

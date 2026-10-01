@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -18,7 +19,7 @@ class HaberSlaytlari extends StatefulWidget {
     required this.bugun,
     required this.onAc,
     this.otomatik = true,
-    this.yukseklik = 214,
+    this.yukseklik = 232,
     this.aralik = const Duration(seconds: 5),
   });
 
@@ -103,7 +104,13 @@ class _HaberSlaytlariState extends State<HaberSlaytlari> {
               onPageChanged: (i) => setState(() => _sayfa = i),
               itemBuilder: (context, i) => Padding(
                 padding: const EdgeInsets.only(right: 10),
-                child: _Slayt(haber: widget.haberler[i], bugun: widget.bugun, onTap: () => widget.onAc(widget.haberler[i])),
+                child: _Slayt(
+                  haber: widget.haberler[i],
+                  bugun: widget.bugun,
+                  kontrol: _kontrol,
+                  sira: i,
+                  onTap: () => widget.onAc(widget.haberler[i]),
+                ),
               ),
             ),
           ),
@@ -136,12 +143,54 @@ class _HaberSlaytlariState extends State<HaberSlaytlari> {
   }
 }
 
-class _Slayt extends StatelessWidget {
-  const _Slayt({required this.haber, required this.bugun, required this.onTap});
+/// Bir slaydın sayfa kaydırmasına göre konumu (−1: solda, 0: ortada, 1: sağda); illüstrasyon
+/// katmanlarını derinliklerine göre kaydırmak (paralaks) için kullanılır.
+class _SayfaFarki extends ChangeNotifier implements ValueListenable<double> {
+  _SayfaFarki(this._kontrol, this._sira) {
+    _kontrol.addListener(notifyListeners);
+  }
+
+  final PageController _kontrol;
+  final int _sira;
+
+  @override
+  double get value {
+    if (!_kontrol.hasClients || !_kontrol.position.haveDimensions) return 0;
+    return ((_kontrol.page ?? 0) - _sira).clamp(-1.0, 1.0);
+  }
+
+  @override
+  void dispose() {
+    _kontrol.removeListener(notifyListeners);
+    super.dispose();
+  }
+}
+
+class _Slayt extends StatefulWidget {
+  const _Slayt({required this.haber, required this.bugun, required this.kontrol, required this.sira, required this.onTap});
 
   final Haber haber;
   final DateTime bugun;
+  final PageController kontrol;
+  final int sira;
   final VoidCallback onTap;
+
+  @override
+  State<_Slayt> createState() => _SlaytState();
+}
+
+class _SlaytState extends State<_Slayt> {
+  late final _SayfaFarki _fark = _SayfaFarki(widget.kontrol, widget.sira);
+
+  @override
+  void dispose() {
+    _fark.dispose();
+    super.dispose();
+  }
+
+  Haber get haber => widget.haber;
+  DateTime get bugun => widget.bugun;
+  VoidCallback get onTap => widget.onTap;
 
   @override
   Widget build(BuildContext context) => Semantics(
@@ -159,7 +208,7 @@ class _Slayt extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              HaberKapagi(haber: haber),
+              HaberKapagi(haber: haber, kaydirma: _fark, yaziAlanli: true),
               // Yazının okunması için alttan koyulaşan katman.
               const DecoratedBox(
                 decoration: BoxDecoration(

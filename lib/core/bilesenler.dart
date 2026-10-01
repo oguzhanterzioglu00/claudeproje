@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'hareket.dart';
 import 'tema.dart';
 
 /// Beyaz zeminli, lacivert çerçeveli kart (tasarımdaki ortak kart).
@@ -30,11 +31,14 @@ class PusulaKart extends StatelessWidget {
           ? const BorderSide(color: PusulaRenk.lacivert, width: 1.5)
           : BorderSide.none,
     );
-    return Material(
-      color: renk,
-      shape: sekil,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(onTap: onTap, child: Padding(padding: padding, child: child)),
+    return Basilabilir(
+      aktif: onTap != null,
+      child: Material(
+        color: renk,
+        shape: sekil,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(onTap: onTap, child: Padding(padding: padding, child: child)),
+      ),
     );
   }
 }
@@ -100,7 +104,7 @@ class GeriBaslik extends StatelessWidget {
     super.key,
     required this.ustYazi,
     required this.baslik,
-    this.sag = const OrnekRozeti(),
+    this.sag = const SizedBox.shrink(),
   });
 
   final String ustYazi;

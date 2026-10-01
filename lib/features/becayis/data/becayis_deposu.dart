@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../profil/domain/profil.dart';
 import '../domain/eslesme.dart';
 import '../domain/eslestirici.dart';
 import '../domain/ilan.dart';
@@ -23,6 +24,33 @@ class BecayisDeposu extends ChangeNotifier {
         _digerleri = digerleri,
         _kisiler = kisiler,
         _yayinda = yayinda;
+
+  /// Becayiş arka ucu bağlanana kadar kullanılan boş depo: yayında değildir, hiçbir başka kullanıcı ya da ilan
+  /// içermez (örnek/uydurma veri yok). Sekme bu durumda "Yakında" gösterir.
+  factory BecayisDeposu.bos(Profil p) => BecayisDeposu(
+        benim: Ilan(
+          id: 'ben',
+          kullaniciId: 'u-ben',
+          kurumId: p.kurumKimligi,
+          kurumAdi: p.kurumAdi,
+          sinif: p.sinif,
+          unvan: p.unvan,
+          mevcutIl: p.il,
+          hedefIller: const [],
+          gorunenAd: 'Sen',
+        ),
+        digerleri: const [],
+        kisiler: {
+          'ben': KisiBilgisi(
+            tamAd: p.ad,
+            sicilNo: p.sicilNo.isEmpty ? '—' : p.sicilNo,
+            telefon: '',
+            eposta: p.kurumsalEposta,
+          ),
+        },
+        epostam: p.kurumsalEposta,
+        yayinda: false,
+      );
 
   final OdemeServisi odeme;
   final DogrulamaServisi dogrulama;

@@ -82,17 +82,28 @@ class _Oge extends StatelessWidget {
               color: secili ? PusulaRenk.amber : Colors.transparent,
               borderRadius: BorderRadius.circular(24),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(sekme.ikon, size: 24, color: secili ? PusulaRenk.lacivert : const Color(0xFFC9D0E0)),
-                if (secili) ...[
-                  const SizedBox(width: 8),
-                  Text(sekme.etiket,
-                      style: PusulaYazi.metin(13, renk: PusulaRenk.lacivert, agirlik: FontWeight.w700)),
+            child: AnimatedSize(
+              duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 240),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Seçilen sekmenin ikonu yaylanarak hafifçe büyür.
+                  AnimatedScale(
+                    scale: secili ? 1.12 : 1,
+                    duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 360),
+                    curve: Curves.easeOutBack,
+                    child: Icon(sekme.ikon, size: 24, color: secili ? PusulaRenk.lacivert : const Color(0xFFC9D0E0)),
+                  ),
+                  if (secili) ...[
+                    const SizedBox(width: 8),
+                    Text(sekme.etiket,
+                        style: PusulaYazi.metin(13, renk: PusulaRenk.lacivert, agirlik: FontWeight.w700)),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),

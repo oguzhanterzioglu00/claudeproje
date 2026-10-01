@@ -66,7 +66,7 @@ class _BecayisIlanVerSayfasiState extends State<BecayisIlanVerSayfasi> {
                         child: ListView(
                           padding: const EdgeInsets.fromLTRB(18, 24, 18, 16),
                           children: [
-                            const Yukselen(child: GeriBaslik(ustYazi: 'Becayiş ilanı', baslik: 'İlan ver')),
+                            const Yukselen(child: GeriBaslik(ustYazi: 'Becayiş ilanı', baslik: 'İlan ver', sag: OrnekRozeti())),
                             const SizedBox(height: 14),
                             Yukselen(
                               gecikme: const Duration(milliseconds: 80),

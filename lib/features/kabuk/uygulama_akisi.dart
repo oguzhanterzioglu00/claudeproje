@@ -8,12 +8,14 @@ import '../haberler/yeni_haber_takibi.dart';
 import '../hatirlatici/hatirlatici_deposu.dart';
 import '../ilanlar/arka_plan.dart';
 import '../ilanlar/kayitli_ilanlar.dart';
+import '../ilanlar/ilan_alarmi.dart';
 import '../ilanlar/ilan_kaynagi.dart';
 import '../ilanlar/yeni_ilan_takibi.dart';
 import '../hatirlatici/hatirlatici_servisi.dart';
 import '../hesap/data/oturum_deposu.dart';
 import '../hesap/domain/hesap.dart';
 import '../hesap/presentation/giris_sayfasi.dart';
+import '../hesap/presentation/yeni_sifre_sayfasi.dart';
 import '../profil/data/fotograf_deposu.dart';
 import '../profil/data/profil_deposu.dart';
 import '../profil/data/profil_kaydi.dart';
@@ -32,6 +34,7 @@ class _KullaniciVerisi {
     this.hatirlatici,
     this.ilanTakibi,
     this.kayitliIlanlar,
+    this.ilanAlarmlari,
     this.haberTakibi,
   );
 
@@ -41,6 +44,7 @@ class _KullaniciVerisi {
   final HatirlaticiDeposu? hatirlatici;
   final YeniIlanTakibi? ilanTakibi;
   final KayitliIlanlar kayitliIlanlar;
+  final IlanAlarmlari ilanAlarmlari;
   final YeniHaberTakibi? haberTakibi;
 
   bool get yuklendi => profil.yuklendi && fotograf.yuklendi;
@@ -51,6 +55,7 @@ class _KullaniciVerisi {
     hatirlatici?.dispose();
     ilanTakibi?.dispose();
     kayitliIlanlar.dispose();
+    ilanAlarmlari.dispose();
     haberTakibi?.dispose();
   }
 }
@@ -169,6 +174,7 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
                 arkaPlan: widget.arkaPlan,
               ),
         KayitliIlanlar(widget.depolama, hesapId: hesap.id),
+        IlanAlarmlari(widget.depolama, hesapId: hesap.id),
         widget.hatirlatici == null || widget.haberKaynagi == null
             ? null
             : YeniHaberTakibi(
@@ -181,6 +187,7 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
       );
       _veri = v;
       v.kayitliIlanlar.yukle();
+      v.ilanAlarmlari.yukle();
       v.profil.yukle();
       v.fotograf.yukle();
       v.profil.addListener(_veriDegisti);
@@ -199,10 +206,17 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
     builder: (context, _) {
       if (!widget.oturum.yuklendi || _tanitimGoruldu == null) return const AcilisEkrani();
 
+      // E-postadaki şifre sıfırlama bağlantısından gelindiyse önce yeni şifre alınır.
+      if (widget.oturum.sifreKurtarmaBekliyor) return YeniSifreSayfasi(oturum: widget.oturum);
+
       final hesap = widget.oturum.hesap;
       if (hesap == null) {
         return _tanitimGoruldu!
-            ? GirisSayfasi(oturum: widget.oturum, appleGoster: widget.appleGoster, sosyalGiris: widget.sosyalGiris)
+            ? GirisSayfasi(
+                oturum: widget.oturum,
+                appleGoster: widget.appleGoster,
+                sosyalGiris: widget.sosyalGiris || widget.oturum.gercek,
+              )
             : KarsilamaSayfasi(onBasla: _tanitimBitti, becayisAcik: widget.becayisAcik);
       }
 
@@ -239,6 +253,7 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
               hatirlatici: veri.hatirlatici,
               ilanTakibi: veri.ilanTakibi,
               kayitliIlanlar: veri.kayitliIlanlar,
+              ilanAlarmlari: veri.ilanAlarmlari,
               haberTakibi: veri.haberTakibi,
               becayisAcik: widget.becayisAcik,
               ilanKaynagi: widget.ilanKaynagi ?? const OrnekIlanKaynagi(),

@@ -69,6 +69,22 @@ class KayitliIlanlar extends ChangeNotifier {
     await _depolama.yaz(_anahtar, jsonEncode([for (final i in _liste) i.toJson()]));
   }
 
+  /// Yedekten gelen ilanları mevcutların arkasına ekler (aynı kimlikli olanlar atlanır, sınır korunur).
+  /// Eklenen ilan sayısını döner.
+  Future<int> birlestir(Iterable<KamuIlani> gelen) async {
+    final yeni = [
+      for (final i in gelen)
+        if (!icerir(i.id)) i,
+    ];
+    final bos = enFazla - _liste.length;
+    final eklenecek = yeni.take(bos < 0 ? 0 : bos).toList();
+    if (eklenecek.isEmpty) return 0;
+    _liste = [..._liste, ...eklenecek];
+    notifyListeners();
+    await _depolama.yaz(_anahtar, jsonEncode([for (final i in _liste) i.toJson()]));
+    return eklenecek.length;
+  }
+
   /// Hesap silinirken.
   Future<void> temizle() async {
     _liste = const [];

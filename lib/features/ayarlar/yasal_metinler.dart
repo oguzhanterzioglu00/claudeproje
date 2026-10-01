@@ -61,11 +61,16 @@ abstract final class YasalMetinler {
       ),
       YasalBolum(
         'Verilerin saklandığı yer ve aktarım',
-        'Bu sürümde profil, hesap ve fotoğraf bilgileriniz yalnızca cihazınızda saklanır; sunucuya gönderilmez, yurt '
-            'dışına aktarılmaz ve üçüncü kişilerle paylaşılmaz. Kademe hatırlatıcıları da yalnızca cihazınızda kurulur. '
+        'Profil bilgileriniz (ad, statü, kurum, maaş girdileri vb.), fotoğrafınız, kayıtlı ilanlarınız, ilan alarmlarınız '
+            've kademe hatırlatıcılarınız yalnızca cihazınızda saklanır; sunucuya gönderilmez. Hesabınızı oluşturmak ve '
+            'giriş yapmak için e-posta adresiniz ve şifrenizin tek yönlü özeti (şifrenin kendisi değil) ile, Google ile giriş '
+            'yaparsanız Google\'ın paylaştığı ad ve e-posta bilgisi, hizmet sağlayıcımız Supabase\'in altyapısında tutulur. '
+            'Bu altyapı Avrupa Birliği içindeki (Almanya) sunucularda çalışır; bu nedenle hesap bilgileriniz yurt dışına '
+            'aktarılır ve hesap oluşturmanız bu aktarıma açık rızanız anlamına gelir. Hesap bilgileriniz üçüncü kişilerle '
+            'paylaşılmaz. Kademe hatırlatıcıları da yalnızca cihazınızda kurulur. '
             'İlan ve haber akışı, herkese açık bir GitHub deposundan (raw.githubusercontent.com) indirilir; bu isteğe '
             'kişisel bilginiz eklenmez, ancak her internet isteğinde olduğu gibi IP adresiniz GitHub tarafından görülür. '
-            'Sunucu tabanlı özellikler (hesap eşitleme, becayiş eşleştirme, ödeme doğrulama) eklendiğinde bu metin '
+            'Profil eşitleme, becayiş eşleştirme ve ödeme doğrulama gibi ek sunucu tabanlı özellikler eklendiğinde bu metin '
             'güncellenecek ve önceden uygulama içinde duyurulacaktır; verileriniz ancak burada belirtilen amaçlarla, hukuka uygun '
             'sebeplerle ve gerektiğinde açık rızanızla aktarılacaktır. Kanunen yetkili kurum ve kuruluşlara yasal '
             'yükümlülük gereği aktarım yapılabilir.',
@@ -79,8 +84,9 @@ abstract final class YasalMetinler {
       ),
       YasalBolum(
         'Saklama süresi',
-        'Cihazınızdaki veriler siz silene ya da uygulamayı kaldırana kadar saklanır. Uygulama içinden profil bilgilerinizi, '
-            'fotoğrafınızı ve hesabınızı istediğiniz zaman silebilirsiniz. İleride sunucuda tutulacak veriler, işleme amacı ve '
+        'Cihazınızdaki veriler siz silene ya da uygulamayı kaldırana kadar saklanır. Sunucudaki hesap bilgileriniz hesabınızı '
+            'silene kadar saklanır; uygulama içinden "Hesabımı ve verilerimi sil" dediğinizde sunucudaki hesabınız da kalıcı '
+            'olarak silinir. Profil bilgilerinizi ve fotoğrafınızı da istediğiniz zaman silebilirsiniz. İleride sunucuda tutulacak diğer veriler, işleme amacı ve '
             'mevzuattaki saklama yükümlülükleri sona erene kadar saklanır, ardından silinir, yok edilir veya anonim hale getirilir.',
       ),
       YasalBolum(

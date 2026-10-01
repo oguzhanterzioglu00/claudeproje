@@ -56,7 +56,7 @@ class _KarsilamaSayfasiState extends State<KarsilamaSayfasi> {
     ),
     _Slayt(
       baslik: 'İlanlar ve gündem tek yerde',
-      aciklama: 'Kamu ilanlarını ve mevzuat gelişmelerini kaynağı ve tarihiyle takip et.',
+      aciklama: 'Kamu ilanlarını ve mevzuat gelişmelerini kaynağı ve tarihiyle takip et; istediğin ilan için alarm kur.',
       gorsel: _IlanHaberGorseli(),
       ornek: true,
     ),

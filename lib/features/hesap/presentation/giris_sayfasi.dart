@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/bilesenler.dart';
 import '../../../core/logo.dart';
-import '../../../core/marka_ikonlari.dart';
 import '../../../core/tema.dart';
 import '../../../core/yukselen.dart';
 import '../../profil/presentation/profil_alanlari.dart';
@@ -39,6 +39,7 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
   bool _kayit = false;
   bool _sifreGizli = true;
   String? _hata;
+  bool _hataBilgi = false;
 
   @override
   void dispose() {
@@ -56,6 +57,7 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
   void _kipDegistir(bool kayit) => setState(() {
     _kayit = kayit;
     _hata = null;
+    _hataBilgi = false;
   });
 
   Future<void> _gonder() async {
@@ -68,18 +70,35 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
         await widget.oturum.girisYap(_eposta.text, _sifre.text);
       }
     } on KimlikHatasi catch (h) {
-      if (mounted) setState(() => _hata = h.mesaj);
+      if (mounted) {
+        setState(() {
+          _hata = h.mesaj;
+          _hataBilgi = h.bilgi;
+        });
+      }
     }
   }
 
   Future<void> _saglayici(GirisSaglayici s) async {
-    final devam = await AltSayfa.goster<bool>(context, builder: (c) => _OrnekGirisOnayi(saglayici: s));
-    if (devam != true || !mounted) return;
-    setState(() => _hata = null);
+    // Gerçek sağlayıcıda onay sayfası yoktur: doğrudan Google'ın giriş sayfası açılır. Yalnızca cihaz içi örnek
+    // servisinde (geliştirme) kullanıcıya bunun örnek olduğu söylenir.
+    if (!widget.oturum.gercek) {
+      final devam = await AltSayfa.goster<bool>(context, builder: (c) => _OrnekGirisOnayi(saglayici: s));
+      if (devam != true || !mounted) return;
+    }
+    setState(() {
+      _hata = null;
+      _hataBilgi = false;
+    });
     try {
       await widget.oturum.saglayiciIleGiris(s);
     } on KimlikHatasi catch (h) {
-      if (mounted) setState(() => _hata = h.mesaj);
+      if (mounted) {
+        setState(() {
+          _hata = h.mesaj;
+          _hataBilgi = h.bilgi;
+        });
+      }
     }
   }
 
@@ -122,7 +141,7 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
                           ],
                         ),
                       ),
-                      const OrnekRozeti(),
+                      if (!widget.oturum.gercek) const OrnekRozeti(),
                     ],
                   ),
                 )
@@ -197,7 +216,7 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
                           ],
                         ),
                       ),
-                      if (_hata != null) ...[const SizedBox(height: 10), HataKutusu(mesaj: _hata!)],
+                      if (_hata != null) ...[const SizedBox(height: 10), HataKutusu(mesaj: _hata!, bilgi: _hataBilgi)],
                       const SizedBox(height: 16),
                       Yukselen(
                         gecikme: const Duration(milliseconds: 140),
@@ -232,7 +251,7 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
                           gecikme: const Duration(milliseconds: 260),
                           child: _HizliGirisDugmesi(
                             metin: 'Google ile devam et',
-                            ikon: const GoogleGIkonu(boyut: 22),
+                            ikon: SvgPicture.asset('assets/marka/google_g.svg', width: 22, height: 22),
                             onPressed: widget.oturum.mesgul ? null : () => _saglayici(GirisSaglayici.google),
                           ),
                         ),
@@ -250,8 +269,12 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
                       ],
                       const SizedBox(height: 22),
                       Text(
-                        'Devam ederek aşağıdaki metinleri kabul etmiş olursun. '
-                        'Bu sürümde hesabın yalnızca bu cihazda tutulur. Kamu Pusulası resmî bir kurum uygulaması değildir.',
+                        widget.oturum.gercek
+                            ? 'Devam ederek aşağıdaki metinleri kabul etmiş olursun. Hesabın (e-posta ve şifre özeti) '
+                                'güvenli sunucuda, profil bilgilerin ise yalnızca bu cihazda tutulur. '
+                                'Kamu Pusulası resmî bir kurum uygulaması değildir.'
+                            : 'Devam ederek aşağıdaki metinleri kabul etmiş olursun. '
+                                'Bu sürümde hesabın yalnızca bu cihazda tutulur. Kamu Pusulası resmî bir kurum uygulaması değildir.',
                         textAlign: TextAlign.center,
                         style: PusulaYazi.metin(
                           12,
@@ -464,8 +487,11 @@ class _SifreSifirlamaState extends State<_SifreSifirlama> {
       const SizedBox(height: 8),
       if (_gonderildi) ...[
         Text(
-          'Bu e-posta ile kayıtlı bir hesap varsa şifre sıfırlama bağlantısı gönderilir. '
-          'Örnek sürümde e-posta gönderilmez; gerçek sürümde bağlantı gelen kutuna düşecek.',
+          widget.oturum.gercek
+              ? 'Bu e-posta ile kayıtlı bir hesap varsa şifre sıfırlama bağlantısı gönderildi. '
+                  'Gelen kutunu (ve gereksiz klasörünü) kontrol et; bağlantıya telefonundan dokun.'
+              : 'Bu e-posta ile kayıtlı bir hesap varsa şifre sıfırlama bağlantısı gönderilir. '
+                  'Örnek sürümde e-posta gönderilmez; gerçek sürümde bağlantı gelen kutuna düşecek.',
           style: PusulaYazi.metin(14, renk: PusulaRenk.soluk, agirlik: FontWeight.w500).copyWith(height: 1.45),
         ),
         const SizedBox(height: 16),

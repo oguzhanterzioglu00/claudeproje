@@ -3,6 +3,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/baglanti.dart';
 import '../../core/bilesenler.dart';
+import '../../core/bos_durum.dart';
+import '../../core/iskelet.dart';
 import '../../core/tema.dart';
 import '../../core/yukselen.dart';
 import 'haber_kapagi.dart';
@@ -68,7 +70,13 @@ class _HaberlerSayfasiState extends State<HaberlerSayfasi> {
               return ListView(
                 padding: const EdgeInsets.fromLTRB(18, 24, 18, 24),
                 children: [
-                  const Yukselen(child: GeriBaslik(ustYazi: 'Kamu çalışanları için', baslik: 'Gündem')),
+                  Yukselen(
+                    child: GeriBaslik(
+                      ustYazi: 'Kamu çalışanları için',
+                      baslik: 'Gündem',
+                      sag: widget.kaynak is OrnekHaberKaynagi ? const OrnekRozeti() : const SizedBox.shrink(),
+                    ),
+                  ),
                   const SizedBox(height: 14),
                   Yukselen(
                     gecikme: const Duration(milliseconds: 80),
@@ -88,21 +96,18 @@ class _HaberlerSayfasiState extends State<HaberlerSayfasi> {
                   ),
                   const SizedBox(height: 14),
                   if (yukleniyor)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 40),
-                      child: Center(child: CircularProgressIndicator(color: PusulaRenk.lacivert)),
-                    )
+                    const IskeletListe()
                   else if (snap.hasError)
-                    HaberMesaji(
-                      ikon: LucideIcons.wifiOff,
+                    BosDurum(
+                      gorsel: BosGorselTuru.baglanti,
                       baslik: 'Haberler yüklenemedi',
                       alt: 'Bağlantını kontrol edip tekrar dene.',
                       dugme: 'Tekrar dene',
                       onDugme: _yenile,
                     )
                   else if (liste.isEmpty)
-                    const HaberMesaji(
-                      ikon: LucideIcons.newspaper,
+                    const BosDurum(
+                      gorsel: BosGorselTuru.haber,
                       baslik: 'Haber bulunamadı',
                       alt: 'Başka bir türü seçmeyi dene.',
                     )
@@ -184,12 +189,7 @@ class HaberKarti extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(color: HaberGorunumu.renk(haber.tur), borderRadius: BorderRadius.circular(14)),
-              child: Icon(HaberGorunumu.ikon(haber.tur), size: 22, color: HaberGorunumu.ikonRengi(haber.tur)),
-            ),
+            HaberKucukGorsel(haber: haber),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -214,47 +214,6 @@ class HaberKarti extends StatelessWidget {
       );
 }
 
-/// Boş/hata durumları için kart.
-class HaberMesaji extends StatelessWidget {
-  const HaberMesaji({super.key, required this.ikon, required this.baslik, required this.alt, this.dugme, this.onDugme});
-
-  final IconData ikon;
-  final String baslik;
-  final String alt;
-  final String? dugme;
-  final VoidCallback? onDugme;
-
-  @override
-  Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
-        decoration: BoxDecoration(
-          color: PusulaRenk.beyaz,
-          borderRadius: BorderRadius.circular(26),
-          border: Border.all(color: PusulaRenk.lacivert, width: 1.5),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(color: PusulaRenk.cizgi, borderRadius: BorderRadius.circular(16)),
-              child: Icon(ikon, size: 24, color: PusulaRenk.lacivert),
-            ),
-            const SizedBox(height: 8),
-            Text(baslik, style: PusulaYazi.metin(16, agirlik: FontWeight.w700)),
-            const SizedBox(height: 4),
-            Text(alt,
-                textAlign: TextAlign.center,
-                style: PusulaYazi.metin(13, renk: PusulaRenk.soluk, agirlik: FontWeight.w500)),
-            if (dugme != null) ...[
-              const SizedBox(height: 14),
-              BirincilDugme(metin: dugme!, onPressed: onDugme, yukseklik: 48),
-            ],
-          ],
-        ),
-      );
-}
-
 class _Ayrinti extends StatelessWidget {
   const _Ayrinti({required this.haber, required this.bugun, this.kaynagiAc});
 
@@ -270,6 +229,11 @@ class _Ayrinti extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: SizedBox(height: 168, child: HaberKapagi(haber: haber)),
+          ),
+          const SizedBox(height: 14),
           Row(children: [
             Hap(haber.tur.etiket, zemin: HaberGorunumu.renk(haber.tur), yazi: HaberGorunumu.ikonRengi(haber.tur), ikon: HaberGorunumu.ikon(haber.tur)),
             const SizedBox(width: 8),

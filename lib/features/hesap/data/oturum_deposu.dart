@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../domain/hesap.dart';
@@ -5,9 +7,58 @@ import 'kimlik_servisi.dart';
 
 /// Oturum durumunun tek kaynağı; kök ekran ve hesap ekranları buna dinler.
 class OturumDeposu extends ChangeNotifier {
-  OturumDeposu(this._servis);
+  OturumDeposu(this._servis) {
+    _abonelik = _servis.olaylar.listen(_olay);
+  }
 
   final KimlikServisi _servis;
+  StreamSubscription<KimlikOlayi>? _abonelik;
+
+  /// Gerçek bir arka uca bağlı mı? false ise hesaplar yalnızca cihazdadır ("örnek" sürüm).
+  bool get gercek => _servis.gercek;
+
+  /// Şifre sıfırlama bağlantısından gelindi: kullanıcıdan yeni şifre beklenir.
+  bool _sifreKurtarmaBekliyor = false;
+  bool get sifreKurtarmaBekliyor => _sifreKurtarmaBekliyor;
+
+  void _olay(KimlikOlayi o) {
+    switch (o.tur) {
+      case KimlikOlayTuru.oturumAcildi:
+        if (o.hesap != null && o.hesap!.id != _hesap?.id) {
+          _hesap = o.hesap;
+          notifyListeners();
+        }
+      case KimlikOlayTuru.oturumKapandi:
+        if (_hesap != null || _sifreKurtarmaBekliyor) {
+          _hesap = null;
+          _sifreKurtarmaBekliyor = false;
+          notifyListeners();
+        }
+      case KimlikOlayTuru.sifreKurtarma:
+        _hesap = o.hesap ?? _hesap;
+        _sifreKurtarmaBekliyor = true;
+        notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    _abonelik?.cancel();
+    super.dispose();
+  }
+
+  /// Sıfırlama bağlantısıyla gelen kullanıcı için yeni şifreyi belirler ve normal oturuma geçer.
+  Future<void> yeniSifreBelirle(String yeni) async {
+    await _calistir(() => _servis.kurtarmaSifresiBelirle(yeni));
+    _sifreKurtarmaBekliyor = false;
+    notifyListeners();
+  }
+
+  /// Şifre sıfırlamadan vazgeçildi: oturum kapatılır.
+  Future<void> kurtarmadanVazgec() async {
+    _sifreKurtarmaBekliyor = false;
+    await cikisYap();
+  }
 
   Hesap? _hesap;
   bool _yuklendi = false;

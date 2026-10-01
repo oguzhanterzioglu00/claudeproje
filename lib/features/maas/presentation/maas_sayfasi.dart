@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/bilesenler.dart';
+import '../../../core/hareket.dart';
 import '../../../core/sayi_adimi.dart';
 import '../../../core/metin.dart';
 import '../../../core/tema.dart';
@@ -353,35 +354,33 @@ class _SonucKarti extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  TweenAnimationBuilder<double>(
-                    tween: Tween<double>(end: net),
-                    duration: hareketsiz ? Duration.zero : const Duration(milliseconds: 550),
-                    curve: Curves.easeOutCubic,
-                    builder: (context, v, _) => Text(
-                      liraTam(v),
-                      maxLines: 1,
-                      style: PusulaYazi.baslik(
-                        44,
-                        renk: PusulaRenk.beyaz,
-                        aralik: -2,
-                      ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
-                    ),
+                  SayiSayaci(
+                    deger: net,
+                    bicim: liraTam,
+                    stil: PusulaYazi.baslik(
+                      44,
+                      renk: PusulaRenk.beyaz,
+                      aralik: -2,
+                    ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
                   ),
                   const SizedBox(height: 10),
+                  // Net/kesinti çubuğu: oran değişince amber kısım akıcı biçimde uzar ya da kısalır.
                   ClipRRect(
                     borderRadius: BorderRadius.circular(4),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: netFlex,
-                          child: Container(height: 8, color: PusulaRenk.amber),
-                        ),
-                        const SizedBox(width: 2),
-                        Expanded(
-                          flex: 1000 - netFlex,
-                          child: Container(height: 8, color: PusulaRenk.lacivert),
-                        ),
-                      ],
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween<double>(end: netFlex / 1000),
+                      duration: hareketsiz ? Duration.zero : const Duration(milliseconds: 650),
+                      curve: Curves.easeOutCubic,
+                      builder: (context, oran, _) {
+                        final amber = (oran * 1000).round().clamp(1, 999);
+                        return Row(
+                          children: [
+                            Expanded(flex: amber, child: Container(height: 8, color: PusulaRenk.amber)),
+                            const SizedBox(width: 2),
+                            Expanded(flex: 1000 - amber, child: Container(height: 8, color: PusulaRenk.lacivert)),
+                          ],
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -406,9 +405,11 @@ class _EtiketDeger extends StatelessWidget {
   final double deger;
 
   @override
-  Widget build(BuildContext context) => Text(
-    '$etiket ${liraTam(deger)}',
-    style: PusulaYazi.metin(12, renk: const Color(0xFFDCE3FF), agirlik: FontWeight.w700),
+  Widget build(BuildContext context) => SayiSayaci(
+    deger: deger,
+    bicim: (v) => '$etiket ${liraTam(v)}',
+    sure: const Duration(milliseconds: 800),
+    stil: PusulaYazi.metin(12, renk: const Color(0xFFDCE3FF), agirlik: FontWeight.w700),
   );
 }
 

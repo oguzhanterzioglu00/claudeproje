@@ -50,7 +50,7 @@ class _BecayisDilekceSayfasiState extends State<BecayisDilekceSayfasi> {
           padding: const EdgeInsets.fromLTRB(18, 24, 18, 28),
           children: [
             const Yukselen(
-              child: GeriBaslik(ustYazi: '657 sayılı Kanun · Madde 73', baslik: 'Dilekçe'),
+              child: GeriBaslik(ustYazi: '657 sayılı Kanun · Madde 73', baslik: 'Dilekçe', sag: OrnekRozeti()),
             ),
             const SizedBox(height: 14),
             const Yukselen(

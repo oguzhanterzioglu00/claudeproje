@@ -17,6 +17,7 @@ import '../data/profil_deposu.dart';
 import '../domain/profil.dart';
 import 'fotograf_sayfasi.dart';
 import 'profil_alanlari.dart';
+import '../../yedek/yedek_paketi.dart';
 import 'secim_sayfasi.dart';
 
 /// Profil: statü, görev bilgileri ve (memurlar için) becayiş/dilekçe bilgileri.
@@ -33,8 +34,12 @@ class ProfilSayfasi extends StatefulWidget {
         this.ilanTakibi,
         this.kayitliIlanlar,
     this.haberTakibi,
+    this.yedek,
     this.tarihSec = _varsayilanTarihSec,
   });
+
+  /// Verilirse Ayarlar'da yedekleme ve geri yükleme görünür.
+  final YedekBaglami? yedek;
 
   final ProfilDeposu depo;
 
@@ -322,7 +327,7 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                             hatirlatici: widget.hatirlatici,
                                                         ilanTakibi: widget.ilanTakibi,
                             haberTakibi: widget.haberTakibi,
-
+                            yedek: widget.yedek,
                           ),
                         ),
                       ),

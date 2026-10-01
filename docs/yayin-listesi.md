@@ -64,3 +64,9 @@ Yerelde imzalamak istersen `android/key.properties` (git'e girmez): `storeFile`,
   yıl/dönem değişince güncellenmelidir.
 - Kullanıcı sayısı arttığında çökme raporu ve sunucu tabanlı bildirim (FCM) gerekir; ikisi de yasal metinleri
   değiştirir.
+- Yedek kodu profil bilgilerini (ad, sicil no, kurum...) içerir ve panoya kopyalanır; kullanıcı kodu kendi sorumluluğunda
+  saklar. Profil fotoğrafı yedeğe girmez. Mağaza metninde "bulut yedeği" denmemeli: yedek cihazlar arası senkron değil,
+  elle aktarımdır.
+- Dilekçe şablonları genel örnektir; kurumların kendi form kuralları olabilir. Metinlerdeki madde atıfları
+  `bilgi_bankasi.dart`'taki doğrulanmış maddelerdir (yeni şablon eklerken kaynağıyla doğrula).
+- İlan alarmı yalnızca Android'de uygulama kapalıyken (arka plan işiyle, gecikmeli) çalışır; iOS'ta uygulama açıkken.

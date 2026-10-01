@@ -18,10 +18,12 @@ class HesapBolumu extends StatelessWidget {
   /// Hesap silinirken cihazdaki kullanıcı verilerini de temizler (profil, fotoğraf).
   final Future<void> Function()? veriSil;
 
-  static String _saglayiciAciklamasi(Hesap h) => switch (h.saglayici) {
+  String _saglayiciAciklamasi(Hesap h) => switch (h.saglayici) {
         GirisSaglayici.eposta => h.eposta,
-        GirisSaglayici.google => 'Google ile giriş (örnek)',
-        GirisSaglayici.apple => 'Apple ile giriş (örnek)',
+        GirisSaglayici.google => h.eposta.isEmpty
+            ? 'Google ile giriş${oturum.gercek ? '' : ' (örnek)'}'
+            : 'Google ile giriş · ${h.eposta}',
+        GirisSaglayici.apple => 'Apple ile giriş${oturum.gercek ? '' : ' (örnek)'}',
       };
 
   static IconData _ikon(GirisSaglayici s) => switch (s) {

@@ -17,7 +17,7 @@ void main() {
 
   testWidgets('özel düğmeler ekran okuyucu için dokunma eylemi taşır', (tester) async {
     final tutamak = tester.ensureSemantics();
-    tester.view.physicalSize = const Size(390, 844);
+    tester.view.physicalSize = const Size(390, 1100);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 

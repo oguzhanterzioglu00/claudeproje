@@ -1,15 +1,19 @@
 import 'package:flutter/foundation.dart' show LicenseEntryWithLineBreaks, LicenseRegistry;
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/depolama.dart';
 import 'core/tema.dart';
+import 'core/sunucu_ayari.dart';
 import 'core/telefon_cercevesi.dart';
 import 'core/akis.dart';
 import 'features/haberler/haber_kaynagi.dart';
 import 'features/hatirlatici/hatirlatici_servisi.dart';
 import 'features/hesap/data/kimlik_servisi.dart';
 import 'features/hesap/data/oturum_deposu.dart';
+import 'features/hesap/data/supabase_kimlik_istemcisi.dart';
+import 'features/hesap/data/supabase_kimlik_servisi.dart';
 import 'features/hesap/data/yerel_kimlik_servisi.dart';
 import 'features/ilanlar/arka_plan.dart';
 import 'features/ilanlar/ilan_kaynagi.dart';
@@ -21,7 +25,16 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _yaziTipiLisanslariniKaydet();
   await WorkmanagerZamanlayici.hazirla();
-  runApp(const PusulaUygulamasi());
+  // Arka uç ayarı verilmişse gerçek hesaplar (e-posta, Google); verilmemişse cihaz içi örnek hesap.
+  KimlikServisi? kimlik;
+  if (SunucuAyari.tanimli) {
+    await Supabase.initialize(url: SunucuAyari.url, publishableKey: SunucuAyari.anahtar);
+    kimlik = SupabaseKimlikServisi(
+      SupabaseKimlikIstemcisi(Supabase.instance.client),
+      googleSunucuIstemcisi: SunucuAyari.googleWebIstemcisi,
+    );
+  }
+  runApp(PusulaUygulamasi(kimlik: kimlik));
 }
 
 /// Uygulamaya gömülü yazı tiplerinin (SIL Open Font License 1.1) lisans sayfasında görünmesi için.
@@ -46,7 +59,7 @@ class PusulaUygulamasi extends StatefulWidget {
     this.depolama = const YerelDepolama(),
     this.profilKaydiUret,
     this.fotografKaynagi = const ImagePickerFotografKaynagi(),
-    this.appleGoster = true,
+    this.appleGoster = false,
     this.sosyalGiris = false,
     this.becayisAcik = false,
     this.hatirlatici,
@@ -55,7 +68,7 @@ class PusulaUygulamasi extends StatefulWidget {
     this.arkaPlan = const WorkmanagerZamanlayici(),
   });
 
-  /// Boşsa cihazda çalışan örnek servis ([YerelKimlikServisi]).
+  /// Boşsa cihazda çalışan örnek servis ([YerelKimlikServisi]); gerçek sürümde [SupabaseKimlikServisi] verilir.
   final KimlikServisi? kimlik;
   final AnahtarDeger depolama;
   final ProfilKaydi Function(String hesapId)? profilKaydiUret;
@@ -82,7 +95,7 @@ class PusulaUygulamasi extends StatefulWidget {
   State<PusulaUygulamasi> createState() => _PusulaUygulamasiState();
 }
 
-class _PusulaUygulamasiState extends State<PusulaUygulamasi> {
+class _PusulaUygulamasiState extends State<PusulaUygulamasi> with WidgetsBindingObserver {
   late final OturumDeposu _oturum = OturumDeposu(widget.kimlik ?? YerelKimlikServisi(depolama: widget.depolama));
 
   late final HatirlaticiServisi _hatirlatici = widget.hatirlatici ?? YerelHatirlaticiServisi();
@@ -94,10 +107,21 @@ class _PusulaUygulamasiState extends State<PusulaUygulamasi> {
   void initState() {
     super.initState();
     _oturum.yukle();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  /// Tarayıcıdaki Google girişinden vazgeçilip uygulamaya dönülürse bekleyen giriş iptal edilir.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState durum) {
+    if (durum == AppLifecycleState.resumed) {
+      final k = widget.kimlik;
+      if (k is SupabaseKimlikServisi) k.uygulamaOnePlanaGeldi();
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _oturum.dispose();
     super.dispose();
   }

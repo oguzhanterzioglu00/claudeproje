@@ -40,7 +40,7 @@ jobs:
 
       # GitHub Pages proje sitesi alt yolda (/<repo>/) yayınlanır.
       - name: Web derlemesi
-        run: flutter build web --release --no-web-resources-cdn --base-href "/${{ github.event.repository.name }}/"
+        run: flutter build web --release --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }} --no-web-resources-cdn --base-href "/${{ github.event.repository.name }}/"
 
       # Mağazaların istediği herkese açık sayfalar (gizlilik, koşullar, hesap silme); metinler uygulamadan üretilir.
       - name: Yasal sayfalar

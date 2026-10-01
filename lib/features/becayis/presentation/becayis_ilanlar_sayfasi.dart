@@ -50,7 +50,7 @@ class _BecayisIlanlarSayfasiState extends State<BecayisIlanlarSayfasi> {
                 padding: const EdgeInsets.fromLTRB(18, 24, 18, 96),
                 children: [
                   Yukselen(
-                    child: GeriBaslik(ustYazi: '${liste.length} açık ilan', baslik: 'İlanları gör'),
+                    child: GeriBaslik(ustYazi: '${liste.length} açık ilan', baslik: 'İlanları gör', sag: const OrnekRozeti()),
                   ),
                   const SizedBox(height: 14),
                   Yukselen(

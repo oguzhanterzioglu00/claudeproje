@@ -6,6 +6,7 @@ import '../../core/tema.dart';
 import '../../core/yukselen.dart';
 import 'asistan_servisi.dart';
 import 'bilgi_bankasi.dart';
+import 'mevzuat_arama_sayfasi.dart';
 
 /// "Hakkım ne?": soru sorulur, cevap ilgili mevzuat maddesiyle birlikte gelir.
 class AsistanSayfasi extends StatefulWidget {
@@ -119,9 +120,9 @@ class _AsistanSayfasiState extends State<AsistanSayfasi> {
   Widget build(BuildContext context) => SafeArea(
     child: Column(
       children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(18, 24, 18, 0),
-          child: Yukselen(child: _Ust()),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(18, 24, 18, 0),
+          child: Yukselen(child: _Ust(kitle: widget.kitle)),
         ),
         const Padding(
           padding: EdgeInsets.fromLTRB(18, 14, 18, 0),
@@ -220,7 +221,9 @@ class _AsistanSayfasiState extends State<AsistanSayfasi> {
 }
 
 class _Ust extends StatelessWidget {
-  const _Ust();
+  const _Ust({this.kitle});
+
+  final Kitle? kitle;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -245,7 +248,33 @@ class _Ust extends StatelessWidget {
         ),
       ),
       const Hap('BETA', zemin: PusulaRenk.cizgi, yazi: PusulaRenk.lacivert),
+      const SizedBox(width: 8),
+      Semantics(
+        button: true,
+        label: 'Mevzuatta ara',
+        excludeSemantics: true,
+        onTap: () => _ara(context),
+        child: Material(
+          color: PusulaRenk.beyaz,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: const BorderSide(color: PusulaRenk.lacivert, width: 1.5),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: () => _ara(context),
+            child: const SizedBox.square(
+              dimension: 42,
+              child: Icon(LucideIcons.bookSearch, size: 20, color: PusulaRenk.lacivert),
+            ),
+          ),
+        ),
+      ),
     ],
+  );
+
+  void _ara(BuildContext context) => Navigator.of(context).push(
+    MaterialPageRoute<void>(builder: (_) => MevzuatAramaSayfasi(kitle: kitle)),
   );
 }
 

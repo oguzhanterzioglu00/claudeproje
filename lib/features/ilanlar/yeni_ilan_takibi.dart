@@ -6,6 +6,7 @@ import '../../core/depolama.dart';
 import '../hatirlatici/hatirlatici_servisi.dart';
 import '../profil/domain/profil.dart';
 import 'arka_plan.dart';
+import 'ilan_alarmi.dart';
 import 'ilan_kaynagi.dart';
 import 'ilan_modeli.dart';
 
@@ -137,12 +138,16 @@ class YeniIlanTakibi extends ChangeNotifier {
 
   /// Bildirimi açar/kapatır. Açarken izin istenir (verilmezse açılmaz, false döner) ve mevcut ilanlar
   /// "görüldü" sayılır: yalnızca bundan sonra yayımlananlar bildirilir.
-  Future<bool> ayarla(bool ac, {Statu? statu}) async {
+  ///
+  /// [yalnizcaAlarm] true ise tür bildirimleri açılmaz (tür listesi boş kalır): yalnızca kurulan alarmlara
+  /// uyan ilanlar bildirilir. Kullanıcı daha önce tür seçtiyse seçimi korunur.
+  Future<bool> ayarla(bool ac, {Statu? statu, bool yalnizcaAlarm = false}) async {
     if (ac) {
       if (!await _servis.izinIste()) return false;
+      if (_tercih.acik && yalnizcaAlarm) return true;
       _tercih = _tercih.kopya(
         acik: true,
-        turler: _tercih.turler.isEmpty ? IlanBildirimTercihi.varsayilan(statu) : null,
+        turler: _tercih.turler.isEmpty && !yalnizcaAlarm ? IlanBildirimTercihi.varsayilan(statu) : null,
       );
       await _kaydet();
       notifyListeners();
@@ -227,27 +232,44 @@ class YeniIlanTakibi extends ChangeNotifier {
       }
       final gorulen = await _gorulenler();
       final bugun = _simdi();
-      final yeniler = [
-        for (final i in ilanlar)
-          if (!gorulen.contains(i.id) && _tercih.turler.contains(i.tur) && i.acikMi(bugun)) i,
-      ];
+      final alarmlar = await IlanAlarmlari.oku(_depolama, _hesapId);
+      // Yeni ve açık ilanlardan: seçili türde olanlar ya da bir alarma uyanlar bildirilir.
+      final eslesen = <(KamuIlani, IlanAlarmi?)>[];
+      for (final i in ilanlar) {
+        if (gorulen.contains(i.id) || !i.acikMi(bugun)) continue;
+        IlanAlarmi? alarm;
+        for (final a in alarmlar) {
+          if (a.eslesir(i)) {
+            alarm = a;
+            break;
+          }
+        }
+        if (alarm != null || _tercih.turler.contains(i.tur)) eslesen.add((i, alarm));
+      }
       await _gorulenleriYaz({...gorulen, for (final i in ilanlar) i.id});
-      if (yeniler.isEmpty) return (durum: KontrolDurumu.yeniYok, bildirim: 0, bakilan: ilanlar.length);
-      if (yeniler.length <= enFazlaBireysel) {
+      if (eslesen.isEmpty) return (durum: KontrolDurumu.yeniYok, bildirim: 0, bakilan: ilanlar.length);
+      if (eslesen.length <= enFazlaBireysel) {
         var sira = 0;
-        for (final i in yeniler) {
+        for (final (i, alarm) in eslesen) {
           await _servis.hemenGoster(
             id: bildirimKimligi + sira++,
-            baslik: i.kurum.isEmpty ? 'Yeni kamu ilanı' : 'Yeni ilan: ${i.kurum}',
-            govde: i.baslik,
+            baslik: alarm != null
+                ? 'Alarm: ${alarm.ad}'
+                : i.kurum.isEmpty
+                ? 'Yeni kamu ilanı'
+                : 'Yeni ilan: ${i.kurum}',
+            govde: alarm != null && i.kurum.isNotEmpty ? '${i.kurum} · ${i.baslik}' : i.baslik,
           );
         }
-        return (durum: KontrolDurumu.bildirildi, bildirim: yeniler.length, bakilan: ilanlar.length);
+        return (durum: KontrolDurumu.bildirildi, bildirim: eslesen.length, bakilan: ilanlar.length);
       }
+      final alarmli = eslesen.where((e) => e.$2 != null).length;
       await _servis.hemenGoster(
         id: bildirimKimligi,
-        baslik: '${yeniler.length} yeni kamu ilanı',
-        govde: '${[for (final i in yeniler.take(2)) i.kurum.isEmpty ? i.baslik : i.kurum].join(', ')} ve diğerleri',
+        baslik: '${eslesen.length} yeni kamu ilanı',
+        govde:
+            '${[for (final (i, _) in eslesen.take(2)) i.kurum.isEmpty ? i.baslik : i.kurum].join(', ')} ve diğerleri'
+            '${alarmli > 0 ? ' · $alarmli tanesi alarmına uyuyor' : ''}',
       );
       return (durum: KontrolDurumu.bildirildi, bildirim: 1, bakilan: ilanlar.length);
     } finally {
@@ -272,6 +294,7 @@ class YeniIlanTakibi extends ChangeNotifier {
     _tercih = const IlanBildirimTercihi();
     await _depolama.sil(_tercihAnahtari);
     await _depolama.sil(_gorulenAnahtari);
+    await _depolama.sil(IlanAlarmlari.anahtar(_hesapId));
     await _arkaPlaniGuncelle();
     notifyListeners();
   }

@@ -23,6 +23,16 @@ class YerelKimlikServisi implements KimlikServisi {
   /// PBKDF2 tur sayısı (testlerde küçültülebilir).
   final int tur;
 
+  @override
+  bool get gercek => false;
+
+  @override
+  Stream<KimlikOlayi> get olaylar => const Stream.empty();
+
+  @override
+  Future<void> kurtarmaSifresiBelirle(String yeniSifre) async =>
+      throw const KimlikHatasi('Bu örnek sürümde şifre sıfırlama bağlantısı yok.');
+
   static const _hesaplarAnahtari = 'hesaplar_v1';
   static const _oturumAnahtari = 'oturum_v1';
 

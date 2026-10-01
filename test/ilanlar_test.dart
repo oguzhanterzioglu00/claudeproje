@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pusula/core/iskelet.dart';
 import 'package:pusula/core/tema.dart';
 import 'package:pusula/features/ilanlar/ilan_kaynagi.dart';
 import 'package:pusula/features/ilanlar/ilan_modeli.dart';
@@ -80,7 +81,7 @@ void main() {
       ));
       await tester.pump();
       expect(find.text('İlanlar yükleniyor'), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(IskeletListe), findsOneWidget);
 
       await tester.pump(const Duration(milliseconds: 150));
       await tester.pumpAndSettle();

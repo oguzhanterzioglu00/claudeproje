@@ -11,6 +11,8 @@ import '../ilanlar/ilan_modeli.dart';
 import '../ilanlar/yeni_ilan_takibi.dart';
 import '../hesap/domain/hesap.dart';
 import '../profil/domain/profil.dart';
+import '../yedek/yedek_paketi.dart';
+import '../yedek/yedek_sayfasi.dart';
 import 'kisisel_veri_dokumu.dart';
 import 'uygulama_bilgisi.dart';
 import 'yasal_metinler.dart';
@@ -26,7 +28,11 @@ class AyarlarSayfasi extends StatelessWidget {
     this.hatirlatici,
     this.ilanTakibi,
     this.haberTakibi,
+    this.yedek,
   });
+
+  /// Verilirse "Yedekle ve aktar" bölümü görünür.
+  final YedekBaglami? yedek;
 
   final Hesap? hesap;
   final Profil? profil;
@@ -57,6 +63,30 @@ class AyarlarSayfasi extends StatelessWidget {
         backgroundColor: PusulaRenk.lacivert,
         behavior: SnackBarBehavior.floating,
       ),
+    );
+  }
+
+  void _bildir(BuildContext context, String metin) =>
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(metin, style: PusulaYazi.metin(14, renk: PusulaRenk.beyaz, agirlik: FontWeight.w600)),
+          backgroundColor: PusulaRenk.lacivert,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+  Future<void> _yedegiKopyala(BuildContext context) async {
+    final paket = yedek!.olustur();
+    if (paket.bos) {
+      _bildir(context, 'Yedeklenecek bir şey yok: profil, kayıtlı ilan ya da alarm ekleyince yedek alabilirsin.');
+      return;
+    }
+    await Clipboard.setData(ClipboardData(text: paket.kodla()));
+    if (!context.mounted) return;
+    _bildir(
+      context,
+      'Yedek kodu panoya kopyalandı (${paket.ozet}). Kendine mesaj olarak gönder; kodu başkasıyla paylaşma, '
+      'profil bilgilerini içerir.',
     );
   }
 
@@ -104,6 +134,22 @@ class AyarlarSayfasi extends StatelessWidget {
             alt: 'Cihazdaki bilgilerinin dökümünü panoya al',
             onTap: () => _verileriKopyala(context),
           ),
+          if (yedek != null) ...[
+            const SizedBox(height: 8),
+            _Satir(
+              ikon: LucideIcons.archive,
+              metin: 'Yedeği kopyala',
+              alt: 'Profil, kayıtlı ilanlar ve alarmların için tek kod',
+              onTap: () => _yedegiKopyala(context),
+            ),
+            const SizedBox(height: 8),
+            _Satir(
+              ikon: LucideIcons.archiveRestore,
+              metin: 'Yedekten yükle',
+              alt: 'Başka telefondan aldığın kodla verilerini getir',
+              onTap: () => AltSayfa.goster<void>(context, builder: (c) => YedekYukleSayfasi(baglam: yedek!)),
+            ),
+          ],
           const SizedBox(height: 8),
           const _Bilgi(
             'Profilini ve hesabını silmek için Profil sayfasındaki "Profil bilgilerimi sil" ve '

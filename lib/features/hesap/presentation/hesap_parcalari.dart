@@ -51,9 +51,12 @@ class SifreKurallari extends StatelessWidget {
 }
 
 class HataKutusu extends StatelessWidget {
-  const HataKutusu({super.key, required this.mesaj});
+  const HataKutusu({super.key, required this.mesaj, this.bilgi = false});
 
   final String mesaj;
+
+  /// true ise hata değil bilgi mesajıdır (yeşil, onay simgesi).
+  final bool bilgi;
 
   @override
   Widget build(BuildContext context) => Semantics(
@@ -61,17 +64,17 @@ class HataKutusu extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFFFCE8E4),
+            color: bilgi ? PusulaRenk.yesilZemin : const Color(0xFFFCE8E4),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(LucideIcons.circleAlert, size: 18, color: PusulaRenk.kirmizi),
+              Icon(bilgi ? LucideIcons.mailCheck : LucideIcons.circleAlert, size: 18, color: bilgi ? PusulaRenk.yesilYazi : PusulaRenk.kirmizi),
               const SizedBox(width: 8),
               Expanded(
                 child:
-                    Text(mesaj, style: PusulaYazi.metin(13, renk: const Color(0xFF8A2A1B), agirlik: FontWeight.w700)),
+                    Text(mesaj, style: PusulaYazi.metin(13, renk: bilgi ? PusulaRenk.yesilYazi : const Color(0xFF8A2A1B), agirlik: FontWeight.w700)),
               ),
             ],
           ),
