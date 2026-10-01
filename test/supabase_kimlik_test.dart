@@ -126,8 +126,9 @@ void main() {
       final h = await servis.kayitOl(eposta: ' ayse@ornek.com ', sifre: 'Deneme123');
       expect(h.eposta, 'ayse@ornek.com', reason: 'baştaki/sondaki boşluk atılır');
       expect(h.saglayici, GirisSaglayici.eposta);
-      expect(istemci.sonYonlendirme, SupabaseKimlikServisi.geriDonusAdresi);
-      expect(istemci.sonYonlendirme, 'tr.com.ayasyazilim.pusula://giris-geri-donus');
+      // E-posta bağlantıları uygulama-içi adrese değil, herkese açık köprü sayfasına iner.
+      expect(istemci.sonYonlendirme, SupabaseKimlikServisi.epostaDonusAdresi);
+      expect(istemci.sonYonlendirme, 'https://oguzhanterzioglu00.github.io/claudeproje/auth-donus.html');
     });
 
     test('e-posta doğrulaması gerekiyorsa bilgi mesajı fırlatılır (hata değil)', () async {

@@ -22,7 +22,12 @@ Hesap açma, anahtar üretme gibi işlemleri başkası sizin yerinize yapamaz.
 
 ```
 tr.com.ayasyazilim.pusula://giris-geri-donus
+https://oguzhanterzioglu00.github.io/claudeproje/auth-donus.html
 ```
+
+İkincisi, e-postadaki bağlantıların (doğrulama, şifre sıfırlama) indiği köprü sayfasıdır (`web/auth-donus.html`):
+telefonda uygulamayı açar, bilgisayarda "telefonunda aç" açıklaması gösterir. Bu adres listede yoksa Supabase
+kullanıcıyı Site URL'ye atar.
 
 (Tarayıcıdan, e-posta bağlantısından ve Google girişinden uygulamaya dönüş bu adresle olur. **Site URL** olarak
 `https://oguzhanterzioglu00.github.io/claudeproje/` yazabilirsiniz.)

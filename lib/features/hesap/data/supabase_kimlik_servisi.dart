@@ -74,6 +74,7 @@ class SupabaseKimlikServisi implements KimlikServisi {
   SupabaseKimlikServisi(
     this._istemci, {
     this.yonlendirme = geriDonusAdresi,
+    this.epostaYonlendirme = epostaDonusAdresi,
     this.girisZamanAsimi = const Duration(minutes: 3),
     this.geriDonusBeklemesi = const Duration(seconds: 6),
     this.googleSunucuIstemcisi = '',
@@ -82,8 +83,14 @@ class SupabaseKimlikServisi implements KimlikServisi {
   /// Android'de tarayıcıdan uygulamaya dönüş adresi (AndroidManifest'teki intent-filter ile aynı olmalı).
   static const geriDonusAdresi = 'tr.com.ayasyazilim.pusula://giris-geri-donus';
 
+  /// E-postadaki bağlantıların (doğrulama, şifre sıfırlama) indiği herkese açık köprü sayfası (`web/auth-donus.html`).
+  /// Uygulama-içi adrese doğrudan yönlendirmek bilgisayarda ya da uygulamasız cihazda boş sayfa bırakırdı; köprü
+  /// telefonda uygulamayı açar, diğer yerlerde ne yapılacağını anlatır.
+  static const epostaDonusAdresi = 'https://oguzhanterzioglu00.github.io/claudeproje/auth-donus.html';
+
   final KimlikIstemcisi _istemci;
   final String yonlendirme;
+  final String epostaYonlendirme;
   final Duration girisZamanAsimi;
 
   /// Google Cloud Web istemci kimliği. Doluysa Google girişi önce cihazın yerel hesap seçicisiyle denenir.
@@ -158,7 +165,7 @@ class SupabaseKimlikServisi implements KimlikServisi {
 
   @override
   Future<Hesap> kayitOl({required String eposta, required String sifre}) => _hataCevir(() async {
-    final k = await _istemci.kayitOl(eposta.trim(), sifre, yonlendirme: yonlendirme);
+    final k = await _istemci.kayitOl(eposta.trim(), sifre, yonlendirme: epostaYonlendirme);
     if (k == null) throw EpostaDogrulamaBekleniyor(eposta.trim());
     return _hesap(k);
   });
@@ -230,7 +237,7 @@ class SupabaseKimlikServisi implements KimlikServisi {
 
   @override
   Future<void> sifreSifirlamaIste(String eposta) => _hataCevir(
-    () => _istemci.sifreSifirlamaIste(eposta.trim(), yonlendirme: yonlendirme),
+    () => _istemci.sifreSifirlamaIste(eposta.trim(), yonlendirme: epostaYonlendirme),
   );
 
   @override
