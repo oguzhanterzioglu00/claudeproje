@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart' show SignInWithAppleButton, SignInWithAppleButtonStyle;
 
 import '../../../core/bilesenler.dart';
 import '../../../core/logo.dart';
@@ -247,25 +248,31 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
                           ),
                         ),
                         const SizedBox(height: 16),
+                        // App Store 4.8 / Apple HIG: Apple düğmesi resmî logo ve stille, en az Google kadar belirgin
+                        // (aynı boy, üstte) gösterilir. Düğme yalnızca iOS'ta çıkar (`appleGoster`).
+                        if (widget.appleGoster) ...[
+                          Yukselen(
+                            gecikme: const Duration(milliseconds: 260),
+                            child: SignInWithAppleButton(
+                              text: 'Apple ile devam et',
+                              height: 56,
+                              borderRadius: const BorderRadius.all(Radius.circular(22)),
+                              style: SignInWithAppleButtonStyle.black,
+                              onPressed: () {
+                                if (!widget.oturum.mesgul) _saglayici(GirisSaglayici.apple);
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
                         Yukselen(
-                          gecikme: const Duration(milliseconds: 260),
+                          gecikme: const Duration(milliseconds: 320),
                           child: _HizliGirisDugmesi(
                             metin: 'Google ile devam et',
                             ikon: SvgPicture.asset('assets/marka/google_g.svg', width: 22, height: 22),
                             onPressed: widget.oturum.mesgul ? null : () => _saglayici(GirisSaglayici.google),
                           ),
                         ),
-                        if (widget.appleGoster) ...[
-                          const SizedBox(height: 12),
-                          Yukselen(
-                            gecikme: const Duration(milliseconds: 320),
-                            child: _HizliGirisDugmesi(
-                              metin: 'Apple ile devam et',
-                              ikon: const Icon(LucideIcons.apple, size: 22, color: PusulaRenk.lacivert),
-                              onPressed: widget.oturum.mesgul ? null : () => _saglayici(GirisSaglayici.apple),
-                            ),
-                          ),
-                        ],
                       ],
                       const SizedBox(height: 22),
                       Text(

@@ -1,0 +1,59 @@
+# Codemagic: iOS derlemesi ve TestFlight'a yükleme (Mac gerekmeden).
+#
+# Bir kez yapılacak kurulum (docs/ios-codemagic.md):
+#  1. Codemagic → Teams → Integrations → App Store Connect: bir API anahtarı ekle ve adını "Kamu_Pusulasi" yap.
+#  2. App Store Connect'te `tr.com.ayasyazilim.pusula` paket kimliğiyle bir uygulama kaydı oluştur.
+#  3. Codemagic'te bu depoyu ekle, "ios-testflight" iş akışını elle başlat.
+#
+# Aşağıdaki üç --dart-define değeri herkese açıktır (istemciye zaten gömülmek üzere tasarlanmıştır); gizli
+# anahtar/secret burada ASLA yer almaz.
+workflows:
+  ios-testflight:
+    name: Kamu Pusulası iOS (TestFlight)
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    integrations:
+      app_store_connect: Kamu_Pusulasi
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: tr.com.ayasyazilim.pusula
+      vars:
+        BUNDLE_ID: tr.com.ayasyazilim.pusula
+        SUPABASE_URL: https://ajuhcblicpnosywlssqn.supabase.co
+        SUPABASE_PUBLISHABLE_KEY: sb_publishable_6EWWelMLp5wiymXh2z_6xQ_nc2gpsT1
+        GOOGLE_WEB_CLIENT_ID: 853772721063-lcjo5735dlod2b1has5n0epebj42nifc.apps.googleusercontent.com
+    scripts:
+      - name: Bağımlılıklar
+        script: flutter pub get
+      - name: Analiz ve testler
+        script: |
+          flutter analyze
+          flutter test
+      - name: Pod'ları kur
+        script: |
+          find . -name "Podfile" -execdir pod install \;
+      - name: İmzalama (otomatik, App Store Connect API anahtarıyla)
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          keychain add-certificates
+          xcode-project use-profiles
+      - name: IPA derle
+        script: |
+          flutter build ipa --release \
+            --build-number=$PROJECT_BUILD_NUMBER \
+            --export-options-plist=/Users/builder/export_options.plist \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY="$SUPABASE_PUBLISHABLE_KEY" \
+            --dart-define=GOOGLE_WEB_CLIENT_ID="$GOOGLE_WEB_CLIENT_ID"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
