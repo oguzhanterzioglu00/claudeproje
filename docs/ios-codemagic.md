@@ -7,8 +7,8 @@ Mac gerekmez. Derleme `codemagic.yaml` dosyasındaki `ios-testflight` iş akış
    Developer'da hazır, Sign In with Apple açık).
 2. **App Store Connect → Kullanıcılar ve Erişim → Entegrasyonlar → App Store Connect API → anahtar oluştur**
    (rol: *App Manager*). `.p8` dosyası bir kez indirilir; gizlidir, depoya koyulmaz.
-3. **Codemagic → Teams → Integrations → App Store Connect**: Issuer ID, Key ID ve `.p8` yüklenir; ad **`Kamu_Pusulasi`**
-   olmalı (yaml'daki ad).
+3. **Codemagic → Settings → Integrations → Developer Portal**: Issuer ID, Key ID ve `.p8` yüklenir. Şu an **`Codemagic`**
+   adlı bir anahtar kurulu (Key `G5GDW7U59W`); yaml'daki `app_store_connect:` değeri bu adla aynı olmalıdır.
 4. **Codemagic → Add application**: bu depo (GitHub) seçilir, "codemagic.yaml" ile yapılandırılır.
 5. `ios-testflight` iş akışını elle başlat. İlk derlemede imzalama dosyaları otomatik oluşturulur.
 
