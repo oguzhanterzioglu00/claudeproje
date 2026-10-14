@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform, kIsWeb;
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
@@ -25,7 +26,12 @@ class SupabaseKimlikIstemcisi implements KimlikIstemcisi {
     final meta = u.userMetadata ?? const <String, dynamic>{};
     final ad = (meta['full_name'] ?? meta['name'] ?? '').toString();
     final saglayici = (u.appMetadata['provider'] ?? 'email').toString();
-    return IstemciKullanicisi(id: u.id, eposta: u.email ?? '', ad: ad, saglayici: saglayici);
+    return IstemciKullanicisi(
+      id: u.id,
+      eposta: u.email ?? '',
+      ad: ad,
+      saglayici: saglayici,
+    );
   }
 
   @override
@@ -38,11 +44,16 @@ class SupabaseKimlikIstemcisi implements KimlikIstemcisi {
           case sb.AuthChangeEvent.signedIn:
           case sb.AuthChangeEvent.initialSession:
             final k = _kullanici(s.session?.user);
-            return k == null ? null : IstemciOlayi(IstemciOlayTuru.girisYapti, k);
+            return k == null
+                ? null
+                : IstemciOlayi(IstemciOlayTuru.girisYapti, k);
           case sb.AuthChangeEvent.signedOut:
             return const IstemciOlayi(IstemciOlayTuru.cikisYapti);
           case sb.AuthChangeEvent.passwordRecovery:
-            return IstemciOlayi(IstemciOlayTuru.sifreKurtarma, _kullanici(s.session?.user));
+            return IstemciOlayi(
+              IstemciOlayTuru.sifreKurtarma,
+              _kullanici(s.session?.user),
+            );
           default:
             return null;
         }
@@ -84,8 +95,16 @@ class SupabaseKimlikIstemcisi implements KimlikIstemcisi {
   }
 
   @override
-  Future<IstemciKullanicisi?> kayitOl(String eposta, String sifre, {required String yonlendirme}) => _sar(() async {
-    final r = await _auth.signUp(email: eposta, password: sifre, emailRedirectTo: yonlendirme);
+  Future<IstemciKullanicisi?> kayitOl(
+    String eposta,
+    String sifre, {
+    required String yonlendirme,
+  }) => _sar(() async {
+    final r = await _auth.signUp(
+      email: eposta,
+      password: sifre,
+      emailRedirectTo: yonlendirme,
+    );
     // E-posta doğrulaması açıkken var olan bir adresle kayıt, hata yerine kimliksiz sahte kullanıcı döner.
     if (r.user != null && (r.user!.identities?.isEmpty ?? false)) {
       throw const IstemciHatasi(kod: 'user_already_exists');
@@ -94,15 +113,20 @@ class SupabaseKimlikIstemcisi implements KimlikIstemcisi {
   });
 
   @override
-  Future<IstemciKullanicisi> girisYap(String eposta, String sifre) => _sar(() async {
-    final r = await _auth.signInWithPassword(email: eposta, password: sifre);
-    final k = _kullanici(r.user);
-    if (k == null) throw const IstemciHatasi(kod: 'invalid_credentials');
-    return k;
-  });
+  Future<IstemciKullanicisi> girisYap(String eposta, String sifre) => _sar(
+    () async {
+      final r = await _auth.signInWithPassword(email: eposta, password: sifre);
+      final k = _kullanici(r.user);
+      if (k == null) throw const IstemciHatasi(kod: 'invalid_credentials');
+      return k;
+    },
+  );
 
   @override
-  Future<bool> saglayiciBaslat(String saglayici, {required String yonlendirme}) => _sar(
+  Future<bool> saglayiciBaslat(
+    String saglayici, {
+    required String yonlendirme,
+  }) => _sar(
     () => _auth.signInWithOAuth(
       saglayici == 'google' ? sb.OAuthProvider.google : sb.OAuthProvider.apple,
       redirectTo: yonlendirme,
@@ -111,7 +135,9 @@ class SupabaseKimlikIstemcisi implements KimlikIstemcisi {
   );
 
   @override
-  Future<IstemciKullanicisi?> googleYerelGiris(String sunucuIstemciKimligi) async {
+  Future<IstemciKullanicisi?> googleYerelGiris(
+    String sunucuIstemciKimligi,
+  ) async {
     if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return null;
     final google = GoogleSignIn.instance;
     try {
@@ -124,16 +150,23 @@ class SupabaseKimlikIstemcisi implements KimlikIstemcisi {
       final idToken = hesap.authentication.idToken;
       if (idToken == null) throw const IstemciHatasi(kod: 'google_hatasi');
       return await _sar(() async {
-        final r = await _client.auth.signInWithIdToken(provider: sb.OAuthProvider.google, idToken: idToken);
+        final r = await _client.auth.signInWithIdToken(
+          provider: sb.OAuthProvider.google,
+          idToken: idToken,
+        );
         final k = _kullanici(r.user);
         if (k == null) throw const IstemciHatasi(kod: 'google_hatasi');
         return k;
       });
     } on GoogleSignInException catch (e) {
-      if (e.code == GoogleSignInExceptionCode.canceled || e.code == GoogleSignInExceptionCode.interrupted) {
+      if (e.code == GoogleSignInExceptionCode.canceled ||
+          e.code == GoogleSignInExceptionCode.interrupted) {
         throw const IstemciHatasi(kod: 'iptal');
       }
-      throw IstemciHatasi(kod: 'google_hatasi', mesaj: '${e.code.name}: ${e.description}');
+      throw IstemciHatasi(
+        kod: 'google_hatasi',
+        mesaj: '${e.code.name}: ${e.description}',
+      );
     }
   }
 
@@ -153,38 +186,64 @@ class SupabaseKimlikIstemcisi implements KimlikIstemcisi {
     final AuthorizationCredentialAppleID kimlik;
     try {
       kimlik = await SignInWithApple.getAppleIDCredential(
-        scopes: [AppleIDAuthorizationScopes.email, AppleIDAuthorizationScopes.fullName],
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
         nonce: ozet,
       );
     } on SignInWithAppleAuthorizationException catch (e) {
-      if (e.code == AuthorizationErrorCode.canceled) throw const IstemciHatasi(kod: 'iptal');
-      throw IstemciHatasi(kod: 'apple_hatasi', mesaj: '${e.code.name}: ${e.message}');
+      if (e.code == AuthorizationErrorCode.canceled) {
+        throw const IstemciHatasi(kod: 'iptal');
+      }
+      throw IstemciHatasi(
+        kod: 'apple_hatasi',
+        mesaj: '${e.code.name}: ${e.message}',
+      );
     }
     final idToken = kimlik.identityToken;
     if (idToken == null) throw const IstemciHatasi(kod: 'apple_hatasi');
     final k = await _sar(() async {
-      final r = await _client.auth.signInWithIdToken(provider: sb.OAuthProvider.apple, idToken: idToken, nonce: ham);
+      final r = await _client.auth.signInWithIdToken(
+        provider: sb.OAuthProvider.apple,
+        idToken: idToken,
+        nonce: ham,
+      );
       final kullanici = _kullanici(r.user);
       if (kullanici == null) throw const IstemciHatasi(kod: 'apple_hatasi');
       return kullanici;
     });
     // Apple adı yalnızca İLK girişte verir; o an kaydedilmezse bir daha alınamaz.
-    final ad = [kimlik.givenName, kimlik.familyName].whereType<String>().where((x) => x.isNotEmpty).join(' ');
+    final ad = [
+      kimlik.givenName,
+      kimlik.familyName,
+    ].whereType<String>().where((x) => x.isNotEmpty).join(' ');
     if (ad.isNotEmpty && k.ad.isEmpty) {
       try {
-        await _client.auth.updateUser(sb.UserAttributes(data: {'full_name': ad}));
-        return IstemciKullanicisi(id: k.id, eposta: k.eposta, ad: ad, saglayici: k.saglayici);
+        await _client.auth.updateUser(
+          sb.UserAttributes(data: {'full_name': ad}),
+        );
+        return IstemciKullanicisi(
+          id: k.id,
+          eposta: k.eposta,
+          ad: ad,
+          saglayici: k.saglayici,
+        );
       } catch (_) {}
     }
     return k;
   }
 
   @override
-  Future<void> sifreSifirlamaIste(String eposta, {required String yonlendirme}) =>
+  Future<void> sifreSifirlamaIste(
+    String eposta, {
+    required String yonlendirme,
+  }) =>
       _sar(() => _auth.resetPasswordForEmail(eposta, redirectTo: yonlendirme));
 
   @override
-  Future<void> sifreGuncelle(String yeniSifre) => _sar(() => _auth.updateUser(sb.UserAttributes(password: yeniSifre)));
+  Future<void> sifreGuncelle(String yeniSifre) =>
+      _sar(() => _auth.updateUser(sb.UserAttributes(password: yeniSifre)));
 
   @override
   Future<void> cikis() async {
@@ -197,6 +256,55 @@ class SupabaseKimlikIstemcisi implements KimlikIstemcisi {
     await _sar(_auth.signOut);
   }
 
+  /// Apple ile açılmış hesap mı (kayıtlı sağlayıcılardan biri Apple).
+  bool get _appleHesabi {
+    final meta = _auth.currentUser?.appMetadata ?? const <String, dynamic>{};
+    final saglayicilar = meta['providers'];
+    return meta['provider'] == 'apple' ||
+        (saglayicilar is List && saglayicilar.contains('apple'));
+  }
+
+  /// App Store 5.1.1(v): Apple ile açılan hesap silinirken Apple'ın jetonu da iptal edilmelidir. Apple, jetonu
+  /// iptal etmek için taze bir `authorizationCode` ister; bu yüzden silmeden önce kullanıcıya Apple penceresi bir
+  /// kez daha gösterilir ve kod `apple-hesap-sil` işlevine (Supabase Edge Function) gönderilir. İşlev reddederse
+  /// (geçersiz kod vb.) hesap SİLİNMEZ; kullanıcı tekrar deneyebilir. İşlev yayında değilse (404) ya da sunucu
+  /// tarafında yapılandırılmamışsa (5xx) hesap silme engellenmez: kullanıcının hesabını silebilmesi zorunludur.
+  Future<void> _appleJetonunuIptalEt() async {
+    final AuthorizationCredentialAppleID kimlik;
+    try {
+      kimlik = await SignInWithApple.getAppleIDCredential(scopes: const []);
+    } on SignInWithAppleAuthorizationException catch (e) {
+      if (e.code == AuthorizationErrorCode.canceled) {
+        throw const IstemciHatasi(kod: 'iptal');
+      }
+      throw IstemciHatasi(
+        kod: 'apple_hatasi',
+        mesaj: '${e.code.name}: ${e.message}',
+      );
+    }
+    await _sar(() async {
+      try {
+        await _client.functions.invoke(
+          'apple-hesap-sil',
+          body: {'authorizationCode': kimlik.authorizationCode},
+        );
+      } on sb.FunctionException catch (e) {
+        if (e.status == 404 || e.status >= 500) return;
+        throw IstemciHatasi(
+          kod: 'apple_iptal_hatasi',
+          mesaj: 'HTTP ${e.status}',
+        );
+      }
+    });
+  }
+
   @override
-  Future<void> hesabiSil() => _sar(() => _client.rpc<void>('hesabi_sil'));
+  Future<void> hesabiSil() async {
+    if (!kIsWeb &&
+        defaultTargetPlatform == TargetPlatform.iOS &&
+        _appleHesabi) {
+      await _appleJetonunuIptalEt();
+    }
+    await _sar(() => _client.rpc<void>('hesabi_sil'));
+  }
 }

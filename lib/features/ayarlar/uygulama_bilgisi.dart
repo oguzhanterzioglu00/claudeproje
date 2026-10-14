@@ -2,8 +2,8 @@
 /// (bir test bunu denetler).
 abstract final class UygulamaBilgisi {
   static const ad = 'Kamu Pusulası';
-  static const surum = '1.0.0';
-  static const derleme = '1';
+  static const surum = '1.0.1';
+  static const derleme = '2';
   static const surumMetni = '$surum ($derleme)';
 
   /// Mağaza ve kullanıcı için: uygulama hiçbir kamu kurumunun resmî uygulaması değildir.

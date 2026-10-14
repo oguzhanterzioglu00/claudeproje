@@ -16,7 +16,12 @@ import 'becayis_panel_sayfasi.dart';
 /// Becayiş sekmesi: panel ve ona bağlı ekranlar. Yalnızca 657 memurlarına
 /// açıktır; diğer statülerde nedenini anlatan sayfa gösterilir.
 class BecayisSekmesi extends StatelessWidget {
-  const BecayisSekmesi({super.key, required this.profil, required this.depo, this.profilAc});
+  const BecayisSekmesi({
+    super.key,
+    required this.profil,
+    required this.depo,
+    this.profilAc,
+  });
 
   final Profil profil;
   final BecayisDeposu depo;
@@ -32,11 +37,47 @@ class BecayisSekmesi extends StatelessWidget {
     BecayisEslesmeSayfasi(
       depo: depo,
       ilkEslesme: e,
-      dilekceAc: (e) => _git<void>(context, BecayisDilekceSayfasi(depo: depo, eslesme: e)),
+      dilekceAc: (e) =>
+          _git<void>(context, BecayisDilekceSayfasi(depo: depo, eslesme: e)),
     ),
   );
 
-  void _ilanVer(BuildContext context) => _git<void>(context, BecayisIlanVerSayfasi(depo: depo));
+  void _ilanVer(BuildContext context) =>
+      _git<void>(context, BecayisIlanVerSayfasi(depo: depo));
+
+  Future<void> _ilaniKapat(BuildContext context) async {
+    final onay = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: const Text('İlan kapatılsın mı?'),
+        content: const Text(
+          'İlanın listeden kaldırılır. Daha sonra yeniden yayınlayabilirsin.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(c, false),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(c, true),
+            child: const Text('İlanı kapat'),
+          ),
+        ],
+      ),
+    );
+    if (onay != true) return;
+    final tamam = await depo.ilanKapat();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          tamam
+              ? 'Becayiş ilanın kapatıldı.'
+              : (depo.hata ?? 'İlan kapatılamadı.'),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,39 +85,81 @@ class BecayisSekmesi extends StatelessWidget {
     if (neden != null) return BecayisKapaliSayfasi(neden: neden);
 
     final eksik = profil.eksikBecayisAlanlari;
-    if (eksik.isNotEmpty) return BecayisProfilEksikSayfasi(eksik: eksik, profilAc: profilAc);
+    if (eksik.isNotEmpty) {
+      return BecayisProfilEksikSayfasi(eksik: eksik, profilAc: profilAc);
+    }
 
     return ListenableBuilder(
       listenable: depo,
-      builder: (context, _) => Scaffold(
-        body: !depo.yayinda
-            ? BecayisIlansizSayfasi(
-                profil: profil,
-                ilanVer: () => _ilanVer(context),
-                ilanlariGor: () => _git<void>(
-                  context,
-                  BecayisIlanlarSayfasi(
-                    depo: depo,
-                    eslesmeAc: (e) => _eslesmeAc(context, e),
-                    ilanVer: () => _ilanVer(context),
+      builder: (context, _) {
+        if (depo.yukleniyor && depo.digerleri.isEmpty && !depo.yayinda) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (depo.hata != null && depo.digerleri.isEmpty && !depo.yayinda) {
+          return Scaffold(
+            body: SafeArea(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(28),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        LucideIcons.wifiOff,
+                        size: 42,
+                        color: PusulaRenk.soluk,
+                      ),
+                      const SizedBox(height: 14),
+                      Text(
+                        depo.hata!,
+                        textAlign: TextAlign.center,
+                        style: PusulaYazi.metin(15, renk: PusulaRenk.soluk),
+                      ),
+                      const SizedBox(height: 18),
+                      BirincilDugme(
+                        metin: 'Tekrar dene',
+                        onPressed: depo.yenile,
+                      ),
+                    ],
                   ),
                 ),
-              )
-            : BecayisPanelSayfasi(
-                benim: depo.benim,
-                eslesmeler: depo.eslesmeler,
-                eslesmeAc: (e) => _eslesmeAc(context, e),
-                ilanlariGor: () => _git<void>(
-                  context,
-                  BecayisIlanlarSayfasi(
-                    depo: depo,
-                    eslesmeAc: (e) => _eslesmeAc(context, e),
-                    ilanVer: () => _ilanVer(context),
-                  ),
-                ),
-                ilaniDuzenle: () => _ilanVer(context),
               ),
-      ),
+            ),
+          );
+        }
+        return Scaffold(
+          body: !depo.yayinda
+              ? BecayisIlansizSayfasi(
+                  profil: profil,
+                  ilanVer: () => _ilanVer(context),
+                  ilanlariGor: () => _git<void>(
+                    context,
+                    BecayisIlanlarSayfasi(
+                      depo: depo,
+                      eslesmeAc: (e) => _eslesmeAc(context, e),
+                      ilanVer: () => _ilanVer(context),
+                    ),
+                  ),
+                )
+              : BecayisPanelSayfasi(
+                  benim: depo.benim,
+                  eslesmeler: depo.eslesmeler,
+                  eslesmeAc: (e) => _eslesmeAc(context, e),
+                  ilanlariGor: () => _git<void>(
+                    context,
+                    BecayisIlanlarSayfasi(
+                      depo: depo,
+                      eslesmeAc: (e) => _eslesmeAc(context, e),
+                      ilanVer: () => _ilanVer(context),
+                    ),
+                  ),
+                  ilaniDuzenle: () => _ilanVer(context),
+                  ilaniKapat: () => _ilaniKapat(context),
+                ),
+        );
+      },
     );
   }
 }
@@ -98,8 +181,15 @@ class BecayisYakindaSayfasi extends StatelessWidget {
               Container(
                 width: 84,
                 height: 84,
-                decoration: const BoxDecoration(color: PusulaRenk.cizgi, shape: BoxShape.circle),
-                child: const Icon(LucideIcons.arrowRightLeft, size: 36, color: PusulaRenk.lacivert),
+                decoration: const BoxDecoration(
+                  color: PusulaRenk.cizgi,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  LucideIcons.arrowRightLeft,
+                  size: 36,
+                  color: PusulaRenk.lacivert,
+                ),
               ),
               const SizedBox(height: 18),
               Text('Becayiş yakında', style: PusulaYazi.baslik(24, aralik: -1)),
@@ -109,7 +199,11 @@ class BecayisYakindaSayfasi extends StatelessWidget {
                 'Şimdilik hakkını "Hakkım ne?" bölümünden sorabilirsin. Becayiş, kurumun atamaya yetkili '
                 'amirinin uygun bulmasına bağlıdır (657 sayılı Kanun md. 73).',
                 textAlign: TextAlign.center,
-                style: PusulaYazi.metin(15, renk: PusulaRenk.soluk, agirlik: FontWeight.w500).copyWith(height: 1.45),
+                style: PusulaYazi.metin(
+                  15,
+                  renk: PusulaRenk.soluk,
+                  agirlik: FontWeight.w500,
+                ).copyWith(height: 1.45),
               ),
             ],
           ),
@@ -137,16 +231,30 @@ class BecayisKapaliSayfasi extends StatelessWidget {
               Container(
                 width: 84,
                 height: 84,
-                decoration: const BoxDecoration(color: PusulaRenk.cizgi, shape: BoxShape.circle),
-                child: const Icon(LucideIcons.lock, size: 36, color: PusulaRenk.lacivert),
+                decoration: const BoxDecoration(
+                  color: PusulaRenk.cizgi,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  LucideIcons.lock,
+                  size: 36,
+                  color: PusulaRenk.lacivert,
+                ),
               ),
               const SizedBox(height: 18),
-              Text('Becayiş sende kapalı', style: PusulaYazi.baslik(24, aralik: -1)),
+              Text(
+                'Becayiş sende kapalı',
+                style: PusulaYazi.baslik(24, aralik: -1),
+              ),
               const SizedBox(height: 10),
               Text(
                 neden,
                 textAlign: TextAlign.center,
-                style: PusulaYazi.metin(15, renk: PusulaRenk.soluk, agirlik: FontWeight.w500).copyWith(height: 1.45),
+                style: PusulaYazi.metin(
+                  15,
+                  renk: PusulaRenk.soluk,
+                  agirlik: FontWeight.w500,
+                ).copyWith(height: 1.45),
               ),
             ],
           ),
@@ -158,7 +266,11 @@ class BecayisKapaliSayfasi extends StatelessWidget {
 
 /// Profilde becayiş için gereken bilgiler eksikse yönlendirme sayfası.
 class BecayisProfilEksikSayfasi extends StatelessWidget {
-  const BecayisProfilEksikSayfasi({super.key, required this.eksik, this.profilAc});
+  const BecayisProfilEksikSayfasi({
+    super.key,
+    required this.eksik,
+    this.profilAc,
+  });
 
   final List<String> eksik;
   final VoidCallback? profilAc;
@@ -175,21 +287,39 @@ class BecayisProfilEksikSayfasi extends StatelessWidget {
               Container(
                 width: 84,
                 height: 84,
-                decoration: const BoxDecoration(color: PusulaRenk.cizgi, shape: BoxShape.circle),
-                child: const Icon(LucideIcons.userRound, size: 36, color: PusulaRenk.lacivert),
+                decoration: const BoxDecoration(
+                  color: PusulaRenk.cizgi,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  LucideIcons.userRound,
+                  size: 36,
+                  color: PusulaRenk.lacivert,
+                ),
               ),
               const SizedBox(height: 18),
-              Text('Profilini tamamla', style: PusulaYazi.baslik(24, aralik: -1)),
+              Text(
+                'Profilini tamamla',
+                style: PusulaYazi.baslik(24, aralik: -1),
+              ),
               const SizedBox(height: 10),
               Text(
                 'Becayiş eşleşmesi kurum, hizmet sınıfı ve ilinle yapılır. Profilinde eksik olanlar: '
                 '${eksik.join(', ')}.',
                 textAlign: TextAlign.center,
-                style: PusulaYazi.metin(15, renk: PusulaRenk.soluk, agirlik: FontWeight.w500).copyWith(height: 1.45),
+                style: PusulaYazi.metin(
+                  15,
+                  renk: PusulaRenk.soluk,
+                  agirlik: FontWeight.w500,
+                ).copyWith(height: 1.45),
               ),
               if (profilAc != null) ...[
                 const SizedBox(height: 22),
-                BirincilDugme(yukseklik: 56, metin: 'Profili düzenle', onPressed: profilAc),
+                BirincilDugme(
+                  yukseklik: 56,
+                  metin: 'Profili düzenle',
+                  onPressed: profilAc,
+                ),
               ],
             ],
           ),
@@ -201,7 +331,12 @@ class BecayisProfilEksikSayfasi extends StatelessWidget {
 
 /// Kullanıcının henüz becayiş ilanı yokken gösterilen karşılama.
 class BecayisIlansizSayfasi extends StatelessWidget {
-  const BecayisIlansizSayfasi({super.key, required this.profil, required this.ilanVer, required this.ilanlariGor});
+  const BecayisIlansizSayfasi({
+    super.key,
+    required this.profil,
+    required this.ilanVer,
+    required this.ilanlariGor,
+  });
 
   final Profil profil;
   final VoidCallback ilanVer;
@@ -214,7 +349,11 @@ class BecayisIlansizSayfasi extends StatelessWidget {
       children: [
         Text(
           'Karşılıklı yer değiştirme',
-          style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w700),
+          style: PusulaYazi.metin(
+            12,
+            renk: PusulaRenk.soluk,
+            agirlik: FontWeight.w700,
+          ),
         ),
         Text('Becayiş', style: PusulaYazi.baslik(26, aralik: -1.2)),
         const SizedBox(height: 14),
@@ -228,16 +367,29 @@ class BecayisIlansizSayfasi extends StatelessWidget {
                 const Positioned(
                   right: -80,
                   top: -90,
-                  child: Opacity(opacity: 0.45, child: PusulaUcgenler(boyut: 210, orta: PusulaRenk.mavi)),
+                  child: Opacity(
+                    opacity: 0.45,
+                    child: PusulaUcgenler(boyut: 210, orta: PusulaRenk.mavi),
+                  ),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Henüz ilanın yok', style: PusulaYazi.baslik(26, renk: PusulaRenk.beyaz, aralik: -1.1)),
+                    Text(
+                      'Henüz ilanın yok',
+                      style: PusulaYazi.baslik(
+                        26,
+                        renk: PusulaRenk.beyaz,
+                        aralik: -1.1,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     Text(
                       '${profil.unvan} · ${profil.kurumAdi} · ${profil.il}',
-                      style: PusulaYazi.metin(14, renk: const Color(0xFFC9D0E0)),
+                      style: PusulaYazi.metin(
+                        14,
+                        renk: const Color(0xFFC9D0E0),
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -256,7 +408,12 @@ class BecayisIlansizSayfasi extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
-        BirincilDugme(yukseklik: 58, ikon: LucideIcons.plus, metin: 'İlan ver', onPressed: ilanVer),
+        BirincilDugme(
+          yukseklik: 58,
+          ikon: LucideIcons.plus,
+          metin: 'İlan ver',
+          onPressed: ilanVer,
+        ),
         const SizedBox(height: 10),
         BirincilDugme(
           yukseklik: 54,

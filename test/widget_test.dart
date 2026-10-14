@@ -4,6 +4,7 @@ import 'package:pusula/core/depolama.dart';
 import 'package:pusula/features/hesap/data/yerel_kimlik_servisi.dart';
 import 'package:pusula/features/profil/data/profil_kaydi.dart';
 import 'package:pusula/features/profil/domain/profil.dart';
+import 'package:pusula/features/profil/presentation/profil_sayfasi.dart';
 import 'package:pusula/features/haberler/haber_kaynagi.dart';
 import 'package:pusula/features/ilanlar/ilan_kaynagi.dart';
 import 'package:pusula/main.dart';
@@ -136,5 +137,71 @@ void main() {
     await ac(tester, tanitimGoruldu: true, apple: false);
     expect(find.text('Google ile devam et'), findsOneWidget);
     expect(find.text('Apple ile devam et'), findsNothing);
+  });
+
+  testWidgets('hesap açmadan devam: giriş zorunlu değil, kurulum atlanabilir, profilde giriş seçeneği vardır', (
+    tester,
+  ) async {
+    final s = await ac(tester, tanitimGoruldu: true);
+    expect(find.text('Hesap açmadan devam et'), findsOneWidget);
+
+    await tester.tap(find.text('Hesap açmadan devam et'));
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+    expect(await s.depo.oku('misafir_modu_v1'), '1');
+
+    // Kurulum: ad ve statü girmeden atlanabilir.
+    expect(find.text('Seni tanıyalım'), findsOneWidget);
+    await tester.tap(find.text('Şimdilik atla'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+    expect(find.text('Seni tanıyalım'), findsNothing);
+    expect(find.text('Kamu Pusulası'), findsOneWidget);
+
+    // Profilde hesap isteğe bağlı olarak sunulur; hesap şart değildir.
+    await tester.tap(find.bySemanticsLabel('Profilim'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Hesap (isteğe bağlı)'),
+      300,
+      scrollable: find.descendant(of: find.byType(ProfilSayfasi), matching: find.byType(Scrollable)).first,
+    );
+    expect(find.text('Hesap (isteğe bağlı)'), findsOneWidget);
+    expect(find.text('Giriş yap veya hesap oluştur'), findsWidgets);
+  });
+
+  testWidgets('hesapsız kullanıcı uygulamayı yeniden açınca giriş ekranı çıkmaz', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final depo = BellekDepolama({'tanitim_goruldu_v1': '1', 'misafir_modu_v1': '1'});
+    final profiller = <String, BellekProfilKaydi>{
+      'misafir': BellekProfilKaydi(const Profil(ad: '', statu: Statu.diger)),
+    };
+    await tester.pumpWidget(
+      PusulaUygulamasi(
+        kimlik: YerelKimlikServisi(depolama: depo, tur: 8),
+        depolama: depo,
+        profilKaydiUret: (id) => profiller.putIfAbsent(id, BellekProfilKaydi.new),
+        fotografKaynagi: SahteFotografKaynagi(sonuc: ornekPng),
+        ilanKaynagi: const OrnekIlanKaynagi(sure: Duration.zero),
+        haberKaynagi: const OrnekHaberKaynagi(sure: Duration.zero),
+      ),
+    );
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+    expect(find.text('Hesap oluştur'), findsNothing);
+    expect(find.text('Kamu Pusulası'), findsOneWidget);
+  });
+
+  testWidgets('kurulumda ad isteğe bağlıdır: yalnızca statü seçince devam edilebilir', (tester) async {
+    await ac(tester, tanitimGoruldu: true, hesapVar: true);
+    expect(find.text('Seni tanıyalım'), findsOneWidget);
+    expect(find.text('Adın (isteğe bağlı)'), findsOneWidget);
+    await tester.tap(find.text('İşçi'));
+    await tester.pump();
+    await tester.tap(find.text('Devam'));
+    await tester.pumpAndSettle();
+    expect(find.text('Seni tanıyalım'), findsNothing);
   });
 }

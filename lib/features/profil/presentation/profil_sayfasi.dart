@@ -30,6 +30,7 @@ class ProfilSayfasi extends StatefulWidget {
     this.fotograf,
     this.fotografKaynagi = const ImagePickerFotografKaynagi(),
     this.oturum,
+    this.girisAc,
     this.hatirlatici,
         this.ilanTakibi,
         this.kayitliIlanlar,
@@ -49,6 +50,7 @@ class ProfilSayfasi extends StatefulWidget {
 
   /// Verilirse "Hesap ve güvenlik" bölümü (şifre, çıkış, hesap silme) görünür.
   final OturumDeposu? oturum;
+  final VoidCallback? girisAc;
 
   /// Verilirse Ayarlar'da hatırlatıcı tercihleri görünür; hesap silinince tercih de silinir.
   final HatirlaticiDeposu? hatirlatici;
@@ -96,7 +98,7 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
 
   bool get _memur => _statu == Statu.memur657;
   bool get _epostaGecerli => _eposta.text.trim().isEmpty || _eposta.text.contains('@');
-  bool get _kaydedilebilir => _ad.text.trim().isNotEmpty && _statu != null && _epostaGecerli;
+  bool get _kaydedilebilir => _statu != null && _epostaGecerli;
 
   @override
   void dispose() {
@@ -336,6 +338,7 @@ class _ProfilSayfasiState extends State<ProfilSayfasi> {
                       const SizedBox(height: 26),
                       HesapBolumu(
                         oturum: widget.oturum!,
+                        girisAc: widget.girisAc,
                         veriSil: () async {
                           await widget.hatirlatici?.tercihiSil();
                           await widget.ilanTakibi?.tercihiSil();

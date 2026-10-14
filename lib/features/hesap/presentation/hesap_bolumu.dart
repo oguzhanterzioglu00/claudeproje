@@ -11,12 +11,15 @@ import 'sifre_degistir_sayfasi.dart';
 /// Profil ekranındaki "Hesap ve güvenlik" bölümü: giriş yöntemi, şifre değiştirme,
 /// çıkış ve hesabı silme.
 class HesapBolumu extends StatelessWidget {
-  const HesapBolumu({super.key, required this.oturum, this.veriSil});
+  const HesapBolumu({super.key, required this.oturum, this.veriSil, this.girisAc});
 
   final OturumDeposu oturum;
 
   /// Hesap silinirken cihazdaki kullanıcı verilerini de temizler (profil, fotoğraf).
   final Future<void> Function()? veriSil;
+
+  /// Hesapsız kullanımda giriş/kayıt ekranını açar.
+  final VoidCallback? girisAc;
 
   String _saglayiciAciklamasi(Hesap h) => switch (h.saglayici) {
         GirisSaglayici.eposta => h.eposta,
@@ -29,7 +32,7 @@ class HesapBolumu extends StatelessWidget {
   static IconData _ikon(GirisSaglayici s) => switch (s) {
         GirisSaglayici.eposta => LucideIcons.mail,
         GirisSaglayici.google => LucideIcons.globe,
-        GirisSaglayici.apple => LucideIcons.apple,
+        GirisSaglayici.apple => LucideIcons.user,
       };
 
   void _mesajGoster(ScaffoldMessengerState messenger, String metin) {
@@ -102,7 +105,23 @@ class HesapBolumu extends StatelessWidget {
         listenable: oturum,
         builder: (context, _) {
           final hesap = oturum.hesap;
-          if (hesap == null) return const SizedBox.shrink();
+          if (hesap == null) {
+            if (girisAc == null) return const SizedBox.shrink();
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('Hesap (isteğe bağlı)', style: PusulaYazi.baslik(18, agirlik: FontWeight.w700, aralik: -0.4)),
+                const SizedBox(height: 4),
+                Text(
+                  'Hesap açmadan tüm özellikleri kullanıyorsun. Hesap yalnızca yedeğini ve ayarlarını '
+                  'başka bir cihaza taşımak içindir.',
+                  style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500).copyWith(height: 1.45),
+                ),
+                const SizedBox(height: 10),
+                _Satir(ikon: LucideIcons.logIn, metin: 'Giriş yap veya hesap oluştur', onTap: girisAc!),
+              ],
+            );
+          }
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

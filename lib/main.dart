@@ -1,5 +1,10 @@
 import 'package:flutter/foundation.dart'
-    show LicenseEntryWithLineBreaks, LicenseRegistry, TargetPlatform, defaultTargetPlatform, kIsWeb;
+    show
+        LicenseEntryWithLineBreaks,
+        LicenseRegistry,
+        TargetPlatform,
+        defaultTargetPlatform,
+        kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -9,6 +14,9 @@ import 'core/tema.dart';
 import 'core/sunucu_ayari.dart';
 import 'core/telefon_cercevesi.dart';
 import 'core/akis.dart';
+import 'core/ozellik_ayari.dart';
+import 'features/becayis/data/becayis_deposu.dart';
+import 'features/becayis/data/supabase_becayis_kaynagi.dart';
 import 'features/haberler/haber_kaynagi.dart';
 import 'features/hatirlatici/hatirlatici_servisi.dart';
 import 'features/hesap/data/kimlik_servisi.dart';
@@ -21,6 +29,7 @@ import 'features/ilanlar/ilan_kaynagi.dart';
 import 'features/kabuk/uygulama_akisi.dart';
 import 'features/profil/data/fotograf_deposu.dart';
 import 'features/profil/data/profil_kaydi.dart';
+import 'features/profil/domain/profil.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,14 +38,30 @@ Future<void> main() async {
   // Arka uç ayarı verilmişse gerçek hesaplar (e-posta, Google); verilmemişse cihaz içi örnek hesap.
   KimlikServisi? kimlik;
   if (SunucuAyari.tanimli) {
-    await Supabase.initialize(url: SunucuAyari.url, publishableKey: SunucuAyari.anahtar);
+    await Supabase.initialize(
+      url: SunucuAyari.url,
+      publishableKey: SunucuAyari.anahtar,
+    );
     kimlik = SupabaseKimlikServisi(
       SupabaseKimlikIstemcisi(Supabase.instance.client),
       googleSunucuIstemcisi: SunucuAyari.googleWebIstemcisi,
     );
   }
   // Apple ile giriş yalnızca iPhone/iPad'de yerel olarak çalışır (Android'de düğme gösterilmez).
-  runApp(PusulaUygulamasi(kimlik: kimlik, appleGoster: !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS));
+  runApp(
+    PusulaUygulamasi(
+      kimlik: kimlik,
+      appleGoster: !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS,
+      becayisAcik: kimlik != null && OzellikAyari.becayisAcik,
+      becayisDeposuUret: kimlik == null || !OzellikAyari.becayisAcik
+          ? null
+          : (profil) => supabaseBecayisDeposu(
+              Supabase.instance.client,
+              profil,
+              odemeAktif: OzellikAyari.becayisOdemeAcik,
+            ),
+    ),
+  );
 }
 
 /// Uygulamaya gömülü yazı tiplerinin (SIL Open Font License 1.1) lisans sayfasında görünmesi için.
@@ -64,6 +89,7 @@ class PusulaUygulamasi extends StatefulWidget {
     this.appleGoster = false,
     this.sosyalGiris = false,
     this.becayisAcik = false,
+    this.becayisDeposuUret,
     this.hatirlatici,
     this.ilanKaynagi,
     this.haberKaynagi,
@@ -82,6 +108,7 @@ class PusulaUygulamasi extends StatefulWidget {
 
   /// Becayiş eşleştirme arka uç ve ödeme bağlanana kadar kapalıdır (sekmede "Yakında" görünür).
   final bool becayisAcik;
+  final BecayisDeposu Function(Profil)? becayisDeposuUret;
 
   /// Boşsa cihaz bildirimleriyle çalışan servis; testlerde sahtesi verilir.
   final HatirlaticiServisi? hatirlatici;
@@ -97,13 +124,19 @@ class PusulaUygulamasi extends StatefulWidget {
   State<PusulaUygulamasi> createState() => _PusulaUygulamasiState();
 }
 
-class _PusulaUygulamasiState extends State<PusulaUygulamasi> with WidgetsBindingObserver {
-  late final OturumDeposu _oturum = OturumDeposu(widget.kimlik ?? YerelKimlikServisi(depolama: widget.depolama));
+class _PusulaUygulamasiState extends State<PusulaUygulamasi>
+    with WidgetsBindingObserver {
+  late final OturumDeposu _oturum = OturumDeposu(
+    widget.kimlik ?? YerelKimlikServisi(depolama: widget.depolama),
+  );
 
-  late final HatirlaticiServisi _hatirlatici = widget.hatirlatici ?? YerelHatirlaticiServisi();
+  late final HatirlaticiServisi _hatirlatici =
+      widget.hatirlatici ?? YerelHatirlaticiServisi();
   late final AkisIstemcisi _akis = AkisIstemcisi();
-  late final IlanKaynagi _ilanKaynagi = widget.ilanKaynagi ?? AkisIlanKaynagi(_akis);
-  late final HaberKaynagi _haberKaynagi = widget.haberKaynagi ?? AkisHaberKaynagi(_akis);
+  late final IlanKaynagi _ilanKaynagi =
+      widget.ilanKaynagi ?? AkisIlanKaynagi(_akis);
+  late final HaberKaynagi _haberKaynagi =
+      widget.haberKaynagi ?? AkisHaberKaynagi(_akis);
 
   @override
   void initState() {
@@ -141,11 +174,13 @@ class _PusulaUygulamasiState extends State<PusulaUygulamasi> with WidgetsBinding
     home: UygulamaAkisi(
       oturum: _oturum,
       depolama: widget.depolama,
-      profilKaydiUret: widget.profilKaydiUret ?? (id) => YerelProfilKaydi(hesapId: id),
+      profilKaydiUret:
+          widget.profilKaydiUret ?? (id) => YerelProfilKaydi(hesapId: id),
       fotografKaynagi: widget.fotografKaynagi,
       appleGoster: widget.appleGoster,
       sosyalGiris: widget.sosyalGiris,
       becayisAcik: widget.becayisAcik,
+      becayisDeposuUret: widget.becayisDeposuUret,
       hatirlatici: _hatirlatici,
       ilanKaynagi: _ilanKaynagi,
       haberKaynagi: _haberKaynagi,

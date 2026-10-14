@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/alt_cubuk.dart';
 import '../../core/bilesenler.dart';
+import '../../core/ozellik_ayari.dart';
 import '../ana_sayfa/ana_sayfa.dart';
 import '../ana_sayfa/ana_sayfa_verisi.dart';
 import '../ana_sayfa/bildirimler.dart';
@@ -38,6 +39,7 @@ import '../profil/data/fotograf_deposu.dart';
 import '../profil/data/profil_deposu.dart';
 import '../profil/domain/profil.dart';
 import '../profil/presentation/profil_sayfasi.dart';
+import '../reklam/reklam_alani.dart';
 
 /// Uygulama kabuğu: beş sekme ve yüzen alt çubuk. Sekmeler değişince durumları
 /// korunur ([IndexedStack]). Ana sayfa, maaş ve becayiş kullanıcının profilinden beslenir.
@@ -55,6 +57,7 @@ class PusulaKabugu extends StatefulWidget {
     this.fotograf,
     this.fotografKaynagi = const ImagePickerFotografKaynagi(),
     this.oturum,
+    this.girisAc,
     this.hatirlatici,
     this.ilanTakibi,
     this.kayitliIlanlar,
@@ -80,6 +83,9 @@ class PusulaKabugu extends StatefulWidget {
   final FotografDeposu? fotograf;
   final FotografKaynagi fotografKaynagi;
   final OturumDeposu? oturum;
+
+  /// Hesapsız (misafir) kullanımda profilden giriş/kayıt ekranını açar.
+  final VoidCallback? girisAc;
 
   /// Verilirse ayarlarda hatırlatıcı tercihleri görünür ve profile göre bildirimler kurulur.
   final HatirlaticiDeposu? hatirlatici;
@@ -109,7 +115,8 @@ class PusulaKabugu extends StatefulWidget {
   State<PusulaKabugu> createState() => _PusulaKabuguState();
 }
 
-class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver {
+class _PusulaKabuguState extends State<PusulaKabugu>
+    with WidgetsBindingObserver {
   Timer? _ilanZamanlayici;
 
   static const _sekmeler = [
@@ -127,8 +134,15 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
   Profil get _profil => widget.profilDeposu.profil!;
 
   /// Becayiş ilanını etkileyen alanlar değişince depo yeniden kurulur.
-  static String _becayisAnahtari(Profil p) =>
-      [p.ad, p.kurumAdi, p.sinif, p.unvan, p.il, p.sicilNo, p.kurumsalEposta].join('|');
+  static String _becayisAnahtari(Profil p) => [
+    p.ad,
+    p.kurumAdi,
+    p.sinif,
+    p.unvan,
+    p.il,
+    p.sicilNo,
+    p.kurumsalEposta,
+  ].join('|');
 
   @override
   void initState() {
@@ -136,7 +150,9 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
     _becayis = widget.becayisDeposuUret(_profil);
     _anahtar = _becayisAnahtari(_profil);
     widget.profilDeposu.addListener(_profilDegisti);
-    widget.hatirlatici?.yukle().then((_) => widget.hatirlatici?.esitle(widget.profilDeposu.profil));
+    widget.hatirlatici?.yukle().then(
+      (_) => widget.hatirlatici?.esitle(widget.profilDeposu.profil),
+    );
     if (widget.haberTakibi != null) {
       widget.haberTakibi!.yukle().then((_) {
         _ilanlariKontrolEt();
@@ -149,7 +165,10 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
         _ilanlariKontrolEt();
         unawaited(widget.ilanTakibi?.arkaPlaniSenkronla());
       });
-      _ilanZamanlayici = Timer.periodic(const Duration(minutes: 15), (_) => _ilanlariKontrolEt());
+      _ilanZamanlayici = Timer.periodic(
+        const Duration(minutes: 15),
+        (_) => _ilanlariKontrolEt(),
+      );
     }
   }
 
@@ -198,6 +217,7 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
         fotograf: widget.fotograf,
         fotografKaynagi: widget.fotografKaynagi,
         oturum: widget.oturum,
+        girisAc: widget.girisAc,
         hatirlatici: widget.hatirlatici,
         ilanTakibi: widget.ilanTakibi,
         kayitliIlanlar: widget.kayitliIlanlar,
@@ -212,19 +232,34 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
   );
 
   /// Zincirler ayrı sayıldığı için ana sayfada yalnızca ikili eşleşmeler görünür.
-  int get _ikiliSayisi => _becayis.eslesmeler.where((e) => e.tip == EslesmeTipi.ikili).length;
+  int get _ikiliSayisi =>
+      _becayis.eslesmeler.where((e) => e.tip == EslesmeTipi.ikili).length;
 
   static const _ornekMaas = MaasGirdisi(derece: 8, kademe: 3, hizmetYili: 10);
 
-  void _sayfaAc(Widget sayfa) => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => sayfa));
+  void _sayfaAc(Widget sayfa) => Navigator.of(
+    context,
+  ).push(MaterialPageRoute<void>(builder: (_) => sayfa));
 
-  void _izinAc() => _sayfaAc(IzinSayfasi(baslangicHizmetYili: _profil.maas?.hizmetYili ?? 5));
+  void _izinAc() =>
+      _sayfaAc(IzinSayfasi(baslangicHizmetYili: _profil.maas?.hizmetYili ?? 5));
 
-  void _zamAc() => _sayfaAc(ZamSayfasi(girdi: _profil.maas ?? _ornekMaas, profildenMi: _profil.maas != null));
+  void _zamAc() => _sayfaAc(
+    ZamSayfasi(
+      girdi: _profil.maas ?? _ornekMaas,
+      profildenMi: _profil.maas != null,
+    ),
+  );
 
-  void _dilekceAc() => _sayfaAc(DilekceSayfasi(profil: _profil, bugun: widget.bugun));
+  void _dilekceAc() =>
+      _sayfaAc(DilekceSayfasi(profil: _profil, bugun: widget.bugun));
 
-  void _tabloAc() => _sayfaAc(DereceTablosuSayfasi(derece: _profil.maas?.derece ?? 8, kademe: _profil.maas?.kademe));
+  void _tabloAc() => _sayfaAc(
+    DereceTablosuSayfasi(
+      derece: _profil.maas?.derece ?? 8,
+      kademe: _profil.maas?.kademe,
+    ),
+  );
 
   List<Bildirim> _bildirimler(Profil p) => bildirimleriUret(
     p,
@@ -236,7 +271,10 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
   Future<void> _bildirimleriAc() async {
     final secilen = await AltSayfa.goster<Bildirim>(
       context,
-      builder: (c) => BildirimListesi(bildirimler: _bildirimler(_profil), onSec: (b) => Navigator.pop(c, b)),
+      builder: (c) => BildirimListesi(
+        bildirimler: _bildirimler(_profil),
+        onSec: (b) => Navigator.pop(c, b),
+      ),
     );
     if (secilen == null || !mounted) return;
     switch (secilen.hedef) {
@@ -272,7 +310,11 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
       index: _secili,
       children: [
         ListenableBuilder(
-          listenable: Listenable.merge([widget.profilDeposu, _becayis, if (widget.fotograf != null) widget.fotograf!]),
+          listenable: Listenable.merge([
+            widget.profilDeposu,
+            _becayis,
+            if (widget.fotograf != null) widget.fotograf!,
+          ]),
           builder: (context, _) {
             final p = _profil;
             return AnaSayfa(
@@ -291,8 +333,14 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
               avatarFoto: widget.fotograf?.foto,
               avatarAd: p.ad,
               araclar: p.statu == Statu.memur657
-                  ? AraclarBolumu(izinAc: _izinAc, zamAc: _zamAc, tabloAc: _tabloAc, dilekceAc: _dilekceAc)
+                  ? AraclarBolumu(
+                      izinAc: _izinAc,
+                      zamAc: _zamAc,
+                      tabloAc: _tabloAc,
+                      dilekceAc: _dilekceAc,
+                    )
                   : null,
+              reklam: OzellikAyari.reklamAlaniAcik ? const ReklamAlani() : null,
               ilanlar: widget.ilanKaynagi is OrnekIlanKaynagi
                   ? null
                   : IlanlarBolumu(
@@ -301,7 +349,11 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
                       tumunuAc: () => _git(PusulaKabugu.ilanlar),
                       bugun: widget.bugun,
                     ),
-              gundem: GundemBolumu(kaynak: widget.haberKaynagi, bugun: widget.bugun, otomatik: widget.haberOtomatik),
+              gundem: GundemBolumu(
+                kaynak: widget.haberKaynagi,
+                bugun: widget.bugun,
+                otomatik: widget.haberOtomatik,
+              ),
             );
           },
         ),
@@ -311,7 +363,9 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
             final p = _profil;
             return MaasSayfasi(
               ay: widget.bugun?.month,
-              baslangic: p.maas ?? const MaasGirdisi(derece: 8, kademe: 3, hizmetYili: 10),
+              baslangic:
+                  p.maas ??
+                  const MaasGirdisi(derece: 8, kademe: 3, hizmetYili: 10),
               kayitliGirdi: p.maas,
               baslangicGrup: switch (p.statu) {
                 Statu.sozlesmeli => 1,
@@ -319,7 +373,9 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
                 _ => 0,
               },
               kayitliBrut: p.brutUcret,
-              kaydetBrut: p.statu.brutUcretliMi ? (b) => widget.profilDeposu.kaydet(p.kopya(brutUcret: b)) : null,
+              kaydetBrut: p.statu.brutUcretliMi
+                  ? (b) => widget.profilDeposu.kaydet(p.kopya(brutUcret: b))
+                  : null,
               haberler: GundemBolumu(
                 kaynak: widget.haberKaynagi,
                 bugun: widget.bugun,
@@ -327,18 +383,27 @@ class _PusulaKabuguState extends State<PusulaKabugu> with WidgetsBindingObserver
                 turler: const {HaberTuru.maas, HaberTuru.mevzuat},
                 otomatik: widget.haberOtomatik,
               ),
-              kaydet: p.statu == Statu.memur657 ? (g) => widget.profilDeposu.kaydet(p.kopya(maas: g)) : null,
+              kaydet: p.statu == Statu.memur657
+                  ? (g) => widget.profilDeposu.kaydet(p.kopya(maas: g))
+                  : null,
             );
           },
         ),
         ListenableBuilder(
           listenable: widget.profilDeposu,
-          builder: (context, _) => AsistanSayfasi(asistan: widget.asistan, kitle: _kitle(_profil.statu)),
+          builder: (context, _) => AsistanSayfasi(
+            asistan: widget.asistan,
+            kitle: _kitle(_profil.statu),
+          ),
         ),
         ListenableBuilder(
           listenable: widget.profilDeposu,
           builder: (context, _) => widget.becayisAcik
-              ? BecayisSekmesi(profil: _profil, depo: _becayis, profilAc: _profilAc)
+              ? BecayisSekmesi(
+                  profil: _profil,
+                  depo: _becayis,
+                  profilAc: _profilAc,
+                )
               : const BecayisYakindaSayfasi(),
         ),
         IlanlarSayfasi(

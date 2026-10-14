@@ -122,8 +122,8 @@ abstract final class YasalMetinler {
       YasalBolum(
         'Becayiş ve ödeme',
         'Becayiş eşleşmesi, kurumun atamaya yetkili amirinin uygun bulmasına bağlıdır (657 sayılı Kanun md. 73); '
-            'becayiş eşleştirmesi açıldığında uygulama eşleşme ve iletişim kolaylığı sağlar, atamayı garanti etmez. Ücretli özellikler sunulduğunda mağaza '
-            '(App Store / Google Play) üzerinden satın alınır; ücret satın alma öncesinde mağazada gösterilir. Ödeme, iade ve '
+            'becayiş eşleştirmesi açıldığında uygulama eşleşme ve iletişim kolaylığı sağlar, atamayı garanti etmez. Ücretli özellikler sunulduğunda uygulama '
+            'mağazası üzerinden satın alınır; ücret satın alma öncesinde mağazada gösterilir. Ödeme, iade ve '
             'iptal işlemleri mağazanın kurallarına ve 6502 sayılı Tüketicinin Korunması Hakkında Kanun\'a tabidir.',
       ),
       YasalBolum(

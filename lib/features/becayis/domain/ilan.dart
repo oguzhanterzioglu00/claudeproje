@@ -42,7 +42,8 @@ class Ilan {
   /// Gizlilik gereği yalnızca baş harf + soyad (ör. "M. Demir"). Eşleşmeyi etkilemez.
   final String gorunenAd;
 
-  Ilan copyWith({List<String>? hedefIller, bool? zincirIzni, bool? maviTik}) => Ilan(
+  Ilan copyWith({List<String>? hedefIller, bool? zincirIzni, bool? maviTik}) =>
+      Ilan(
         id: id,
         kullaniciId: kullaniciId,
         kurumId: kurumId,
@@ -56,11 +57,42 @@ class Ilan {
         gorunenAd: gorunenAd,
       );
 
+  Map<String, Object?> toJson() => {
+    'user_id': kullaniciId,
+    'kurum_id': kurumId,
+    'kurum_adi': kurumAdi,
+    'sinif': sinif,
+    'unvan': unvan,
+    'mevcut_il': mevcutIl,
+    'hedef_iller': hedefIller,
+    'zincir_izni': zincirIzni,
+    'gorunen_ad': gorunenAd,
+    'aktif': true,
+  };
+
+  factory Ilan.fromJson(Map<String, dynamic> j) => Ilan(
+    id: (j['user_id'] ?? '').toString(),
+    kullaniciId: (j['user_id'] ?? '').toString(),
+    kurumId: (j['kurum_id'] ?? '').toString(),
+    kurumAdi: (j['kurum_adi'] ?? '').toString(),
+    sinif: (j['sinif'] ?? '').toString(),
+    unvan: (j['unvan'] ?? '').toString(),
+    mevcutIl: (j['mevcut_il'] ?? '').toString(),
+    hedefIller: (j['hedef_iller'] as List<dynamic>? ?? const [])
+        .map((e) => e.toString())
+        .where((e) => e.isNotEmpty)
+        .toList(growable: false),
+    zincirIzni: j['zincir_izni'] == true,
+    maviTik: j['mavi_tik'] == true,
+    gorunenAd: (j['gorunen_ad'] ?? '').toString(),
+  );
+
   /// Yasal olarak karşılaştırılabilir grup: aynı kurum + aynı sınıf.
   String get grup => '${normalize(kurumId)}|${normalize(sinif)}';
 
   /// Bu ilanın sahibi [il] iline gitmek istiyor mu?
-  bool hedefliyor(String il) => hedefIller.any((h) => normalize(h) == normalize(il));
+  bool hedefliyor(String il) =>
+      hedefIller.any((h) => normalize(h) == normalize(il));
 
   /// [il] hedefleri arasında kaçıncı sırada; yoksa -1.
   int hedefSirasi(String il) =>

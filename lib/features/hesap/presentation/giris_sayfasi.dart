@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart' show SignInWithAppleButton, SignInWithAppleButtonStyle;
 
 import '../../../core/bilesenler.dart';
 import '../../../core/logo.dart';
@@ -13,6 +12,7 @@ import '../../ayarlar/yasal_sayfasi.dart';
 import '../data/kimlik_servisi.dart';
 import '../data/oturum_deposu.dart';
 import '../domain/hesap.dart';
+import 'apple_giris_dugmesi.dart';
 import 'hesap_parcalari.dart';
 
 /// Giriş yap / hesap oluştur; Google ve Apple ile hızlı giriş.
@@ -20,7 +20,14 @@ import 'hesap_parcalari.dart';
 /// Bu sürümde hesaplar yalnızca cihazda tutulur ve Google/Apple girişi örnektir
 /// (bkz. `YerelKimlikServisi`); ekranda "ÖRNEK" rozeti bunu belirtir.
 class GirisSayfasi extends StatefulWidget {
-  const GirisSayfasi({super.key, required this.oturum, this.appleGoster = true, this.sosyalGiris = true});
+  const GirisSayfasi({
+    super.key,
+    required this.oturum,
+    this.appleGoster = true,
+    this.sosyalGiris = true,
+    this.onMisafir,
+    this.onVazgec,
+  });
 
   final OturumDeposu oturum;
 
@@ -29,6 +36,13 @@ class GirisSayfasi extends StatefulWidget {
 
   /// Google/Apple düğmeleri. Gerçek giriş bağlanana kadar mağaza sürümünde kapalıdır (yalnızca örnek hesap açar).
   final bool sosyalGiris;
+
+  /// Verilirse "Hesap açmadan devam et" gösterilir: hesap yalnızca yedek/eşitleme içindir, uygulamanın
+  /// hesaba bağlı olmayan özellikleri giriş yapmadan kullanılabilir (App Store 5.1.1(v)).
+  final VoidCallback? onMisafir;
+
+  /// Verilirse (profilden açıldığında) "Vazgeç" gösterilir ve ekran kapatılabilir.
+  final VoidCallback? onVazgec;
 
   @override
   State<GirisSayfasi> createState() => _GirisSayfasiState();
@@ -229,6 +243,26 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
                           onPressed: _gonderilebilir ? _gonder : null,
                         ),
                       ),
+                      if (widget.onMisafir != null || widget.onVazgec != null) ...[
+                        const SizedBox(height: 14),
+                        Center(
+                          child: TextButton(
+                            onPressed: widget.oturum.mesgul ? null : (widget.onMisafir ?? widget.onVazgec),
+                            child: Text(
+                              widget.onMisafir != null ? 'Hesap açmadan devam et' : 'Vazgeç',
+                              style: PusulaYazi.metin(15, renk: PusulaRenk.lacivert, agirlik: FontWeight.w800),
+                            ),
+                          ),
+                        ),
+                        if (widget.onMisafir != null)
+                          Text(
+                            'Maaş, haklar, ilanlar ve asistan için hesap gerekmez. Hesap yalnızca yedekleme ve '
+                            'cihazlar arası geçiş içindir.',
+                            textAlign: TextAlign.center,
+                            style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500)
+                                .copyWith(height: 1.45),
+                          ),
+                      ],
                       if (widget.sosyalGiris) ...[
                         const SizedBox(height: 20),
                         Yukselen(
@@ -253,11 +287,7 @@ class _GirisSayfasiState extends State<GirisSayfasi> {
                         if (widget.appleGoster) ...[
                           Yukselen(
                             gecikme: const Duration(milliseconds: 260),
-                            child: SignInWithAppleButton(
-                              text: 'Apple ile devam et',
-                              height: 56,
-                              borderRadius: const BorderRadius.all(Radius.circular(22)),
-                              style: SignInWithAppleButtonStyle.black,
+                            child: AppleGirisDugmesi(
                               onPressed: () {
                                 if (!widget.oturum.mesgul) _saglayici(GirisSaglayici.apple);
                               },

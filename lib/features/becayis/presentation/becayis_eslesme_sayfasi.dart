@@ -36,7 +36,10 @@ class _BecayisEslesmeSayfasiState extends State<BecayisEslesmeSayfasi> {
     final tip = _zincirMod ? EslesmeTipi.zincir : EslesmeTipi.ikili;
     final adaylar = hepsi.where((e) => e.tip == tip).toList();
     if (adaylar.isEmpty) return null;
-    return adaylar.firstWhere((e) => e.id == widget.ilkEslesme.id, orElse: () => adaylar.first);
+    return adaylar.firstWhere(
+      (e) => e.id == widget.ilkEslesme.id,
+      orElse: () => adaylar.first,
+    );
   }
 
   /// Çevrimi "ben" başa gelecek şekilde döndürür.
@@ -47,79 +50,85 @@ class _BecayisEslesmeSayfasiState extends State<BecayisEslesmeSayfasi> {
   }
 
   Future<void> _odemeAc(Eslesme e) => AltSayfa.goster<void>(
-        context,
-        builder: (c) => _OdemeSayfasi(depo: widget.depo, eslesme: e),
-      );
+    context,
+    builder: (c) => _OdemeSayfasi(depo: widget.depo, eslesme: e),
+  );
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-        listenable: widget.depo,
-        builder: (context, _) {
-          final hepsi = widget.depo.eslesmeler;
-          final ikiModVar = hepsi.any((e) => e.tip == EslesmeTipi.ikili) &&
-              hepsi.any((e) => e.tip == EslesmeTipi.zincir);
-          final e = _secili(hepsi) ?? widget.ilkEslesme;
-          final benim = widget.depo.benim;
-          final sirali = _benBasta(e);
-          final digerler = sirali.where((i) => i.id != benim.id).toList();
+    listenable: widget.depo,
+    builder: (context, _) {
+      final hepsi = widget.depo.eslesmeler;
+      final ikiModVar =
+          hepsi.any((e) => e.tip == EslesmeTipi.ikili) &&
+          hepsi.any((e) => e.tip == EslesmeTipi.zincir);
+      final e = _secili(hepsi) ?? widget.ilkEslesme;
+      final benim = widget.depo.benim;
+      final sirali = _benBasta(e);
+      final digerler = sirali.where((i) => i.id != benim.id).toList();
 
-          return Scaffold(
-            body: SafeArea(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(18, 24, 18, 28),
-                children: [
-                  Yukselen(
-                    child: GeriBaslik(
-                      ustYazi: '${benim.kurumAdi} · ${benim.unvan}',
-                      baslik: 'Eşleşme',
-                    ),
-                  ),
-                  if (ikiModVar) ...[
-                    const SizedBox(height: 14),
-                    Yukselen(
-                      gecikme: const Duration(milliseconds: 80),
-                      child: _ModSecici(
-                        zincir: _zincirMod,
-                        onDegis: (z) => setState(() => _zincirMod = z),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 14),
-                  Yukselen(gecikme: const Duration(milliseconds: 140), child: _SkorKarti(eslesme: e)),
-                  const SizedBox(height: 14),
-                  Yukselen(
-                    gecikme: const Duration(milliseconds: 200),
-                    child: e.tip == EslesmeTipi.ikili
-                        ? _IkiliTakas(ben: benim, diger: digerler.first)
-                        : _ZincirTakas(sirali: sirali, benimId: benim.id),
-                  ),
-                  if (e.tip == EslesmeTipi.zincir) ...[
-                    const SizedBox(height: 10),
-                    const _UyariSatiri(
-                      "3'lü zincir 657 sayılı Kanun md. 73'te açıkça geçmez; kurum uygun bulmayabilir.",
-                    ),
-                  ],
-                  for (final u in e.uyarilar) ...[
-                    const SizedBox(height: 10),
-                    _UyariSatiri(u),
-                  ],
-                  const SizedBox(height: 14),
-                  Yukselen(
-                    gecikme: const Duration(milliseconds: 260),
-                    child: _IletisimKarti(
-                      depo: widget.depo,
-                      eslesme: e,
-                      digerler: digerler,
-                      onOdeme: () => _odemeAc(e),
-                      onDilekce: widget.dilekceAc == null ? null : () => widget.dilekceAc!(e),
-                    ),
-                  ),
-                ],
+      return Scaffold(
+        body: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(18, 24, 18, 28),
+            children: [
+              Yukselen(
+                child: GeriBaslik(
+                  ustYazi: '${benim.kurumAdi} · ${benim.unvan}',
+                  baslik: 'Eşleşme',
+                ),
               ),
-            ),
-          );
-        },
+              if (ikiModVar) ...[
+                const SizedBox(height: 14),
+                Yukselen(
+                  gecikme: const Duration(milliseconds: 80),
+                  child: _ModSecici(
+                    zincir: _zincirMod,
+                    onDegis: (z) => setState(() => _zincirMod = z),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 14),
+              Yukselen(
+                gecikme: const Duration(milliseconds: 140),
+                child: _SkorKarti(eslesme: e),
+              ),
+              const SizedBox(height: 14),
+              Yukselen(
+                gecikme: const Duration(milliseconds: 200),
+                child: e.tip == EslesmeTipi.ikili
+                    ? _IkiliTakas(ben: benim, diger: digerler.first)
+                    : _ZincirTakas(sirali: sirali, benimId: benim.id),
+              ),
+              if (e.tip == EslesmeTipi.zincir) ...[
+                const SizedBox(height: 10),
+                const _UyariSatiri(
+                  "3'lü zincir 657 sayılı Kanun md. 73'te açıkça geçmez; kurum uygun bulmayabilir.",
+                ),
+              ],
+              for (final u in e.uyarilar) ...[
+                const SizedBox(height: 10),
+                _UyariSatiri(u),
+              ],
+              const SizedBox(height: 14),
+              Yukselen(
+                gecikme: const Duration(milliseconds: 260),
+                child: _IletisimKarti(
+                  depo: widget.depo,
+                  eslesme: e,
+                  digerler: digerler,
+                  onOdeme: () => _odemeAc(e),
+                  onDilekce: widget.dilekceAc == null
+                      ? null
+                      : () => widget.dilekceAc!(e),
+                ),
+              ),
+            ],
+          ),
+        ),
       );
+    },
+  );
 }
 
 class _ModSecici extends StatelessWidget {
@@ -130,16 +139,19 @@ class _ModSecici extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(color: PusulaRenk.cizgi, borderRadius: BorderRadius.circular(18)),
-        child: Row(
-          children: [
-            Expanded(child: _Sekme('İkili', !zincir, () => onDegis(false))),
-            const SizedBox(width: 4),
-            Expanded(child: _Sekme("3'lü zincir", zincir, () => onDegis(true))),
-          ],
-        ),
-      );
+    padding: const EdgeInsets.all(4),
+    decoration: BoxDecoration(
+      color: PusulaRenk.cizgi,
+      borderRadius: BorderRadius.circular(18),
+    ),
+    child: Row(
+      children: [
+        Expanded(child: _Sekme('İkili', !zincir, () => onDegis(false))),
+        const SizedBox(width: 4),
+        Expanded(child: _Sekme("3'lü zincir", zincir, () => onDegis(true))),
+      ],
+    ),
+  );
 }
 
 class _Sekme extends StatelessWidget {
@@ -151,30 +163,30 @@ class _Sekme extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        button: true,
-        selected: secili,
-        child: Material(
-          color: secili ? PusulaRenk.lacivert : Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(14),
-            onTap: onTap,
-            child: SizedBox(
-              height: 44,
-              child: Center(
-                child: Text(
-                  etiket,
-                  style: PusulaYazi.metin(
-                    14,
-                    renk: secili ? PusulaRenk.beyaz : PusulaRenk.lacivert,
-                    agirlik: FontWeight.w700,
-                  ),
-                ),
+    button: true,
+    selected: secili,
+    child: Material(
+      color: secili ? PusulaRenk.lacivert : Colors.transparent,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: SizedBox(
+          height: 44,
+          child: Center(
+            child: Text(
+              etiket,
+              style: PusulaYazi.metin(
+                14,
+                renk: secili ? PusulaRenk.beyaz : PusulaRenk.lacivert,
+                agirlik: FontWeight.w700,
               ),
             ),
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _SkorKarti extends StatelessWidget {
@@ -188,10 +200,18 @@ class _SkorKarti extends StatelessWidget {
   Widget build(BuildContext context) {
     final ikili = eslesme.tip == EslesmeTipi.ikili;
     final skor = eslesme.skor;
-    final etiket = skor >= 90 ? 'Çok yüksek' : skor >= 75 ? 'Yüksek' : 'İyi';
+    final etiket = skor >= 90
+        ? 'Çok yüksek'
+        : skor >= 75
+        ? 'Yüksek'
+        : 'İyi';
     final farkliUnvan = eslesme.uyarilar.isNotEmpty;
     final kriterler = ikili
-        ? ['Kurum eşleşti', 'Sınıf eşleşti', farkliUnvan ? 'Unvan farklı' : 'Unvan aynı']
+        ? [
+            'Kurum eşleşti',
+            'Sınıf eşleşti',
+            farkliUnvan ? 'Unvan farklı' : 'Unvan aynı',
+          ]
         : ['3 kişi', 'Kurum ve sınıf aynı', 'İller karşılıklı'];
 
     return ClipRRect(
@@ -204,7 +224,10 @@ class _SkorKarti extends StatelessWidget {
             const Positioned(
               right: -80,
               top: -90,
-              child: Opacity(opacity: 0.4, child: PusulaUcgenler(boyut: 200, orta: PusulaRenk.mavi)),
+              child: Opacity(
+                opacity: 0.4,
+                child: PusulaUcgenler(boyut: 200, orta: PusulaRenk.mavi),
+              ),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -225,13 +248,30 @@ class _SkorKarti extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('UYUM SKORU',
-                              style: PusulaYazi.metin(11, renk: _acikYazi, agirlik: FontWeight.w700)
-                                  .copyWith(letterSpacing: 0.6)),
-                          Text(etiket,
-                              style: PusulaYazi.baslik(22, renk: PusulaRenk.beyaz, aralik: -0.8)),
-                          Text(ikili ? 'Kriterler tutuyor' : 'Zincir kapanıyor',
-                              style: PusulaYazi.metin(13, renk: _acikYazi, agirlik: FontWeight.w500)),
+                          Text(
+                            'UYUM SKORU',
+                            style: PusulaYazi.metin(
+                              11,
+                              renk: _acikYazi,
+                              agirlik: FontWeight.w700,
+                            ).copyWith(letterSpacing: 0.6),
+                          ),
+                          Text(
+                            etiket,
+                            style: PusulaYazi.baslik(
+                              22,
+                              renk: PusulaRenk.beyaz,
+                              aralik: -0.8,
+                            ),
+                          ),
+                          Text(
+                            ikili ? 'Kriterler tutuyor' : 'Zincir kapanıyor',
+                            style: PusulaYazi.metin(
+                              13,
+                              renk: _acikYazi,
+                              agirlik: FontWeight.w500,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -252,9 +292,20 @@ class _SkorKarti extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(LucideIcons.check, size: 14, color: PusulaRenk.amber),
+                            const Icon(
+                              LucideIcons.check,
+                              size: 14,
+                              color: PusulaRenk.amber,
+                            ),
                             const SizedBox(width: 5),
-                            Text(k, style: PusulaYazi.metin(12, renk: PusulaRenk.beyaz, agirlik: FontWeight.w700)),
+                            Text(
+                              k,
+                              style: PusulaYazi.metin(
+                                12,
+                                renk: PusulaRenk.beyaz,
+                                agirlik: FontWeight.w700,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -287,43 +338,54 @@ class _Dugum extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        width: 84,
-        child: Column(
+    width: 84,
+    child: Column(
+      children: [
+        Stack(
+          clipBehavior: Clip.none,
           children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Container(
-                  width: 54,
-                  height: 54,
-                  decoration: BoxDecoration(color: zemin, shape: BoxShape.circle),
-                  child: Icon(LucideIcons.user, size: 26, color: yazi),
-                ),
-                if (tik)
-                  Positioned(
-                    right: -4,
-                    bottom: -4,
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      decoration: const BoxDecoration(color: PusulaRenk.beyaz, shape: BoxShape.circle),
-                      child: const Icon(LucideIcons.badgeCheck, size: 16, color: PusulaRenk.mavi),
-                    ),
-                  ),
-              ],
+            Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(color: zemin, shape: BoxShape.circle),
+              child: Icon(LucideIcons.user, size: 26, color: yazi),
             ),
-            const SizedBox(height: 4),
-            Text(ad,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: PusulaYazi.metin(14, agirlik: FontWeight.w700)),
-            Text(alt,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: PusulaYazi.metin(12, renk: PusulaRenk.soluk)),
+            if (tik)
+              Positioned(
+                right: -4,
+                bottom: -4,
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: const BoxDecoration(
+                    color: PusulaRenk.beyaz,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    LucideIcons.badgeCheck,
+                    size: 16,
+                    color: PusulaRenk.mavi,
+                  ),
+                ),
+              ),
           ],
         ),
-      );
+        const SizedBox(height: 4),
+        Text(
+          ad,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: PusulaYazi.metin(14, agirlik: FontWeight.w700),
+        ),
+        Text(
+          alt,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: PusulaYazi.metin(12, renk: PusulaRenk.soluk),
+        ),
+      ],
+    ),
+  );
 }
 
 class _IkiliTakas extends StatelessWidget {
@@ -334,41 +396,53 @@ class _IkiliTakas extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => PusulaKart(
-        padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _Dugum(zemin: PusulaRenk.amber, yazi: PusulaRenk.lacivert, ad: 'Sen', alt: ben.mevcutIl),
-            Expanded(
-              child: SizedBox(
-                height: 54,
-                child: Row(
-                  children: [
-                    const SizedBox(width: 4),
-                    const Expanded(child: _Kesik(renk: PusulaRenk.turkuaz)),
-                    Container(
-                      width: 38,
-                      height: 38,
-                      margin: const EdgeInsets.symmetric(horizontal: 6),
-                      decoration: const BoxDecoration(color: PusulaRenk.lacivert, shape: BoxShape.circle),
-                      child: const Icon(LucideIcons.arrowRightLeft, size: 20, color: PusulaRenk.amber),
-                    ),
-                    const Expanded(child: _Kesik(renk: PusulaRenk.turkuaz)),
-                    const SizedBox(width: 4),
-                  ],
-                ),
-              ),
-            ),
-            _Dugum(
-              zemin: PusulaRenk.turkuaz,
-              yazi: PusulaRenk.lacivert,
-              ad: diger.gorunenAd,
-              alt: diger.mevcutIl,
-              tik: diger.maviTik,
-            ),
-          ],
+    padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _Dugum(
+          zemin: PusulaRenk.amber,
+          yazi: PusulaRenk.lacivert,
+          ad: 'Sen',
+          alt: ben.mevcutIl,
         ),
-      );
+        Expanded(
+          child: SizedBox(
+            height: 54,
+            child: Row(
+              children: [
+                const SizedBox(width: 4),
+                const Expanded(child: _Kesik(renk: PusulaRenk.turkuaz)),
+                Container(
+                  width: 38,
+                  height: 38,
+                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                  decoration: const BoxDecoration(
+                    color: PusulaRenk.lacivert,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    LucideIcons.arrowRightLeft,
+                    size: 20,
+                    color: PusulaRenk.amber,
+                  ),
+                ),
+                const Expanded(child: _Kesik(renk: PusulaRenk.turkuaz)),
+                const SizedBox(width: 4),
+              ],
+            ),
+          ),
+        ),
+        _Dugum(
+          zemin: PusulaRenk.turkuaz,
+          yazi: PusulaRenk.lacivert,
+          ad: diger.gorunenAd,
+          alt: diger.mevcutIl,
+          tik: diger.maviTik,
+        ),
+      ],
+    ),
+  );
 }
 
 class _ZincirTakas extends StatelessWidget {
@@ -390,18 +464,26 @@ class _ZincirTakas extends StatelessWidget {
       final ilan = sirali[k];
       final sonraki = sirali[(k + 1) % sirali.length];
       final (zemin, yazi) = _renkler[k % _renkler.length];
-      oklar.add(_Dugum(
-        zemin: zemin,
-        yazi: yazi,
-        ad: ilan.id == benimId ? 'Sen' : ilan.gorunenAd,
-        alt: '→ ${sonraki.mevcutIl}',
-        tik: ilan.id != benimId && ilan.maviTik,
-      ));
+      oklar.add(
+        _Dugum(
+          zemin: zemin,
+          yazi: yazi,
+          ad: ilan.id == benimId ? 'Sen' : ilan.gorunenAd,
+          alt: '→ ${sonraki.mevcutIl}',
+          tik: ilan.id != benimId && ilan.maviTik,
+        ),
+      );
       if (k < sirali.length - 1) {
-        oklar.add(const Padding(
-          padding: EdgeInsets.only(top: 15),
-          child: Icon(LucideIcons.chevronRight, size: 24, color: PusulaRenk.mor),
-        ));
+        oklar.add(
+          const Padding(
+            padding: EdgeInsets.only(top: 15),
+            child: Icon(
+              LucideIcons.chevronRight,
+              size: 24,
+              color: PusulaRenk.mor,
+            ),
+          ),
+        );
       }
     }
     return PusulaKart(
@@ -416,12 +498,22 @@ class _ZincirTakas extends StatelessWidget {
           const SizedBox(height: 4),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 42),
-            child: SizedBox(height: 18, width: double.infinity, child: _Kesik(renk: PusulaRenk.mor, kose: true)),
+            child: SizedBox(
+              height: 18,
+              width: double.infinity,
+              child: _Kesik(renk: PusulaRenk.mor, kose: true),
+            ),
           ),
           const SizedBox(height: 6),
-          Text('Zincir kapanıyor: herkes istediği ile ulaşıyor',
-              textAlign: TextAlign.center,
-              style: PusulaYazi.metin(12, renk: PusulaRenk.mor, agirlik: FontWeight.w700)),
+          Text(
+            'Zincir kapanıyor: herkes istediği ile ulaşıyor',
+            textAlign: TextAlign.center,
+            style: PusulaYazi.metin(
+              12,
+              renk: PusulaRenk.mor,
+              agirlik: FontWeight.w700,
+            ),
+          ),
         ],
       ),
     );
@@ -437,9 +529,9 @@ class _Kesik extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => CustomPaint(
-        painter: _KesikYol(renk: renk, kose: kose),
-        child: kose ? null : const SizedBox(height: 3, width: double.infinity),
-      );
+    painter: _KesikYol(renk: renk, kose: kose),
+    child: kose ? null : const SizedBox(height: 3, width: double.infinity),
+  );
 }
 
 class _KesikYol extends CustomPainter {
@@ -469,7 +561,10 @@ class _KesikYol extends CustomPainter {
       ..strokeCap = StrokeCap.round;
     for (final m in yol.computeMetrics()) {
       for (var d = 0.0; d < m.length; d += 11) {
-        canvas.drawPath(m.extractPath(d, (d + 6).clamp(0, m.length).toDouble()), boya);
+        canvas.drawPath(
+          m.extractPath(d, (d + 6).clamp(0, m.length).toDouble()),
+          boya,
+        );
       }
     }
   }
@@ -485,23 +580,28 @@ class _UyariSatiri extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFFF1D6),
-          borderRadius: BorderRadius.circular(18),
+    padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+    decoration: BoxDecoration(
+      color: const Color(0xFFFFF1D6),
+      borderRadius: BorderRadius.circular(18),
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(top: 1),
+          child: Icon(LucideIcons.info, size: 18, color: PusulaRenk.lacivert),
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.only(top: 1),
-              child: Icon(LucideIcons.info, size: 18, color: PusulaRenk.lacivert),
-            ),
-            const SizedBox(width: 10),
-            Expanded(child: Text(metin, style: PusulaYazi.metin(13, agirlik: FontWeight.w600))),
-          ],
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            metin,
+            style: PusulaYazi.metin(13, agirlik: FontWeight.w600),
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _IletisimKarti extends StatelessWidget {
@@ -526,6 +626,52 @@ class _IletisimKarti extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!depo.iletisimOzelligiAktif) {
+      return PusulaKart(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Eşleşme bulundu',
+                  style: PusulaYazi.baslik(
+                    17,
+                    agirlik: FontWeight.w700,
+                    aralik: -0.4,
+                  ),
+                ),
+                const Hap(
+                  'Gizli',
+                  zemin: PusulaRenk.cizgi,
+                  yazi: PusulaRenk.lacivert,
+                  ikon: LucideIcons.shieldCheck,
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            for (var k = 0; k < digerler.length; k++)
+              _KisiSatiri(
+                ilan: digerler[k],
+                kisi: null,
+                renk: _renkler[k % _renkler.length],
+              ),
+            const SizedBox(height: 8),
+            Text(
+              'Kişisel iletişim bilgileri paylaşılmaz. Karşılıklı onay ve güvenli iletişim özelliği tamamlandığında '
+              'eşleştiğin kişiye uygulama içinden ulaşabileceksin.',
+              textAlign: TextAlign.center,
+              style: PusulaYazi.metin(
+                12,
+                renk: PusulaRenk.soluk,
+                agirlik: FontWeight.w500,
+              ).copyWith(height: 1.4),
+            ),
+          ],
+        ),
+      );
+    }
     final acik = depo.iletisimAcik;
     final onayladim = depo.onayladim(eslesme);
     final hazir = depo.hazir(eslesme);
@@ -539,7 +685,14 @@ class _IletisimKarti extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('İletişim bilgisi', style: PusulaYazi.baslik(17, agirlik: FontWeight.w700, aralik: -0.4)),
+              Text(
+                'İletişim bilgisi',
+                style: PusulaYazi.baslik(
+                  17,
+                  agirlik: FontWeight.w700,
+                  aralik: -0.4,
+                ),
+              ),
               Hap(
                 acik ? 'Açık' : 'Kilitli',
                 zemin: acik ? PusulaRenk.yesilZemin : PusulaRenk.cizgi,
@@ -559,19 +712,32 @@ class _IletisimKarti extends StatelessWidget {
           if (!acik) ...[
             if (karsi)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 9,
+                ),
                 decoration: BoxDecoration(
                   color: PusulaRenk.yesilZemin,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Row(
                   children: [
-                    const Icon(LucideIcons.check, size: 16, color: PusulaRenk.yesilYazi),
+                    const Icon(
+                      LucideIcons.check,
+                      size: 16,
+                      color: PusulaRenk.yesilYazi,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        digerler.length == 1 ? '$adlar de ilgileniyor' : '$adlar ilgileniyor',
-                        style: PusulaYazi.metin(13, renk: PusulaRenk.yesilYazi, agirlik: FontWeight.w700),
+                        digerler.length == 1
+                            ? '$adlar de ilgileniyor'
+                            : '$adlar ilgileniyor',
+                        style: PusulaYazi.metin(
+                          13,
+                          renk: PusulaRenk.yesilYazi,
+                          agirlik: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ],
@@ -598,7 +764,11 @@ class _IletisimKarti extends StatelessWidget {
                   ? 'İkiniz de onayladınız. Tek seferlik ödeme, abonelik yok.'
                   : 'Ödeme, iki taraf da onaylayınca istenir.',
               textAlign: TextAlign.center,
-              style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w500),
+              style: PusulaYazi.metin(
+                12,
+                renk: PusulaRenk.soluk,
+                agirlik: FontWeight.w500,
+              ),
             ),
           ] else
             BirincilDugme(
@@ -615,7 +785,11 @@ class _IletisimKarti extends StatelessWidget {
 }
 
 class _KisiSatiri extends StatelessWidget {
-  const _KisiSatiri({required this.ilan, required this.kisi, required this.renk});
+  const _KisiSatiri({
+    required this.ilan,
+    required this.kisi,
+    required this.renk,
+  });
 
   final Ilan ilan;
 
@@ -648,7 +822,10 @@ class _KisiSatiri extends StatelessWidget {
             height: 42,
             alignment: Alignment.center,
             decoration: BoxDecoration(color: renk.$1, shape: BoxShape.circle),
-            child: Text(ad.characters.first, style: PusulaYazi.baslik(17, renk: renk.$2)),
+            child: Text(
+              ad.characters.first,
+              style: PusulaYazi.baslik(17, renk: renk.$2),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -656,19 +833,39 @@ class _KisiSatiri extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(ad, style: PusulaYazi.metin(15, agirlik: FontWeight.w700)),
-                Text('${ilan.unvan} · ${ilan.mevcutIl} → ${ilan.hedefIller.first}',
-                    style: PusulaYazi.metin(12, renk: PusulaRenk.soluk)),
+                Text(
+                  '${ilan.unvan} · ${ilan.mevcutIl} → ${ilan.hedefIller.first}',
+                  style: PusulaYazi.metin(12, renk: PusulaRenk.soluk),
+                ),
                 const SizedBox(height: 2),
-                Row(children: [
-                  const Icon(LucideIcons.phone, size: 13, color: PusulaRenk.soluk),
-                  const SizedBox(width: 6),
-                  Text(tel, style: veri),
-                ]),
-                Row(children: [
-                  const Icon(LucideIcons.mail, size: 13, color: PusulaRenk.soluk),
-                  const SizedBox(width: 6),
-                  Expanded(child: Text(mail, overflow: TextOverflow.ellipsis, style: veri)),
-                ]),
+                Row(
+                  children: [
+                    const Icon(
+                      LucideIcons.phone,
+                      size: 13,
+                      color: PusulaRenk.soluk,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(tel, style: veri),
+                  ],
+                ),
+                Row(
+                  children: [
+                    const Icon(
+                      LucideIcons.mail,
+                      size: 13,
+                      color: PusulaRenk.soluk,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        mail,
+                        overflow: TextOverflow.ellipsis,
+                        style: veri,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -713,68 +910,88 @@ class _OdemeSayfasiState extends State<_OdemeSayfasi> {
 
   @override
   Widget build(BuildContext context) => PopScope(
-        canPop: !_bekliyor,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    canPop: !_bekliyor,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('İletişimi aç', style: PusulaYazi.baslik(22, aralik: -0.9)),
-                Text(lira(widget.depo.fiyat), style: PusulaYazi.baslik(22, aralik: -0.9)),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(color: PusulaRenk.zemin, borderRadius: BorderRadius.circular(20)),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _Madde('Bu ilandaki tüm eşleşmelerin iletişimi açılır'),
-                  SizedBox(height: 9),
-                  _Madde('Tek seferlik; abonelik ve yenileme yok'),
-                  SizedBox(height: 9),
-                  _Madde('Dilekçen otomatik hazırlanır'),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(LucideIcons.shield, size: 18, color: PusulaRenk.lacivert),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Ödeme App Store / Google Play hesabınla yapılır; kart bilgisi uygulamada tutulmaz.',
-                    style: PusulaYazi.metin(12, renk: PusulaRenk.soluk),
-                  ),
-                ),
-              ],
-            ),
-            if (_hata != null) ...[
-              const SizedBox(height: 10),
-              Text(_hata!, style: PusulaYazi.metin(13, renk: PusulaRenk.kirmizi, agirlik: FontWeight.w700)),
-            ],
-            const SizedBox(height: 14),
-            BirincilDugme(
-              yukseklik: 56,
-              metin: 'Onayla ve öde',
-              ikon: LucideIcons.fingerprintPattern,
-              yukleniyor: _bekliyor,
-              yukleniyorMetni: 'Ödeme onaylanıyor',
-              onPressed: _ode,
-            ),
-            const SizedBox(height: 4),
-            TextButton(
-              onPressed: _bekliyor ? null : () => Navigator.pop(context),
-              child: Text('Vazgeç', style: PusulaYazi.metin(14, agirlik: FontWeight.w700)),
+            Text('İletişimi aç', style: PusulaYazi.baslik(22, aralik: -0.9)),
+            Text(
+              lira(widget.depo.fiyat),
+              style: PusulaYazi.baslik(22, aralik: -0.9),
             ),
           ],
         ),
-      );
+        const SizedBox(height: 14),
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: PusulaRenk.zemin,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _Madde('Bu ilandaki tüm eşleşmelerin iletişimi açılır'),
+              SizedBox(height: 9),
+              _Madde('Tek seferlik; abonelik ve yenileme yok'),
+              SizedBox(height: 9),
+              _Madde('Dilekçen otomatik hazırlanır'),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              LucideIcons.shield,
+              size: 18,
+              color: PusulaRenk.lacivert,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Ödeme uygulama mağazası hesabınla yapılır; kart bilgisi uygulamada tutulmaz.',
+                style: PusulaYazi.metin(12, renk: PusulaRenk.soluk),
+              ),
+            ),
+          ],
+        ),
+        if (_hata != null) ...[
+          const SizedBox(height: 10),
+          Text(
+            _hata!,
+            style: PusulaYazi.metin(
+              13,
+              renk: PusulaRenk.kirmizi,
+              agirlik: FontWeight.w700,
+            ),
+          ),
+        ],
+        const SizedBox(height: 14),
+        BirincilDugme(
+          yukseklik: 56,
+          metin: 'Onayla ve öde',
+          ikon: LucideIcons.fingerprintPattern,
+          yukleniyor: _bekliyor,
+          yukleniyorMetni: 'Ödeme onaylanıyor',
+          onPressed: _ode,
+        ),
+        const SizedBox(height: 4),
+        TextButton(
+          onPressed: _bekliyor ? null : () => Navigator.pop(context),
+          child: Text(
+            'Vazgeç',
+            style: PusulaYazi.metin(14, agirlik: FontWeight.w700),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _Madde extends StatelessWidget {
@@ -784,10 +1001,10 @@ class _Madde extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
-        children: [
-          const Icon(LucideIcons.check, size: 18, color: PusulaRenk.yesilYazi),
-          const SizedBox(width: 8),
-          Expanded(child: Text(metin, style: PusulaYazi.metin(14))),
-        ],
-      );
+    children: [
+      const Icon(LucideIcons.check, size: 18, color: PusulaRenk.yesilYazi),
+      const SizedBox(width: 8),
+      Expanded(child: Text(metin, style: PusulaYazi.metin(14))),
+    ],
+  );
 }

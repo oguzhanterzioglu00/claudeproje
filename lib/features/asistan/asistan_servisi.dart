@@ -10,6 +10,27 @@ class MevzuatKaynagi {
 
   /// Maddeden doğrudan alıntı (varsa).
   final String? alinti;
+
+  /// Kullanıcıyı bilginin yayımlandığı resmî mevzuat metnine götürür.
+  /// Bilgi bankasındaki her kaynak bu dört resmî derlemeden birine dayanır.
+  Uri get resmiBaglanti {
+    final k = baslik.toLowerCase();
+    if (k.contains('4857')) {
+      return Uri.parse('https://www.mevzuat.gov.tr/mevzuatmetin/1.5.4857.pdf');
+    }
+    if (k.contains('1475')) {
+      return Uri.parse('https://www.mevzuat.gov.tr/mevzuatmetin/1.5.1475.pdf');
+    }
+    if (k.contains('5510')) {
+      return Uri.parse('https://www.mevzuat.gov.tr/mevzuatmetin/1.5.5510.pdf');
+    }
+    if (k.contains('sözleşmeli personel')) {
+      return Uri.parse(
+        'https://www.mevzuat.gov.tr/MevzuatMetin/2.5.715754.pdf',
+      );
+    }
+    return Uri.parse('https://www.mevzuat.gov.tr/mevzuatmetin/1.5.657.pdf');
+  }
 }
 
 class AsistanCevabi {
@@ -78,7 +99,10 @@ abstract final class BilgiArama {
   /// ya da hiçbiri geçmiyorsa null.
   static Kitle? _sorudakiKitle(String soru) {
     final bulunan = <Kitle>{
-      if (soru.contains('isci') || soru.contains('is kanunu') || soru.contains('4857') || soru.contains('1475'))
+      if (soru.contains('isci') ||
+          soru.contains('is kanunu') ||
+          soru.contains('4857') ||
+          soru.contains('1475'))
         Kitle.isci,
       if (soru.contains('memur') || soru.contains('657')) Kitle.memur,
       if (soru.contains('sozlesmeli') || soru.contains('4/b')) Kitle.sozlesmeli,
@@ -86,13 +110,18 @@ abstract final class BilgiArama {
     return bulunan.length == 1 ? bulunan.first : null;
   }
 
-  static bool _uygun(BilgiKonusu k, Kitle? hedef) => hedef == null || k.kitle == Kitle.herkes || k.kitle == hedef;
+  static bool _uygun(BilgiKonusu k, Kitle? hedef) =>
+      hedef == null || k.kitle == Kitle.herkes || k.kitle == hedef;
 
   /// Soruya en uygun konuyu bulur. Çalışan grubu ([kitle], sorudaki açık ifade ya da kullanıcının statüsü)
   /// biliniyorsa yalnızca o gruba ve herkese yönelik konular aranır; orada eşleşme yoksa tüm konulara bakılır.
   /// Grup hiç bilinmiyorsa önce memur/herkes konularına bakılır (işçi konuları yalnızca "işçi" gibi bir
   /// ifadeyle, işçi statüsüyle ya da memur konusu bulunamadığında devreye girer).
-  static BilgiEslesmesi esles(String soru, {List<BilgiKonusu> konular = BilgiBankasi.konular, Kitle? kitle}) {
+  static BilgiEslesmesi esles(
+    String soru, {
+    List<BilgiKonusu> konular = BilgiBankasi.konular,
+    Kitle? kitle,
+  }) {
     final s = aramaAnahtari(soru);
     final hedef = _sorudakiKitle(s) ?? kitle;
     final once = hedef ?? Kitle.memur;
@@ -112,7 +141,9 @@ abstract final class BilgiArama {
       for (final e in puanlar)
         if (e.$2 == en) e.$1,
     ];
-    return ust.length == 1 ? BilgiEslesmesi(konu: ust.first) : BilgiEslesmesi(adaylar: ust);
+    return ust.length == 1
+        ? BilgiEslesmesi(konu: ust.first)
+        : BilgiEslesmesi(adaylar: ust);
   }
 }
 
@@ -126,7 +157,8 @@ class YerelMevzuatAsistani implements MevzuatAsistani {
   final Duration sure;
 
   static const becayisKaynagi = MevzuatKaynagi(
-    baslik: '657 sayılı Devlet Memurları Kanunu, md. 73 (Karşılıklı yer değiştirme)',
+    baslik:
+        '657 sayılı Devlet Memurları Kanunu, md. 73 (Karşılıklı yer değiştirme)',
     alinti:
         'Aynı Kurumun başka başka yerlerde bulunan aynı sınıftaki memurları, karşılıklı olarak '
         'yer değiştirme suretiyle atanmalarını isteyebilirler. Bu isteğin yerine getirilmesi '
@@ -138,7 +170,11 @@ class YerelMevzuatAsistani implements MevzuatAsistani {
 
   /// [kitle] biliniyorsa yalnızca o gruba ve herkese yönelik konular; bilinmiyorsa hepsi.
   static List<BilgiKonusu> konularIcin(Kitle? kitle) => BilgiBankasi.konular
-      .where((k) => !k.kapsamDisi && (kitle == null || k.kitle == Kitle.herkes || k.kitle == kitle))
+      .where(
+        (k) =>
+            !k.kapsamDisi &&
+            (kitle == null || k.kitle == Kitle.herkes || k.kitle == kitle),
+      )
       .toList();
 
   @override
@@ -149,7 +185,8 @@ class YerelMevzuatAsistani implements MevzuatAsistani {
     if (e.konu != null) {
       final k = e.konu!;
       // Kullanıcının grubuna ait olmayan bir konu bulunduysa (ör. sözleşmeli soran birine memur mevzuatı), bunu açıkça söyle.
-      final farkli = kitle != null && k.kitle != Kitle.herkes && k.kitle != kitle;
+      final farkli =
+          kitle != null && k.kitle != Kitle.herkes && k.kitle != kitle;
       final uyari = [
         if (farkli)
           'Bu cevap ${k.kitle.etiket} için geçerli mevzuata dayanıyor; ${kitle.etiket} için farklı olabilir, kendi durumunu ayrıca kontrol et.',

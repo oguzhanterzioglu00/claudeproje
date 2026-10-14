@@ -19,3 +19,6 @@ ios/Pods/
 ios/.symlinks/
 *.jks
 *.keystore
+__pycache__/
+*.pyc
+incoming_assets_*/

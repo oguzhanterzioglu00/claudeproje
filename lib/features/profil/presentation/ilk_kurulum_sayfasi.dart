@@ -54,7 +54,7 @@ class _IlkKurulumSayfasiState extends State<IlkKurulumSayfasi> {
   bool get _epostaGecerli => _eposta.text.trim().isEmpty || _eposta.text.contains('@');
 
   bool get _devamEdilebilir => switch (_adim) {
-        1 => _ad.text.trim().isNotEmpty && _statu != null,
+        1 => _statu != null,
         4 => _epostaGecerli,
         _ => true,
       };
@@ -82,16 +82,17 @@ class _IlkKurulumSayfasiState extends State<IlkKurulumSayfasi> {
 
   Future<void> _devam({bool atla = false}) async {
     if (!_devamEdilebilir && !atla) return;
-    if (_adim < _adimSayisi) {
+    if (_adim < _adimSayisi && !(atla && _adim == 1)) {
       _git(_adim + 1);
       return;
     }
     if (_kaydediliyor) return;
     setState(() => _kaydediliyor = true);
     final sicilVeEposta = _memur && !atla;
+    // Adım 1'de atlandıysa kalan adımlar da geçilir; profil sonradan Profil ekranından tamamlanır.
     await widget.depo.kaydet(Profil(
       ad: _ad.text.trim(),
-      statu: _statu!,
+      statu: _statu ?? Statu.diger,
       adayMemur: _memur && _aday,
       kurumAdi: _kurum,
       sinif: _memur ? _sinif : '',
@@ -158,14 +159,11 @@ class _IlkKurulumSayfasiState extends State<IlkKurulumSayfasi> {
                     yukleniyorMetni: 'Kaydediliyor',
                     onPressed: _devamEdilebilir ? _devam : null,
                   ),
-                  if (_adim > 1)
-                    TextButton(
-                      onPressed: _kaydediliyor ? null : () => _devam(atla: true),
-                      child: Text('Şimdilik atla',
-                          style: PusulaYazi.metin(14, renk: PusulaRenk.soluk, agirlik: FontWeight.w700)),
-                    )
-                  else
-                    const SizedBox(height: 8),
+                  TextButton(
+                    onPressed: _kaydediliyor ? null : () => _devam(atla: true),
+                    child: Text('Şimdilik atla',
+                        style: PusulaYazi.metin(14, renk: PusulaRenk.soluk, agirlik: FontWeight.w700)),
+                  ),
                 ],
               ),
             ),
@@ -186,9 +184,9 @@ class _IlkKurulumSayfasiState extends State<IlkKurulumSayfasi> {
 
   List<Widget> _kimsin() => [
         ..._baslik('Adım 1', 'Seni tanıyalım',
-            'Sana uygun maaş, hak ve ilan bilgilerini gösterebilmemiz için birkaç bilgiye ihtiyacımız var.'),
+            'Sana uygun maaş, hak ve ilan bilgilerini gösterebilmemiz için statünü seçmen yeterli; adın isteğe bağlı. Hepsini sonra Profil ekranından da girebilirsin.'),
         MetinAlani(
-          etiket: 'Adın',
+          etiket: 'Adın (isteğe bağlı)',
           denetleyici: _ad,
           onDegis: () => setState(() {}),
           capitalization: TextCapitalization.words,
