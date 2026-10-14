@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <!-- `flutter build web --base-href` bu değeri derleme sırasında değiştirir. -->
+  <base href="/claudeproje/">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Kamu Pusulası: kamu çalışanlarının maaş, hak, becayiş, ilan ve haber rehberi.">
+  <meta name="theme-color" content="#0F2266">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pusula">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <title>Kamu Pusulası</title>
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    html, body { margin: 0; height: 100%; background: #0F2266; }
+    /* Flutter ilk kareyi çizene kadar görünen açılış ekranı. */
+    #acilis {
+      position: fixed; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 18px;
+      background: #0F2266; color: #fff; font-family: system-ui, sans-serif;
+      transition: opacity .35s ease;
+    }
+    #acilis.bitti { opacity: 0; pointer-events: none; }
+    #acilis svg { width: 132px; height: 132px; }
+    #acilis .ibre { transform-origin: 50px 50px; animation: sallan 1.6s cubic-bezier(.2,.8,.2,1) both; }
+    #acilis p { margin: 0; font-size: 13px; opacity: .7; letter-spacing: .02em; }
+    @keyframes sallan { from { transform: rotate(-160deg); } to { transform: rotate(45deg); } }
+    @media (prefers-reduced-motion: reduce) { #acilis .ibre { animation: none; transform: rotate(45deg); } }
+  </style>
+</head>
+<body>
+  <div id="acilis" role="status" aria-label="Kamu Pusulası yükleniyor">
+    <svg viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M16.06 47.92 A34 34 0 0 1 49.70 16.00" fill="none" stroke="#F7941D" stroke-width="7.6"/>
+      <path d="M53.85 16.22 A34 34 0 0 1 83.84 53.26" fill="none" stroke="#19C1EA" stroke-width="7.6"/>
+      <path d="M83.19 57.36 A34 34 0 0 1 49.11 83.99" fill="none" stroke="#6A3BD8" stroke-width="7.6"/>
+      <path d="M44.97 83.63 A34 34 0 0 1 16.03 51.48" fill="none" stroke="#C060E6" stroke-width="7.6"/>
+      <g transform="rotate(0 50 50)"><polygon points="50,23 44.7,44.7 50,50" fill="#fff"/><polygon points="50,23 55.3,44.7 50,50" fill="#C3CCEE"/></g>
+      <g transform="rotate(90 50 50)"><polygon points="50,23 44.7,44.7 50,50" fill="#fff"/><polygon points="50,23 55.3,44.7 50,50" fill="#C3CCEE"/></g>
+      <g transform="rotate(180 50 50)"><polygon points="50,23 44.7,44.7 50,50" fill="#fff"/><polygon points="50,23 55.3,44.7 50,50" fill="#C3CCEE"/></g>
+      <g transform="rotate(270 50 50)"><polygon points="50,23 44.7,44.7 50,50" fill="#fff"/><polygon points="50,23 55.3,44.7 50,50" fill="#C3CCEE"/></g>
+      <g class="ibre">
+        <polygon points="50,18.5 42,50 50,50" fill="#FFD25C"/><polygon points="50,18.5 58,50 50,50" fill="#F7941D"/>
+        <polygon points="50,81.5 42,50 50,50" fill="#fff"/><polygon points="50,81.5 58,50 50,50" fill="#C3CCEE"/>
+        <circle cx="50" cy="50" r="5.2" fill="#2450B0"/><circle cx="50" cy="50" r="3.5" fill="#0C1E5F"/>
+      </g>
+    </svg>
+    <p>Kamu Pusulası yükleniyor…</p>
+  </div>
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      var a = document.getElementById('acilis');
+      if (!a) return;
+      a.classList.add('bitti');
+      setTimeout(function () { a.remove(); }, 500);
+    });
+  </script>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
