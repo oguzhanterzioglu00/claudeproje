@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Kamu Pusulası</title>
+  <link rel="icon" href="favicon.png">
+  <style>
+    :root { --lacivert:#182350; --mavi:#2F63B5; --turkuaz:#12B5D6; --amber:#FBB040; --eflatun:#C43F9C; }
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+           background:#eaf0fb; font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif; color:#1c2733; }
+    .kart { width:100%; max-width:440px; background:#fff; border-radius:20px; overflow:hidden; box-shadow:0 8px 30px rgba(24,35,80,.14); text-align:center; }
+    .ust { background:linear-gradient(135deg,var(--lacivert),var(--mavi)); padding:30px 24px 24px; color:#fff; }
+    .ust img { width:68px; height:68px; border-radius:17px; display:block; margin:0 auto 12px; }
+    .ust b { font-size:22px; letter-spacing:.3px; }
+    .serit { display:flex; height:5px; }
+    .serit i { flex:1; }
+    .icerik { padding:28px 26px 30px; }
+    h1 { margin:0 0 10px; font-size:21px; color:var(--lacivert); }
+    p { margin:0 0 18px; line-height:1.65; font-size:15px; color:#3b4658; }
+    .dugme { display:inline-block; padding:14px 34px; border-radius:12px; font-weight:700; font-size:16px; text-decoration:none; color:#fff;
+             background:linear-gradient(90deg,var(--mavi),var(--turkuaz)); }
+    .not { margin-top:20px; padding:12px 14px; background:#fff8ec; border-left:4px solid var(--amber); border-radius:8px; font-size:13px; line-height:1.55; color:#5c4a1f; text-align:left; }
+    .gizle { display:none; }
+    .hata h1 { color:#b3261e; }
+  </style>
+</head>
+<body>
+  <main class="kart" id="kart">
+    <div class="ust"><img src="icons/Icon-192.png" alt="Kamu Pusulası"><b>Kamu Pusulası</b></div>
+    <div class="serit"><i style="background:var(--amber)"></i><i style="background:var(--turkuaz)"></i><i style="background:var(--mavi)"></i><i style="background:var(--eflatun)"></i></div>
+    <div class="icerik">
+      <h1 id="baslik">Uygulamaya dönülüyor…</h1>
+      <p id="metin">Kamu Pusulası açılıyor. Açılmazsa aşağıdaki düğmeye dokun.</p>
+      <a class="dugme" id="ac" href="#">Uygulamayı aç</a>
+      <div class="not gizle" id="not"></div>
+    </div>
+  </main>
+  <script>
+    (function () {
+      var uygulama = 'tr.com.ayasyazilim.pusula://giris-geri-donus';
+      var arama = location.search || '';
+      var karma = location.hash || '';
+      var hedef = uygulama + arama + karma;
+      var p = new URLSearchParams(arama);
+      var h = new URLSearchParams(karma.replace(/^#/, ''));
+      var hata = p.get('error_description') || h.get('error_description');
+      var mobil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      var baslik = document.getElementById('baslik');
+      var metin = document.getElementById('metin');
+      var ac = document.getElementById('ac');
+      var not = document.getElementById('not');
+      ac.href = hedef;
+
+      if (hata) {
+        document.getElementById('kart').classList.add('hata');
+        baslik.textContent = 'Bağlantı kullanılamadı';
+        metin.textContent = 'Bu bağlantının süresi dolmuş ya da daha önce kullanılmış olabilir. Uygulamadan yeni bir e-posta isteyebilirsin.';
+        ac.classList.add('gizle');
+        return;
+      }
+      if (!mobil) {
+        baslik.textContent = 'Telefonunda aç';
+        metin.textContent = 'Bu işlemi tamamlamak için bu e-postadaki bağlantıyı Kamu Pusulası\'nın yüklü olduğu telefonda aç.';
+        not.innerHTML = '<b>E-postanı doğruladıysan</b> hesabın etkinleşmiştir; uygulamaya dönüp giriş yapabilirsin.<br><b>Şifre sıfırlıyorsan</b> işlemi, isteği yaptığın telefonda tamamlaman gerekir.';
+        not.classList.remove('gizle');
+        ac.classList.add('gizle');
+        return;
+      }
+      // Telefonda: uygulamayı kendiliğinden aç; engellenirse düğme yedek olarak durur.
+      setTimeout(function () { location.href = hedef; }, 350);
+      setTimeout(function () {
+        baslik.textContent = 'Uygulama açılmadı mı?';
+        metin.textContent = 'Düğmeye dokun. Kamu Pusulası yüklü değilse önce uygulamayı kurman gerekir.';
+      }, 2500);
+    })();
+  </script>
+</body>
+</html>
