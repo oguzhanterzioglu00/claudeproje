@@ -101,8 +101,8 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 3));
     expect(find.text('Seni tanıyalım'), findsOneWidget);
 
-    // Kurulum: memur olmayan kısa yol.
-    await tester.enterText(find.byType(TextField).first, 'Ayşe Yılmaz');
+    // Kurulum: ad/e-posta sorulmaz (Apple 4. madde); memur olmayan kısa yol.
+    expect(find.byType(TextField), findsNothing);
     await tester.tap(find.text('İşçi'));
     await tester.pump();
     for (var i = 0; i < 2; i++) {
@@ -114,10 +114,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
 
     // Hazırlanıyor akışı.
-    expect(find.text('Hazırlıyoruz, Ayşe'), findsOneWidget);
+    expect(find.text('Hazırlıyoruz'), findsOneWidget);
     await tester.pump(const Duration(seconds: 4));
     await tester.pumpAndSettle();
-    expect(find.text('Hazırlıyoruz, Ayşe'), findsNothing);
+    expect(find.text('Hazırlıyoruz'), findsNothing);
     expect(find.text('Kamu Pusulası'), findsOneWidget);
   });
 
@@ -194,10 +194,11 @@ void main() {
     expect(find.text('Kamu Pusulası'), findsOneWidget);
   });
 
-  testWidgets('kurulumda ad isteğe bağlıdır: yalnızca statü seçince devam edilebilir', (tester) async {
+  testWidgets('kurulumda ad ve e-posta sorulmaz: yalnızca statü seçince devam edilebilir', (tester) async {
     await ac(tester, tanitimGoruldu: true, hesapVar: true);
     expect(find.text('Seni tanıyalım'), findsOneWidget);
-    expect(find.text('Adın (isteğe bağlı)'), findsOneWidget);
+    expect(find.byType(TextField), findsNothing);
+    expect(find.textContaining('Adın'), findsNothing);
     await tester.tap(find.text('İşçi'));
     await tester.pump();
     await tester.tap(find.text('Devam'));

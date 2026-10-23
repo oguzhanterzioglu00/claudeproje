@@ -20,6 +20,8 @@ class IlkKurulumSayfasi extends StatefulWidget {
     required this.fotograf,
     this.fotografKaynagi = const ImagePickerFotografKaynagi(),
     this.ilkAd = '',
+    this.adSor = true,
+    this.becayisAdimi = true,
   });
 
   final ProfilDeposu depo;
@@ -28,6 +30,12 @@ class IlkKurulumSayfasi extends StatefulWidget {
 
   /// Hesaptan geliyorsa ad alanına önceden yazılır.
   final String ilkAd;
+
+  /// false ise kurulumda ad sorulmaz (Apple 4. madde: Apple ile girişten sonra ad/e-posta istenmez).
+  final bool adSor;
+
+  /// false ise memurlara becayiş adımı (sicil no, kurumsal e-posta) gösterilmez; bu bilgiler Profil'den girilir.
+  final bool becayisAdimi;
 
   @override
   State<IlkKurulumSayfasi> createState() => _IlkKurulumSayfasiState();
@@ -50,7 +58,7 @@ class _IlkKurulumSayfasiState extends State<IlkKurulumSayfasi> {
   bool _kaydediliyor = false;
 
   bool get _memur => _statu == Statu.memur657;
-  int get _adimSayisi => _memur ? 4 : 3;
+  int get _adimSayisi => (_memur && widget.becayisAdimi) ? 4 : 3;
   bool get _epostaGecerli => _eposta.text.trim().isEmpty || _eposta.text.contains('@');
 
   bool get _devamEdilebilir => switch (_adim) {
@@ -88,7 +96,7 @@ class _IlkKurulumSayfasiState extends State<IlkKurulumSayfasi> {
     }
     if (_kaydediliyor) return;
     setState(() => _kaydediliyor = true);
-    final sicilVeEposta = _memur && !atla;
+    final sicilVeEposta = _memur && !atla && widget.becayisAdimi;
     // Adım 1'de atlandıysa kalan adımlar da geçilir; profil sonradan Profil ekranından tamamlanır.
     await widget.depo.kaydet(Profil(
       ad: _ad.text.trim(),
@@ -184,14 +192,18 @@ class _IlkKurulumSayfasiState extends State<IlkKurulumSayfasi> {
 
   List<Widget> _kimsin() => [
         ..._baslik('Adım 1', 'Seni tanıyalım',
-            'Sana uygun maaş, hak ve ilan bilgilerini gösterebilmemiz için statünü seçmen yeterli; adın isteğe bağlı. Hepsini sonra Profil ekranından da girebilirsin.'),
-        MetinAlani(
-          etiket: 'Adın (isteğe bağlı)',
-          denetleyici: _ad,
-          onDegis: () => setState(() {}),
-          capitalization: TextCapitalization.words,
-        ),
-        const SizedBox(height: 20),
+            widget.adSor
+                ? 'Sana uygun maaş, hak ve ilan bilgilerini gösterebilmemiz için statünü seçmen yeterli; adın isteğe bağlı. Hepsini sonra Profil ekranından da girebilirsin.'
+                : 'Sana uygun maaş, hak ve ilan bilgilerini gösterebilmemiz için yalnızca statünü seçmen yeterli. Diğer bilgileri istersen sonra Profil ekranından girebilirsin.'),
+        if (widget.adSor) ...[
+          MetinAlani(
+            etiket: 'Adın (isteğe bağlı)',
+            denetleyici: _ad,
+            onDegis: () => setState(() {}),
+            capitalization: TextCapitalization.words,
+          ),
+          const SizedBox(height: 20),
+        ],
         Text('Statün', style: PusulaYazi.metin(12, renk: PusulaRenk.soluk, agirlik: FontWeight.w700)),
         const SizedBox(height: 8),
         for (final s in Statu.values) ...[

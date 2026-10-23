@@ -20,6 +20,8 @@ void main() {
     FotografDeposu? fotograf,
     FotografKaynagi? kaynak,
     String ilkAd = '',
+    bool adSor = true,
+    bool becayisAdimi = true,
   }) async {
     tester.view.physicalSize = boyut;
     tester.view.devicePixelRatio = 1;
@@ -33,6 +35,8 @@ void main() {
         fotograf: fotograf ?? FotografDeposu(BellekDepolama()),
         fotografKaynagi: kaynak ?? SahteFotografKaynagi(sonuc: ornekPng),
         ilkAd: ilkAd,
+        adSor: adSor,
+        becayisAdimi: becayisAdimi,
       ),
     ));
     await tester.pumpAndSettle();
@@ -225,5 +229,24 @@ void main() {
     expect(depo.profil!.ad, 'Ayşe');
     expect(depo.profil!.sicilNo, isEmpty);
     expect(depo.profil!.eksikBecayisAlanlari, isNotEmpty);
+  });
+
+  testWidgets('Apple/hesap akışı: ad alanı ve becayiş (sicil/e-posta) adımı yoktur; memur 3 adımda biter', (tester) async {
+    final depo = await ac(tester, adSor: false, becayisAdimi: false);
+    expect(find.byType(TextField), findsNothing, reason: 'ad/e-posta sorulmaz');
+    await tester.tap(find.text('657 sayılı Kanun memuru'));
+    await tester.pump();
+    expect(find.text('1 / 3'), findsOneWidget);
+    await tester.tap(find.text('Devam'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Devam'));
+    await tester.pumpAndSettle();
+    expect(find.text('Sicil no'), findsNothing);
+    expect(find.text('Kurumsal e-posta'), findsNothing);
+    await tester.tap(find.text('Tamamla'));
+    await tester.pumpAndSettle();
+    expect(depo.profil!.statu, Statu.memur657);
+    expect(depo.profil!.sicilNo, '');
+    expect(depo.profil!.kurumsalEposta, '');
   });
 }

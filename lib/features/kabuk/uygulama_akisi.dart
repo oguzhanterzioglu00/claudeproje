@@ -286,6 +286,8 @@ class _UygulamaAkisiState extends State<UygulamaAkisi> {
           fotograf: veri.fotograf,
           fotografKaynagi: widget.fotografKaynagi,
           ilkAd: hesap.ad,
+          adSor: false,
+          becayisAdimi: false,
         );
       }
 
